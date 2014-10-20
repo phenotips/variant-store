@@ -28,7 +28,7 @@ import parquet.avro.AvroSchemaConverter;
  */
 public class App 
 {
-    private final static String devDir = "/home/meatcar/dev/drill/";
+    private final static String devDir = "/home/meatcar/dev/drill/variant-store/";
 
 
 
@@ -158,7 +158,7 @@ public class App
                 "      }\n" +
                 "    }\n" +
                 "  }\n" +
-                "}"
+                "}";
 
         AvroParquetWriter avroParquetWriter;
         Job j;
@@ -166,7 +166,7 @@ public class App
             j = new Job();
 
             //TODO: remove file if it exists.
-            Path path = new Path(devDir + "/parquet/" + fileName + ".parquet");
+            Path path = new Path(devDir + "parquet/" + fileName + ".parquet");
             avroParquetWriter = new AvroParquetWriter(
                     path, GAVariant.getClassSchema());
             avroParquetWriter.write(avro);
