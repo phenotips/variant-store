@@ -20,7 +20,7 @@ import org.ga4gh.GAVariant;
 import parquet.avro.AvroParquetOutputFormat;
 import parquet.avro.AvroParquetWriter;
 import parquet.avro.AvroSchemaConverter;
-import parquet.schema.MessageType;
+import parquet.schema.*;
 
 
 /**
@@ -38,7 +38,7 @@ public class App
      *
      * Pre-runtime:
      * - turn avro schema into parquet schema
-     * - add typed info fields as parquet fields (not values in an array)
+     * - TODO: add typed info fields as parquet fields (not values in an array)
      *
      * Runtime:
      *
@@ -58,10 +58,9 @@ public class App
 
     public static void main( String[] args )
     {
-//        File vcfFile = new File(devDir + "vcf/F0000009.ezr2");
-        String fileName = "test.vcf";
-        File vcfFile = new File(devDir + fileName);
-        VCFFileReader vcfReader = new VCFFileReader(vcfFile, false);
+//        String vcfFileName = "test.vcf";
+        String vcfFileName = "../vcf/F0000009.ezr2";
+        VCFFileReader vcfReader = new VCFFileReader(new File(devDir + vcfFileName), false);
         VCFHeader vcfHeader = vcfReader.getFileHeader();
         Iterator<VariantContext> it;
         it = vcfReader.iterator();
@@ -130,59 +129,32 @@ public class App
         avro.setCalls(calls);
 //        avro.setCalls(new ArrayList<GACall>());
 
-        System.out.println(avro);
+        System.out.println(avro.toString().replace(",", ",\n"));
 
         /**
          * Write Parquet file
          */
 
+        /**
+         * Modify Avro->Parquet schema to include typed INFO fields.
+         * This is nescessary because otherwise, INFO shows up as {map: {array: [{key: "foo", value: "bar"}..]}},
+         * and drill can only query the inner array by index.
+         *      ("SELECT * FROM table.info.map.array[0]" == "bar")
+         * We need the values to be columns, so we can access them by name:
+         *      ("SELECT * FROM table.infoTyped.foo" == "bar")
+         */
         MessageType parquetSchema = new AvroSchemaConverter().convert(avro.getSchema());
-/*      the output:
-        String parquetSchema = "message org.ga4gh.GAVariant {\n" +
-                "  required binary id (UTF8);\n" +
-                "  required binary variantSetId (UTF8);\n" +
-                "  required group names (LIST) {\n" +
-                "    repeated binary array (UTF8);\n" +
-                "  }\n" +
-                "  optional int64 created;\n" +
-                "  optional int64 updated;\n" +
-                "  required binary referenceName (UTF8);\n" +
-                "  required int64 start;\n" +
-                "  required int64 end;\n" +
-                "  required binary referenceBases (UTF8);\n" +
-                "  required group alternateBases (LIST) {\n" +
-                "    repeated binary array (UTF8);\n" +
-                "  }\n" +
-                "  required group info (MAP) {\n" +
-                "    repeated group map (MAP_KEY_VALUE) {\n" +
-                "      required binary key (UTF8);\n" +
-                "      required group value (LIST) {\n" +
-                "        repeated binary array (UTF8);\n" +
-                "      }\n" +
-                "    }\n" +
-                "  }\n" +
-                "  required group calls (LIST) {\n" +
-                "    repeated group array {\n" +
-                "      optional binary callSetId (UTF8);\n" +
-                "      optional binary callSetName (UTF8);\n" +
-                "      required group genotype (LIST) {\n" +
-                "        repeated int32 array;\n" +
-                "      }\n" +
-                "      optional binary phaseset (UTF8);\n" +
-                "      required group genotypeLikelihood (LIST) {\n" +
-                "        repeated double array;\n" +
-                "      }\n" +
-                "      required group info (MAP) {\n" +
-                "        repeated group map (MAP_KEY_VALUE) {\n" +
-                "          required binary key (UTF8);\n" +
-                "          required group value (LIST) {\n" +
-                "            repeated binary array (UTF8);\n" +
-                "          }\n" +
-                "        }\n" +
-                "      }\n" +
-                "    }\n" +
-                "  }\n" +
-                "}";*/
+        System.out.println(parquetSchema.toString());
+        List<Type> infoTypedFields = new ArrayList<>();
+        infoTypedFields.add(new PrimitiveType(Type.Repetition.OPTIONAL, PrimitiveType.PrimitiveTypeName.DOUBLE, "exomiserGeneVariantScore"));
+
+        List<Type> fields = parquetSchema.getFields();
+        fields.add(new GroupType(Type.Repetition.OPTIONAL, "infoTyped", OriginalType.MAP_KEY_VALUE, infoTypedFields));
+
+        parquetSchema = new MessageType(parquetSchema.getName(), fields);
+        System.out.println(parquetSchema.toString());
+
+
 
         AvroParquetWriter avroParquetWriter;
         Job j;
@@ -190,7 +162,7 @@ public class App
             j = new Job();
 
             //TODO: remove file if it exists.
-            Path path = new Path(devDir + "parquet/" + fileName + ".parquet");
+            Path path = new Path(devDir + "parquet/" + vcfFileName + ".parquet");
             avroParquetWriter = new AvroParquetWriter(
                     path, GAVariant.getClassSchema());
             avroParquetWriter.write(avro);
