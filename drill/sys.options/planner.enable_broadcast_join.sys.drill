@@ -1,0 +1,6 @@
+{
+  "name" : "planner.enable_broadcast_join",
+  "kind" : "BOOLEAN",
+  "type" : "SYSTEM",
+  "bool_val" : true
+}

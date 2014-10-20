@@ -1,0 +1,6 @@
+{
+  "name" : "planner.producer_consumer_queue_size",
+  "kind" : "LONG",
+  "type" : "SYSTEM",
+  "num_val" : 10
+}

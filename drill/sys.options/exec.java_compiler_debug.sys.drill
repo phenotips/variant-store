@@ -1,0 +1,6 @@
+{
+  "name" : "exec.java_compiler_debug",
+  "kind" : "BOOLEAN",
+  "type" : "SYSTEM",
+  "bool_val" : true
+}

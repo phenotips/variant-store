@@ -1,0 +1,6 @@
+{
+  "name" : "exec.java_compiler_janino_maxsize",
+  "kind" : "LONG",
+  "type" : "SYSTEM",
+  "num_val" : 262144
+}

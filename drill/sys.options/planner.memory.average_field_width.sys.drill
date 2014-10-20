@@ -1,0 +1,6 @@
+{
+  "name" : "planner.memory.average_field_width",
+  "kind" : "LONG",
+  "type" : "SYSTEM",
+  "num_val" : 8
+}

@@ -20,6 +20,7 @@ import org.ga4gh.GAVariant;
 import parquet.avro.AvroParquetOutputFormat;
 import parquet.avro.AvroParquetWriter;
 import parquet.avro.AvroSchemaConverter;
+import parquet.schema.MessageType;
 
 
 /**
@@ -31,6 +32,29 @@ public class App
     private final static String devDir = "/home/meatcar/dev/drill/variant-store/";
 
 
+    /**************
+     * BATTLE PLAN
+     **************
+     *
+     * Pre-runtime:
+     * - turn avro schema into parquet schema
+     * - add typed info fields as parquet fields (not values in an array)
+     *
+     * Runtime:
+     *
+     * == Import step ==
+     * - Parse VCF using Picard/htsjdk
+     * - TODO: Insert attributes into some sort of object
+     * - Write object into parquet file using schema
+     *
+     * == TODO: Query step ==
+     * - Copy ./drill to /tmp/drill, specifically drill/sys.storage_plugins/phenotips.sys.drill
+     * - Initialize drillbit using java in embedded mode, not sh/scripts (note: see jar calls in scripts)
+     *   - make sure
+     * - Connect to it over jdbc
+     * - compose your queries!!
+     *
+     */
 
     public static void main( String[] args )
     {
@@ -112,9 +136,9 @@ public class App
          * Write Parquet file
          */
 
-        System.out.println(new AvroSchemaConverter().convert(avro.getSchema()).toString());
-
-        String parquerSchema = "message org.ga4gh.GAVariant {\n" +
+        MessageType parquetSchema = new AvroSchemaConverter().convert(avro.getSchema());
+/*      the output:
+        String parquetSchema = "message org.ga4gh.GAVariant {\n" +
                 "  required binary id (UTF8);\n" +
                 "  required binary variantSetId (UTF8);\n" +
                 "  required group names (LIST) {\n" +
@@ -158,7 +182,7 @@ public class App
                 "      }\n" +
                 "    }\n" +
                 "  }\n" +
-                "}";
+                "}";*/
 
         AvroParquetWriter avroParquetWriter;
         Job j;

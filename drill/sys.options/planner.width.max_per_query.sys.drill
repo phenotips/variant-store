@@ -1,0 +1,6 @@
+{
+  "name" : "planner.width.max_per_query",
+  "kind" : "LONG",
+  "type" : "SYSTEM",
+  "num_val" : 1000
+}

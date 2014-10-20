@@ -1,0 +1,40 @@
+{
+  "type" : "file",
+  "enabled" : true,
+  "connection" : "file:///",
+  "workspaces" : {
+    "root" : {
+      "location" : "/",
+      "writable" : false,
+      "storageformat" : null
+    },
+    "tmp" : {
+      "location" : "/tmp",
+      "writable" : true,
+      "storageformat" : "csv"
+    }
+  },
+  "formats" : {
+    "psv" : {
+      "type" : "text",
+      "extensions" : [ "tbl" ],
+      "delimiter" : "|"
+    },
+    "csv" : {
+      "type" : "text",
+      "extensions" : [ "csv" ],
+      "delimiter" : ","
+    },
+    "tsv" : {
+      "type" : "text",
+      "extensions" : [ "tsv" ],
+      "delimiter" : "\t"
+    },
+    "parquet" : {
+      "type" : "parquet"
+    },
+    "json" : {
+      "type" : "json"
+    }
+  }
+}

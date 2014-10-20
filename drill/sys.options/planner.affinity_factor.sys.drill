@@ -1,0 +1,6 @@
+{
+  "name" : "planner.affinity_factor",
+  "kind" : "DOUBLE",
+  "type" : "SYSTEM",
+  "float_val" : 1.2
+}

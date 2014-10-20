@@ -1,0 +1,6 @@
+{
+  "name" : "planner.memory.enable_memory_estimation",
+  "kind" : "BOOLEAN",
+  "type" : "SYSTEM",
+  "bool_val" : false
+}

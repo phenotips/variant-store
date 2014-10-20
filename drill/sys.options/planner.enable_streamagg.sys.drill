@@ -1,0 +1,6 @@
+{
+  "name" : "planner.enable_streamagg",
+  "kind" : "BOOLEAN",
+  "type" : "SYSTEM",
+  "bool_val" : true
+}

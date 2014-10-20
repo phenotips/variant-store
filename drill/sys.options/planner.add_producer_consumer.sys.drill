@@ -1,0 +1,6 @@
+{
+  "name" : "planner.add_producer_consumer",
+  "kind" : "BOOLEAN",
+  "type" : "SYSTEM",
+  "bool_val" : false
+}

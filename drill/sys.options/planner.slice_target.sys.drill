@@ -1,0 +1,6 @@
+{
+  "name" : "planner.slice_target",
+  "kind" : "LONG",
+  "type" : "SYSTEM",
+  "num_val" : 100000
+}

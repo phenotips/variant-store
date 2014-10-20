@@ -1,0 +1,6 @@
+{
+  "name" : "store.parquet.block-size",
+  "kind" : "LONG",
+  "type" : "SYSTEM",
+  "num_val" : 536870912
+}

@@ -1,0 +1,6 @@
+{
+  "name" : "exec.java_compiler",
+  "kind" : "STRING",
+  "type" : "SYSTEM",
+  "string_val" : "DEFAULT"
+}

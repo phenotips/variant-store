@@ -1,0 +1,6 @@
+{
+  "name" : "planner.broadcast_threshold",
+  "kind" : "LONG",
+  "type" : "SYSTEM",
+  "num_val" : 1000000
+}

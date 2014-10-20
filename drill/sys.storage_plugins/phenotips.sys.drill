@@ -1,0 +1,25 @@
+{
+  "type" : "file",
+  "enabled" : true,
+  "connection" : "file:///",
+  "workspaces" : {
+    "root" : {
+      "location" : "/home/meatcar/dev/drill/variant-store/parquet",
+      "writable" : true,
+      "storageformat" : "parquet"
+    }
+  },
+  "formats" : {
+    "tsv" : {
+      "type" : "text",
+      "extensions" : [ "tsv", "vcf" ],
+      "delimiter" : "\t"
+    },
+    "parquet" : {
+      "type" : "parquet"
+    },
+    "json" : {
+      "type" : "json"
+    }
+  }
+}

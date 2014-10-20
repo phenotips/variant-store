@@ -1,0 +1,6 @@
+{
+  "name" : "store.format",
+  "kind" : "STRING",
+  "type" : "SYSTEM",
+  "string_val" : "parquet"
+}

@@ -1,0 +1,6 @@
+{
+  "name" : "planner.memory.hash_join_table_factor",
+  "kind" : "DOUBLE",
+  "type" : "SYSTEM",
+  "float_val" : 1.1
+}

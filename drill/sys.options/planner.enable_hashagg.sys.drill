@@ -1,0 +1,6 @@
+{
+  "name" : "planner.enable_hashagg",
+  "kind" : "BOOLEAN",
+  "type" : "SYSTEM",
+  "bool_val" : true
+}
