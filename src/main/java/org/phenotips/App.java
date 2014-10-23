@@ -29,28 +29,19 @@ public class App
     private final static String devDir = "/home/meatcar/dev/drill/variant-store/";
     private final static String vcfDir = "/home/meatcar/dev/drill/vcf/";
 
-    /**************
-     * BATTLE PLAN
-     **************
-     *
-     * Runtime:
-     *
-     * == Import step ==
-     * - Parse VCF using Picard/htsjdk
-     * - Insert attributes into some sort of object
-     * - Write object into parquet file using schema
-     *
-     * == TODO: Query step ==
-     * - Copy ./drill to /tmp/drill, specifically drill/sys.storage_plugins/phenotips.sys.drill
-     * - Initialize drillbit using java in embedded mode, not sh/scripts (note: see jar calls in scripts)
-     *   - make sure
-     * - Connect to it over jdbc
-     * - compose your queries!!
-     *
-     */
-
     public static void main( String[] args )
     {
+        /**************
+         * BATTLE PLAN
+         **************
+         *
+         * Runtime:
+         *
+         * == Import step ==
+         * - Parse VCF using Picard/htsjdk
+         * - Insert attributes into some sort of object
+         * - Write object into parquet file using schema
+         */
         File dir = new File(vcfDir);
         File[] directoryListing = dir.listFiles();
         if (directoryListing != null) {
@@ -60,9 +51,26 @@ public class App
             }
         } else {
             System.err.println("Directory " + vcfDir + "is empty!");
+            return;
         }
+
+        /*
+         * == TODO: Query step ==
+         * - Copy ./drill to /tmp/drill, specifically drill/sys.storage_plugins/phenotips.sys.drill
+         * - Initialize drillbit using java in embedded mode, not sh/scripts (note: see jar calls in scripts)
+         *   - make sure
+         * - Connect to it over jdbc
+         * - compose your queries!!
+         *
+         */
+
     }
 
+    /**
+     * Parse a VCF File into parquet format, and write the parquet file out to a directory
+     * @param vcfFile the VCF file to parse
+     * @param outputDirPath the directory to write the parquet file to
+     */
     private static void vcfToParquet(File vcfFile, String outputDirPath) {
         VCFFileReader vcfReader = new VCFFileReader(vcfFile, false);
         VCFHeader vcfHeader = vcfReader.getFileHeader();
@@ -94,6 +102,10 @@ public class App
                 continue;
             }
 
+            /**
+             * Parse VCF row to ga4gh schema + our own metadata schema
+             */
+
             gaVariant = getGaVariant(vcfRow);
 
             typedInfo = getTypedInfo(vcfRow, gaVariant.getId());
@@ -123,12 +135,14 @@ public class App
 
     /**
      * Build GAVariant given a VCF Row
+     * @param vcfRow the row to build a variant out of
+     * @return the ga4gh GAVariant object
      */
     private static GAVariant getGaVariant(VariantContext vcfRow) {
         GAVariant avro = new GAVariant();
 
-        avro.setId(vcfRow.getID());
-        avro.setVariantSetId("test");
+        avro.setId(vcfRow.getID()); //TODO: what happens when ID = '.'? (missing value) (maybe generate our own?)
+        avro.setVariantSetId("test"); //TODO: probably should be patient
 
         List<CharSequence> names = new ArrayList<>();
         for (String n : vcfRow.getSampleNamesOrderedByName()) {
@@ -152,29 +166,43 @@ public class App
         Map<CharSequence, List<CharSequence>> info = getGAInfoMap(attrs);
         info.put("SSEN", new ArrayList<CharSequence>(alts));
         avro.setInfo(info);
-//        avro.setInfo(new HashMap<CharSequence, List<CharSequence>>());
 
         // Calls
-//        avro.setCalls(getGaCalls(ctx));
+//        avro.setCalls(getGaCalls(ctx)); // TODO: seems like nulls in arrays break drill..
         avro.setCalls(new ArrayList<GACall>());
         return avro;
     }
 
+    /**
+     * Build an Info object, which contains all the info fields
+     * @param vcfRow the VCF row whose info field should be parsed
+     * @param variantId the id of the variant we are parsing
+     * @return the Info object
+     */
     private static Info getTypedInfo(VariantContext vcfRow, CharSequence variantId) {
         Info typedInfo = new Info();
         final CommonInfo commonInfo = vcfRow.getCommonInfo();
 
         typedInfo.setVariantId(variantId);
+
+        //TODO: make sure this stuff works when theres no exomiser info..
         typedInfo.setExomiserGene((CharSequence) commonInfo.getAttribute("EXOMISER_GENE"));
         typedInfo.setExomiserGenePhenoScore(Double.valueOf((String) commonInfo.getAttribute("EXOMISER_GENE_PHENO_SCORE")));
         typedInfo.setExomiserGeneCominedScore(Double.valueOf((String) commonInfo.getAttribute("EXOMISER_GENE_COMBINED_SCORE")));
         typedInfo.setExomiserGeneVariantScore(Double.valueOf((String) commonInfo.getAttribute("EXOMISER_GENE_VARIANT_SCORE")));
         typedInfo.setExomiserVariantScore(Double.valueOf((String) commonInfo.getAttribute("EXOMISER_VARIANT_SCORE")));
 
+        //TODO: ADD OTHER INFO FIELDS! what else do we care about?
+
         return typedInfo;
     }
 
 
+    /**
+     * Build a list of calls in a variant.
+     * @param vcfRow the VCF row representing the variant
+     * @return a list of GACalls, where each GACall is a ga4gh object that represents a call made in the variant
+     */
     private static List<GACall> getGaCalls(VariantContext vcfRow) {
         List<GACall> calls = new ArrayList<>();
         for (Genotype g : vcfRow.getGenotypes()) {
@@ -189,6 +217,7 @@ public class App
             call.setCallSetName(g.getSampleName());
 
             // Likelihood. Wrangle double[] to List<Double>
+            // TODO: this seems to error out in drill.. investigate
             call.setGenotypeLikelihood(new ArrayList<Double>());
             if (g.getLikelihoods() != null) {
                 List<Double> likelihood = Arrays.asList(ArrayUtils.toObject(g.getLikelihoods().getAsVector()));
@@ -202,6 +231,11 @@ public class App
         return calls;
     }
 
+    /**
+     * Turn a list of htsjdk Alleles into a list of Strings/CharSequences
+     * @param alleles a list of htsjdk Alleles
+     * @return a list of String representations of each allele
+     */
     private static List<CharSequence> stringifyAlleles(List<Allele> alleles) {
         List<CharSequence> alts = new ArrayList<>();
         for (Allele a : alleles) {
@@ -210,10 +244,21 @@ public class App
         return alts;
     }
 
-    private static Map<CharSequence, List<CharSequence>> getGAInfoMap(Map<String, Object> arg) {
+    /**
+     * Convert a map with un-typed objects into a map of lists of strings.
+     * The rules for converting the objects are as follows:
+     *
+     *  null   -> []
+     *  x      -> [x.toString()]
+     *  [x, y] -> [x.toString(), y.toString()]
+     *
+     * @param objectMap a String->Object map to convert
+     * @return a String->List[String..] map
+     */
+    private static Map<CharSequence, List<CharSequence>> getGAInfoMap(Map<String, Object> objectMap) {
         Map<CharSequence,List<CharSequence>> info = new HashMap<>();
 
-        for (Map.Entry<String, Object> entry : arg.entrySet()) {
+        for (Map.Entry<String, Object> entry : objectMap.entrySet()) {
             Object v = entry.getValue();
             List<CharSequence> list = new ArrayList<>();
             if (v != null) {
