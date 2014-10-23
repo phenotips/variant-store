@@ -142,7 +142,7 @@ public class App
         GAVariant avro = new GAVariant();
 
         avro.setId(vcfRow.getID()); //TODO: what happens when ID = '.'? (missing value) (maybe generate our own?)
-        avro.setVariantSetId("test"); //TODO: probably should be patient
+        avro.setVariantSetId("test"); //TODO: probably should be some sort of patient identifier
 
         List<CharSequence> names = new ArrayList<>();
         for (String n : vcfRow.getSampleNamesOrderedByName()) {
@@ -168,7 +168,7 @@ public class App
         avro.setInfo(info);
 
         // Calls
-//        avro.setCalls(getGaCalls(ctx)); // TODO: seems like nulls in arrays break drill..
+//        avro.setCalls(getGaCalls(ctx)); // TODO: seems like nulls in arrays break drill. Investigate
         avro.setCalls(new ArrayList<GACall>());
         return avro;
     }
