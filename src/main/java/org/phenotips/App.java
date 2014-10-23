@@ -1,12 +1,9 @@
 package org.phenotips;
 
-import htsjdk.variant.variantcontext.Allele;
-import htsjdk.variant.variantcontext.Genotype;
-import htsjdk.variant.variantcontext.GenotypesContext;
+import htsjdk.variant.variantcontext.*;
 import htsjdk.variant.vcf.VCFFileReader;
 import htsjdk.variant.vcf.VCFHeader;
 import java.io.File;
-import htsjdk.variant.variantcontext.VariantContext;
 import java.io.IOException;
 import java.util.*;
 import org.apache.avro.file.DataFileWriter;
@@ -30,21 +27,17 @@ import parquet.schema.*;
 public class App 
 {
     private final static String devDir = "/home/meatcar/dev/drill/variant-store/";
-
+    private final static String vcfDir = "/home/meatcar/dev/drill/vcf/";
 
     /**************
      * BATTLE PLAN
      **************
      *
-     * Pre-runtime:
-     * - turn avro schema into parquet schema
-     * - TODO: add typed info fields as parquet fields (not values in an array)
-     *
      * Runtime:
      *
      * == Import step ==
      * - Parse VCF using Picard/htsjdk
-     * - TODO: Insert attributes into some sort of object
+     * - Insert attributes into some sort of object
      * - Write object into parquet file using schema
      *
      * == TODO: Query step ==
@@ -58,44 +51,103 @@ public class App
 
     public static void main( String[] args )
     {
-//        String vcfFileName = "test.vcf";
-        String vcfFileName = "../vcf/F0000009.ezr2";
-        VCFFileReader vcfReader = new VCFFileReader(new File(devDir + vcfFileName), false);
+        File dir = new File(vcfDir);
+        File[] directoryListing = dir.listFiles();
+        if (directoryListing != null) {
+            for (File vcfFile : directoryListing) {
+                System.out.println("Processing: " + vcfFile.getAbsolutePath());
+                vcfToParquet(vcfFile, devDir + "parquet/");
+            }
+        } else {
+            System.err.println("Directory " + vcfDir + "is empty!");
+        }
+    }
+
+    private static void vcfToParquet(File vcfFile, String outputDirPath) {
+        VCFFileReader vcfReader = new VCFFileReader(vcfFile, false);
         VCFHeader vcfHeader = vcfReader.getFileHeader();
         Iterator<VariantContext> it;
         it = vcfReader.iterator();
 
+        AvroParquetWriter variantWriter = null;
+        AvroParquetWriter infoWriter = null;
 
-//        while (it.hasNext()) {
-//        }
-        VariantContext ctx = it.next(); //.fullyDecode(vcfHeader, true);
+        try {
+            variantWriter = new AvroParquetWriter(
+                    new Path(devDir + "parquet/" + vcfFile.getName() + ".parquet"), GAVariant.getClassSchema());
+            infoWriter = new AvroParquetWriter(
+                    new Path(devDir + "parquet/" + vcfFile.getName() + ".info.parquet"), Info.getClassSchema());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
+        GAVariant gaVariant;
+        Info typedInfo;
+
+        VariantContext vcfRow;
+        while (it.hasNext()) {
+            try {
+                vcfRow = it.next(); //.fullyDecode(vcfHeader, true);
+            } catch (Exception e) {
+                System.err.println("Error encountered while processing " + vcfFile.getAbsolutePath());
+                e.printStackTrace();
+                continue;
+            }
+
+            gaVariant = getGaVariant(vcfRow);
+
+            typedInfo = getTypedInfo(vcfRow, gaVariant.getId());
+
+            /**
+             * Write Parquet file
+             */
+
+            try {
+                //TODO: remove file if it exists.
+                variantWriter.write(gaVariant);
+                infoWriter.write(typedInfo);
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.exit(1);
+            }
+        }
+        try {
+            variantWriter.close();
+            infoWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+
+    }
+
+    /**
+     * Build GAVariant given a VCF Row
+     */
+    private static GAVariant getGaVariant(VariantContext vcfRow) {
         GAVariant avro = new GAVariant();
 
-        /**
-         * Build AVRO object
-         */
-        avro.setId(ctx.getID());
+        avro.setId(vcfRow.getID());
         avro.setVariantSetId("test");
 
         List<CharSequence> names = new ArrayList<>();
-        for (String n : ctx.getSampleNamesOrderedByName()) {
+        for (String n : vcfRow.getSampleNamesOrderedByName()) {
             names.add(n);
         }
         avro.setNames(names);
 
-        avro.setReferenceName(ctx.getChr());
-        avro.setStart((long) ctx.getStart());
-        avro.setEnd((long) ctx.getEnd());
+        avro.setReferenceName(vcfRow.getChr());
+        avro.setStart((long) vcfRow.getStart());
+        avro.setEnd((long) vcfRow.getEnd());
 
-        avro.setReferenceBases(ctx.getReference().getBaseString());
+        avro.setReferenceBases(vcfRow.getReference().getBaseString());
 
         // ALT
-        List<CharSequence> alts = stringifyAlleles(ctx.getAlternateAlleles());
+        List<CharSequence> alts = stringifyAlleles(vcfRow.getAlternateAlleles());
         avro.setAlternateBases(alts);
 
         // INFO
-        Map<String, Object> attrs = ctx.getCommonInfo().getAttributes();
+        Map<String, Object> attrs = vcfRow.getCommonInfo().getAttributes();
 
         Map<CharSequence, List<CharSequence>> info = getGAInfoMap(attrs);
         info.put("SSEN", new ArrayList<CharSequence>(alts));
@@ -103,13 +155,34 @@ public class App
 //        avro.setInfo(new HashMap<CharSequence, List<CharSequence>>());
 
         // Calls
+//        avro.setCalls(getGaCalls(ctx));
+        avro.setCalls(new ArrayList<GACall>());
+        return avro;
+    }
+
+    private static Info getTypedInfo(VariantContext vcfRow, CharSequence variantId) {
+        Info typedInfo = new Info();
+        final CommonInfo commonInfo = vcfRow.getCommonInfo();
+
+        typedInfo.setVariantId(variantId);
+        typedInfo.setExomiserGene((CharSequence) commonInfo.getAttribute("EXOMISER_GENE"));
+        typedInfo.setExomiserGenePhenoScore(Double.valueOf((String) commonInfo.getAttribute("EXOMISER_GENE_PHENO_SCORE")));
+        typedInfo.setExomiserGeneCominedScore(Double.valueOf((String) commonInfo.getAttribute("EXOMISER_GENE_COMBINED_SCORE")));
+        typedInfo.setExomiserGeneVariantScore(Double.valueOf((String) commonInfo.getAttribute("EXOMISER_GENE_VARIANT_SCORE")));
+        typedInfo.setExomiserVariantScore(Double.valueOf((String) commonInfo.getAttribute("EXOMISER_VARIANT_SCORE")));
+
+        return typedInfo;
+    }
+
+
+    private static List<GACall> getGaCalls(VariantContext vcfRow) {
         List<GACall> calls = new ArrayList<>();
-        for (Genotype g : ctx.getGenotypes()) {
+        for (Genotype g : vcfRow.getGenotypes()) {
             GACall call = new GACall();
 
             call.setGenotype(new ArrayList<Integer>());
             for (Allele a : g.getAlleles()) {
-                call.getGenotype().add(ctx.getAlleleIndex(a));
+                call.getGenotype().add(vcfRow.getAlleleIndex(a));
             }
 
             call.setCallSetId(g.getSampleName());
@@ -126,52 +199,7 @@ public class App
 
             calls.add(call);
         }
-        avro.setCalls(calls);
-//        avro.setCalls(new ArrayList<GACall>());
-
-        System.out.println(avro.toString().replace(",", ",\n"));
-
-        /**
-         * Write Parquet file
-         */
-
-        /**
-         * Modify Avro->Parquet schema to include typed INFO fields.
-         * This is nescessary because otherwise, INFO shows up as {map: {array: [{key: "foo", value: "bar"}..]}},
-         * and drill can only query the inner array by index.
-         *      ("SELECT * FROM table.info.map.array[0]" == "bar")
-         * We need the values to be columns, so we can access them by name:
-         *      ("SELECT * FROM table.infoTyped.foo" == "bar")
-         */
-        MessageType parquetSchema = new AvroSchemaConverter().convert(avro.getSchema());
-        System.out.println(parquetSchema.toString());
-        List<Type> infoTypedFields = new ArrayList<>();
-        infoTypedFields.add(new PrimitiveType(Type.Repetition.OPTIONAL, PrimitiveType.PrimitiveTypeName.DOUBLE, "exomiserGeneVariantScore"));
-
-        List<Type> fields = parquetSchema.getFields();
-        fields.add(new GroupType(Type.Repetition.OPTIONAL, "infoTyped", OriginalType.MAP_KEY_VALUE, infoTypedFields));
-
-        parquetSchema = new MessageType(parquetSchema.getName(), fields);
-        System.out.println(parquetSchema.toString());
-
-
-
-        AvroParquetWriter avroParquetWriter;
-        Job j;
-        try {
-            j = new Job();
-
-            //TODO: remove file if it exists.
-            Path path = new Path(devDir + "parquet/" + vcfFileName + ".parquet");
-            avroParquetWriter = new AvroParquetWriter(
-                    path, GAVariant.getClassSchema());
-            avroParquetWriter.write(avro);
-            avroParquetWriter.close();
-        } catch (IOException e) {
-            System.out.println("ERRROOORR!!");
-            e.printStackTrace();
-            return;
-        }
+        return calls;
     }
 
     private static List<CharSequence> stringifyAlleles(List<Allele> alleles) {
