@@ -29,8 +29,7 @@ public class App
     private final static String devDir = "/home/meatcar/dev/drill/variant-store/";
     private final static String vcfDir = "/home/meatcar/dev/drill/vcf/";
 
-    public static void main( String[] args )
-    {
+    public static void main( String[] args ) {
         /**************
          * BATTLE PLAN
          **************
@@ -42,12 +41,31 @@ public class App
          * - Insert attributes into some sort of object
          * - Write object into parquet file using schema
          */
-        File dir = new File(vcfDir);
-        File[] directoryListing = dir.listFiles();
+
+        // Nuke all parquet files. Really, we should be overwriting them..
+        File dir;
+        File[] directoryListing;
+
+        String outDir = devDir + "parquet/";
+
+        dir = new File(outDir);
+        directoryListing = dir.listFiles();
         if (directoryListing != null) {
             for (File vcfFile : directoryListing) {
-                System.out.println("Processing: " + vcfFile.getAbsolutePath());
-                vcfToParquet(vcfFile, devDir + "parquet/");
+                if (vcfFile.getName().endsWith(".parquet")) {
+                    vcfFile.delete();
+                }
+            }
+        }
+
+        dir = new File(vcfDir);
+        directoryListing = dir.listFiles();
+        if (directoryListing != null) {
+            for (File vcfFile : directoryListing) {
+                if (vcfFile.getName().endsWith("ASM.vcf")) {
+                    System.out.println("Processing: " + vcfFile.getAbsolutePath());
+                    vcfToParquet(vcfFile, outDir);
+                }
             }
         } else {
             System.err.println("Directory " + vcfDir + "is empty!");
@@ -71,9 +89,20 @@ public class App
      * @param vcfFile the VCF file to parse
      * @param outputDirPath the directory to write the parquet file to
      */
-    private static void vcfToParquet(File vcfFile, String outputDirPath) {
+    private static void vcfToParquet(File vcfFile, String outputDirPath){
         VCFFileReader vcfReader = new VCFFileReader(vcfFile, false);
         VCFHeader vcfHeader = vcfReader.getFileHeader();
+        String id = null;
+        if (vcfHeader.getSampleNamesInOrder().size() > 1) {
+            System.err.println("Multi-sample VCF unsupported");
+            return;
+        } else if (vcfHeader.getSampleNamesInOrder().size() == 1) {
+            id = vcfHeader.getSampleNamesInOrder().get(0);
+            //TODO: pass this to getGaVariant
+        } else {
+            //TODO: get patient name
+        }
+
         Iterator<VariantContext> it;
         it = vcfReader.iterator();
 
@@ -142,6 +171,7 @@ public class App
         GAVariant avro = new GAVariant();
 
         avro.setId(vcfRow.getID()); //TODO: what happens when ID = '.'? (missing value) (maybe generate our own?)
+                                    //      Note that the names field is the one that stores RefSNP Ids.
         avro.setVariantSetId("test"); //TODO: probably should be some sort of patient identifier
 
         List<CharSequence> names = new ArrayList<>();
@@ -168,7 +198,7 @@ public class App
         avro.setInfo(info);
 
         // Calls
-//        avro.setCalls(getGaCalls(ctx)); // TODO: seems like nulls in arrays break drill. Investigate
+//        avro.setCalls(getGaCalls(vcfRow)); // TODO: seems like nulls in arrays break drill. Investigate
         avro.setCalls(new ArrayList<GACall>());
         return avro;
     }
@@ -181,16 +211,26 @@ public class App
      */
     private static Info getTypedInfo(VariantContext vcfRow, CharSequence variantId) {
         Info typedInfo = new Info();
-        final CommonInfo commonInfo = vcfRow.getCommonInfo();
+        Map<String, Object> info = vcfRow.getCommonInfo().getAttributes();
+        Object tmp;
 
         typedInfo.setVariantId(variantId);
 
-        //TODO: make sure this stuff works when theres no exomiser info..
-        typedInfo.setExomiserGene((CharSequence) commonInfo.getAttribute("EXOMISER_GENE"));
-        typedInfo.setExomiserGenePhenoScore(Double.valueOf((String) commonInfo.getAttribute("EXOMISER_GENE_PHENO_SCORE")));
-        typedInfo.setExomiserGeneCominedScore(Double.valueOf((String) commonInfo.getAttribute("EXOMISER_GENE_COMBINED_SCORE")));
-        typedInfo.setExomiserGeneVariantScore(Double.valueOf((String) commonInfo.getAttribute("EXOMISER_GENE_VARIANT_SCORE")));
-        typedInfo.setExomiserVariantScore(Double.valueOf((String) commonInfo.getAttribute("EXOMISER_VARIANT_SCORE")));
+        if ((tmp = info.get("EXOMISER_GENE")) != null) {
+            typedInfo.setExomiserGene((CharSequence) tmp);
+        }
+        if ((tmp = info.get("EXOMISER_GENE_PHENO_SCORE")) != null) {
+            typedInfo.setExomiserGenePhenoScore(Double.valueOf((String) tmp));
+        }
+        if ((tmp = info.get("EXOMISER_GENE_COMBINED_SCORE")) != null) {
+            typedInfo.setExomiserGeneCominedScore(Double.valueOf((String) tmp));
+        }
+        if ((tmp = info.get("EXOMISER_GENE_VARIANT_SCORE")) != null) {
+            typedInfo.setExomiserGeneVariantScore(Double.valueOf((String) tmp));
+        }
+        if ((tmp = info.get("EXOMISER_VARIANT_SCORE")) != null) {
+            typedInfo.setExomiserVariantScore(Double.valueOf((String) tmp));
+        }
 
         //TODO: ADD OTHER INFO FIELDS! what else do we care about?
 
@@ -239,7 +279,7 @@ public class App
     private static List<CharSequence> stringifyAlleles(List<Allele> alleles) {
         List<CharSequence> alts = new ArrayList<>();
         for (Allele a : alleles) {
-            alts.add(a.getBaseString());
+            alts.add(a.getDisplayString());
         }
         return alts;
     }
