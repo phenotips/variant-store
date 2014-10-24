@@ -256,11 +256,16 @@ public class App
             call.setCallSetId(g.getSampleName());
             call.setCallSetName(g.getSampleName());
 
-            // Likelihood. Wrangle double[] to List<Double>
             // TODO: this seems to error out in drill.. investigate
+            // Likelihood. Wrangle double[] to List<Double>
             call.setGenotypeLikelihood(new ArrayList<Double>());
             if (g.getLikelihoods() != null) {
                 List<Double> likelihood = Arrays.asList(ArrayUtils.toObject(g.getLikelihoods().getAsVector()));
+                for (Double d : likelihood) {
+                    if (d == null) {
+                        System.out.println(g.getLikelihoodsString());
+                    }
+                }
                 call.setGenotypeLikelihood(likelihood);
             }
 
