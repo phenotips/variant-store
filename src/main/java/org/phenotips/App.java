@@ -5,19 +5,15 @@ import htsjdk.variant.vcf.VCFFileReader;
 import htsjdk.variant.vcf.VCFHeader;
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.*;
-import org.apache.avro.file.DataFileWriter;
-import org.apache.avro.io.DatumWriter;
-import org.apache.avro.specific.SpecificDatumWriter;
+import org.apache.avro.Schema;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapreduce.Job;
 import org.ga4gh.GACall;
 import org.ga4gh.GAVariant;
-import parquet.avro.AvroParquetOutputFormat;
 import parquet.avro.AvroParquetWriter;
-import parquet.avro.AvroSchemaConverter;
-import parquet.schema.*;
 
 
 /**
@@ -42,21 +38,10 @@ public class App
          * - Write object into parquet file using schema
          */
 
-        // Nuke all parquet files. Really, we should be overwriting them..
         File dir;
         File[] directoryListing;
 
         String outDir = devDir + "parquet/";
-
-        dir = new File(outDir);
-        directoryListing = dir.listFiles();
-        if (directoryListing != null) {
-            for (File vcfFile : directoryListing) {
-                if (vcfFile.getName().endsWith(".parquet")) {
-                    vcfFile.delete();
-                }
-            }
-        }
 
         dir = new File(vcfDir);
         directoryListing = dir.listFiles();
@@ -81,6 +66,16 @@ public class App
          * - compose your queries!!
          *
          */
+
+        DrillManager connector = null;
+        try {
+            connector = new DrillManager();
+            Statement statement = connector.connection().createStatement();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
 
     }
 
@@ -110,10 +105,12 @@ public class App
         AvroParquetWriter infoWriter = null;
 
         try {
-            variantWriter = new AvroParquetWriter(
-                    new Path(devDir + "parquet/" + vcfFile.getName() + ".parquet"), GAVariant.getClassSchema());
-            infoWriter = new AvroParquetWriter(
-                    new Path(devDir + "parquet/" + vcfFile.getName() + ".info.parquet"), Info.getClassSchema());
+            variantWriter = getParquetWriter(
+                    new Path(devDir + "parquet/" + vcfFile.getName() + ".parquet"),
+                    GAVariant.getClassSchema());
+            infoWriter = getParquetWriter(
+                    new Path(devDir + "parquet/" + vcfFile.getName() + ".info.parquet"),
+                    Info.getClassSchema());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -160,6 +157,22 @@ public class App
             System.exit(1);
         }
 
+    }
+
+    private static AvroParquetWriter getParquetWriter(Path path, Schema schema) throws IOException {
+        File f = new File(path.toUri());
+
+        if (f.exists() && !f.isDirectory()) {
+            f.delete();
+        }
+
+        return new AvroParquetWriter(path, schema);
+
+    }
+
+    private static Path removeFileIfExists(Path path) {
+
+        return path;
     }
 
     /**

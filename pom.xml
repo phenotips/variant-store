@@ -50,6 +50,16 @@
       <artifactId>hadoop-core</artifactId>
       <version>1.1.0</version>
     </dependency>
+    <dependency>
+      <groupId>javax.inject</groupId>
+      <artifactId>javax.inject</artifactId>
+      <version>1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.drill.exec</groupId>
+      <artifactId>drill-jdbc</artifactId>
+      <version>0.5.0-incubating</version>
+    </dependency>
   </dependencies>
 
   <build>
