@@ -1,7 +1,6 @@
-package org.phenotips;
+package org.phenotips.variantstore;
 
 import java.sql.*;
-import java.util.Enumeration;
 import java.util.Properties;
 import javax.inject.Singleton;
 import org.apache.drill.jdbc.Driver;
@@ -13,7 +12,7 @@ import org.apache.drill.jdbc.Driver;
 public class DrillManager {
     private Connection connection = null;
 
-    public DrillManager() throws SQLException {
+    public DrillManager(String drillPath) throws SQLException {
 
         try {
             Class.forName("org.apache.drill.jdbc.Driver");
@@ -22,7 +21,11 @@ public class DrillManager {
         }
         Driver d = new Driver();
         // TODO: this creates a new instance of drill, and complains if one is running. Figure out how to connect to a running one.
-        connection = d.connect("jdbc:drill:zk=local", new Properties());
+        connection = d.connect(drillPath, new Properties());
+    }
+
+    public DrillManager() throws SQLException {
+        this("jdbc:drill:zk=local");
     }
 
     public Connection connection() {
