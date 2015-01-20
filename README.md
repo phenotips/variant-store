@@ -15,8 +15,7 @@ Change the hardcoded paths in java, to point at a different VCF folder.
 
 ## Query data
 
-1. `cp -rf drill /tmp/drill`
-2. Set up apache drill as described [here](https://cwiki.apache.org/confluence/display/DRILL/Apache+Drill+in+10+Minutes).
-3. In the sqlline, run `USE phenotips.root;`
-4. Query away! For example: `select alternateBases from test.vcf.parquet where referenceBase='C'`.
+1. Set up apache drill as described [here](https://cwiki.apache.org/confluence/display/DRILL/Apache+Drill+in+10+Minutes).
+2. In the sqlline, run `USE phenotips.root;`
+3. Query away! For example: `select alternateBases from test.vcf.parquet where referenceBase='C'`.
 
