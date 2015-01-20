@@ -1,6 +1,0 @@
-{
-  "name" : "planner.disable_exchanges",
-  "kind" : "BOOLEAN",
-  "type" : "SYSTEM",
-  "bool_val" : false
-}

@@ -1,6 +1,0 @@
-{
-  "name" : "exec.max_hash_table_size",
-  "kind" : "LONG",
-  "type" : "SYSTEM",
-  "num_val" : 1073741824
-}

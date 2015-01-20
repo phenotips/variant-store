@@ -1,9 +1,9 @@
 package org.phenotips.variantstore;
 
-import java.io.File;
 import java.sql.SQLException;
-import java.util.concurrent.Future;
 import org.apache.log4j.Logger;
+import org.phenotips.variantstore.storage.DrillManager;
+import org.phenotips.variantstore.storage.StorageManager;
 
 /**
  * The Variant Store enables the storage of many many variants.
@@ -24,13 +24,14 @@ public class VariantStore {
         this.vcfDir = vcfDir;
         this.outDir = outDir;
 
+        storageManager = new StorageManager(this.outDir);
+
         try {
             drillManager = new DrillManager(drillPath);
-        } catch (SQLException e) {
+        } catch (Exception e) {
+            e.printStackTrace();
             throw new VariantStoreException(e.getMessage());
         }
-
-        storageManager = new StorageManager(this.outDir);
     }
 
     public VariantStore(String vcfDir, String outDir) throws VariantStoreException {
@@ -51,7 +52,7 @@ public class VariantStore {
                     "/home/meatcar/dev/drill/parquet/"
             );
 
-            store.addAllInDirectory("/home/meatcar/dev/drill/vcf/NOSUCHTHING/");
+            store.addAllInDirectory("/home/meatcar/dev/drill/vcf/");
 
 
         } catch (VariantStoreException e) {

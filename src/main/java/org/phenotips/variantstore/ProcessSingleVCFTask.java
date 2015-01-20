@@ -15,12 +15,12 @@ import org.phenotips.variantstore.writers.VariantWriter;
 /**
  * Created by meatcar on 1/19/15.
  */
-public class ProcessVCFTask implements Callable {
-    Logger logger = Logger.getLogger(ProcessVCFTask.class);
+public class ProcessSingleVCFTask implements Callable {
+    Logger logger = Logger.getLogger(ProcessSingleVCFTask.class);
     private String outDir;
     File vcfFile;
 
-    public ProcessVCFTask(String fileName, String outDir) {
+    public ProcessSingleVCFTask(String fileName, String outDir) {
         vcfFile = new File(fileName);
         this.outDir = outDir;
     }
@@ -30,6 +30,8 @@ public class ProcessVCFTask implements Callable {
         VCFFileReader vcfReader = new VCFFileReader(vcfFile, false);
         VCFHeader vcfHeader = vcfReader.getFileHeader();
         String id = null;
+
+        logger.debug("Processing: " + vcfFile.getAbsolutePath());
 
         if (vcfHeader.getSampleNamesInOrder().size() > 1) {
             throw new VariantStoreException("Multi-sample VCF unsupported");
@@ -70,6 +72,9 @@ public class ProcessVCFTask implements Callable {
 
         variantWriter.close();
         infoWriter.close();
+
+        logger.debug("Done processing: " + vcfFile.getAbsolutePath());
+
         return null;
     }
 }

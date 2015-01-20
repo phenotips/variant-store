@@ -1,6 +1,0 @@
-{
-  "name" : "planner.enable_multiphase_agg",
-  "kind" : "BOOLEAN",
-  "type" : "SYSTEM",
-  "bool_val" : true
-}

@@ -1,6 +1,0 @@
-{
-  "name" : "planner.memory.non_blocking_operators_memory",
-  "kind" : "LONG",
-  "type" : "SYSTEM",
-  "num_val" : 64
-}

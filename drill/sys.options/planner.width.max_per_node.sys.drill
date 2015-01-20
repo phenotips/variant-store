@@ -1,6 +1,0 @@
-{
-  "name" : "planner.width.max_per_node",
-  "kind" : "LONG",
-  "type" : "SYSTEM",
-  "num_val" : 6
-}

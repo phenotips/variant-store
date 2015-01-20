@@ -1,6 +1,0 @@
-{
-  "name" : "store.json.all_text_mode",
-  "kind" : "BOOLEAN",
-  "type" : "SYSTEM",
-  "bool_val" : false
-}

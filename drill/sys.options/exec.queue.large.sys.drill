@@ -1,6 +1,0 @@
-{
-  "name" : "exec.queue.large",
-  "kind" : "LONG",
-  "type" : "SYSTEM",
-  "num_val" : 10
-}

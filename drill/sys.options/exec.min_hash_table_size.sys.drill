@@ -1,6 +1,0 @@
-{
-  "name" : "exec.min_hash_table_size",
-  "kind" : "LONG",
-  "type" : "SYSTEM",
-  "num_val" : 65536
-}

@@ -1,6 +1,0 @@
-{
-  "name" : "planner.join.row_count_estimate_factor",
-  "kind" : "DOUBLE",
-  "type" : "SYSTEM",
-  "float_val" : 1.0
-}

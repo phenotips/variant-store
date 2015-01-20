@@ -1,6 +1,0 @@
-{
-  "name" : "store.parquet.use_new_reader",
-  "kind" : "BOOLEAN",
-  "type" : "SYSTEM",
-  "bool_val" : false
-}

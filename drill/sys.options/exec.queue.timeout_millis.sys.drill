@@ -1,6 +1,0 @@
-{
-  "name" : "exec.queue.timeout_millis",
-  "kind" : "LONG",
-  "type" : "SYSTEM",
-  "num_val" : 300000
-}

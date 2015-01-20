@@ -1,6 +1,0 @@
-{
-  "name" : "planner.enable_hash_single_key",
-  "kind" : "BOOLEAN",
-  "type" : "SYSTEM",
-  "bool_val" : true
-}
