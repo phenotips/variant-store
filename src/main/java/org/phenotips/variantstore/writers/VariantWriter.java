@@ -3,12 +3,14 @@ package org.phenotips.variantstore.writers;
 import htsjdk.variant.variantcontext.Allele;
 import htsjdk.variant.variantcontext.Genotype;
 import htsjdk.variant.variantcontext.VariantContext;
+import htsjdk.variant.vcf.VCFHeader;
 import java.io.IOException;
 import java.util.*;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.log4j.Logger;
 import org.ga4gh.GACall;
 import org.ga4gh.GAVariant;
+import parquet.avro.AvroSchemaConverter;
 
 /**
  * Created by meatcar on 1/16/15.
@@ -18,7 +20,7 @@ public class VariantWriter extends AbstractParquetWriter {
     private Logger logger = Logger.getLogger(VariantWriter.class);
 
     public VariantWriter(String filename, String outdir) throws Exception {
-        setParquetWriter(filename, outdir, GAVariant.getClassSchema());
+        super(filename, outdir, GAVariant.getClassSchema());
     }
 
     /**
@@ -58,10 +60,10 @@ public class VariantWriter extends AbstractParquetWriter {
         avro.setInfo(info);
 
         // Calls
-//        avro.setCalls(getGaCalls(vcfRow)); // TODO: seems like nulls in arrays break drill. Investigate
+        avro.setCalls(getGaCalls(vcfRow)); //TODO: seems like nulls in arrays break drill. Investigate
         avro.setCalls(new ArrayList<GACall>());
 
-        this.writeAvro(avro);
+        super.writeAvro(avro);
     }
 
     /**

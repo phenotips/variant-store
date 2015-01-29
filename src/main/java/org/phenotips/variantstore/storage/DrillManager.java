@@ -32,11 +32,11 @@ public class DrillManager {
         Driver d = new Driver();
         // TODO: this creates a new instance of drill, and complains if one is running. Figure out how to connect to a running one.
         try {
-            connection = d.connect(drillPath, new Properties());
+            connection = DriverManager.getConnection(drillPath);
         } catch (SQLException e) {
-            throw new VariantStoreException("Unable to connect to Apache Drill at " + drillPath + ".\n" +
-                                            "If starting a single-node instance ensure one isn't already running,\n" +
-                                            "otherwise make the Drill cluster is available");
+            throw new VariantStoreException("Unable to connect to Apache Drill at " + drillPath + "." +
+                                            " If starting a single-node instance ensure one isn't already running," +
+                                            " otherwise make sure the Drill cluster is available");
         }
     }
 
@@ -53,19 +53,21 @@ public class DrillManager {
 
         if (configDir .exists()) {
             if (configDir.isDirectory()) {
-                logger.info(configDir.getAbsolutePath() + " already exists");
+                logger.info(configDir.getAbsolutePath() + " already exists, using it now.");
                 return;
             } else {
                 throw new VariantStoreException("/tmp/drill is not a directory");
             }
         }
 
+        logger.info(configDir.getAbsolutePath() + " doesn't exist, initializing it.");
+
         URL config = DrillManager.class.getResource("/" + configName);
         try {
             // strip initial / in configPath
             FileUtils.copyURLToFile(config, new File(configDir.getAbsolutePath(), configName));
         } catch (IOException e) {
-            logger.error("Copying drill config failed.");
+            logger.error("Copying drill config failed.", e);
             throw e;
         }
     }

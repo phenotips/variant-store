@@ -7,4 +7,8 @@ public class VariantStoreException extends Exception {
     public VariantStoreException(String message) {
         super(message);
     }
+
+    public VariantStoreException(String message, Exception e) {
+        super(message, e);
+    }
 }

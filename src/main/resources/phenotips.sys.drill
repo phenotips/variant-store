@@ -4,7 +4,7 @@
   "connection" : "file:///",
   "workspaces" : {
     "root" : {
-      "location" : "/home/meatcar/dev/drill/variant-store/parquet",
+      "location" : "/home/meatcar/dev/drill/parquet",
       "writable" : true,
       "storageformat" : "parquet"
     }

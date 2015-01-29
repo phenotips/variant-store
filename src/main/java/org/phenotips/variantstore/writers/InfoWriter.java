@@ -11,7 +11,7 @@ import org.phenotips.variantstore.models.Info;
 public class InfoWriter extends AbstractParquetWriter {
 
     public InfoWriter(String filename, String outdir) throws Exception {
-        setParquetWriter(filename, outdir, Info.getClassSchema());
+        super(filename + ".info", outdir, Info.getClassSchema());
     }
 
     @Override
@@ -40,6 +40,6 @@ public class InfoWriter extends AbstractParquetWriter {
         }
 
         //TODO: ADD OTHER INFO FIELDS! what else do we care about?
-        this.writeAvro(avro);
+        super.writeAvro(avro);
     }
 }

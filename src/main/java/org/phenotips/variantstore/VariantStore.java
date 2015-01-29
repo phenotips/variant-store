@@ -1,6 +1,7 @@
 package org.phenotips.variantstore;
 
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.concurrent.Future;
 import org.apache.log4j.Logger;
 import org.phenotips.variantstore.storage.DrillManager;
 import org.phenotips.variantstore.storage.StorageManager;
@@ -11,10 +12,10 @@ import org.phenotips.variantstore.storage.StorageManager;
 public class VariantStore {
     private String vcfDir;
     private String outDir;
-    private Logger logger = Logger.getLogger(VariantStore.class);
+    private static Logger logger = Logger.getLogger(VariantStore.class);
 
-    DrillManager drillManager;
-    StorageManager storageManager;
+    private DrillManager drillManager;
+    private StorageManager storageManager;
 
     /**
      *
@@ -29,8 +30,7 @@ public class VariantStore {
         try {
             drillManager = new DrillManager(drillPath);
         } catch (Exception e) {
-            e.printStackTrace();
-            throw new VariantStoreException(e.getMessage());
+            throw new VariantStoreException(e.getMessage(), e);
         }
     }
 
@@ -38,25 +38,32 @@ public class VariantStore {
         this("jdbc:drill:zk=local", vcfDir, outDir);
     }
 
-    public void addAllInDirectory(String vcfDir) throws VariantStoreException {
+    public Connection connection() {
+        return drillManager.connection();
+    }
+
+    public void stop() throws VariantStoreException {
         try {
-            this.storageManager.addAllInDirectory(vcfDir);
-        } catch (InterruptedException e) {
-            throw new VariantStoreException(e.getMessage());
+            drillManager.stop();
+        } catch (SQLException e) {
+            throw new VariantStoreException(e.getMessage(), e);
         }
     }
 
-    public static void main(String[] args){
-        try {
-            VariantStore store = new VariantStore("/home/meatcar/dev/drill/vcf/",
-                    "/home/meatcar/dev/drill/parquet/"
-            );
+    public Future addFile(String filePath) {
+        return storageManager.add(filePath);
+    }
 
-            store.addAllInDirectory("/home/meatcar/dev/drill/vcf/");
+    public static void main(String[] args) throws SQLException, ClassNotFoundException {
+        Class.forName("org.apache.drill.jdbc.Driver");
+        Connection connection = DriverManager.getConnection("jdbc:drill:zk=local", null);
+        String query = "select N_NAME from dfs.`/home/meatcar/dev/drill/apache-drill-0.7.0/sample-data/nation.parquet`";
 
+        Statement statement = connection.createStatement();
 
-        } catch (VariantStoreException e) {
-            e.printStackTrace();
-        }
+        // hangs here
+        System.out.println("About to hang..");
+        ResultSet rs = statement.executeQuery(query);
+        System.out.println("Didn't hang!!!");
     }
 }
