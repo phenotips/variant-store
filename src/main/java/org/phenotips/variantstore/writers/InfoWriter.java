@@ -2,6 +2,7 @@ package org.phenotips.variantstore.writers;
 
 import htsjdk.variant.variantcontext.VariantContext;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Map;
 import org.phenotips.variantstore.models.Info;
 
@@ -10,8 +11,8 @@ import org.phenotips.variantstore.models.Info;
  */
 public class InfoWriter extends AbstractParquetWriter {
 
-    public InfoWriter(String filename, String outdir) throws Exception {
-        super(filename + ".info", outdir, Info.getClassSchema());
+    public InfoWriter(Path outFile) throws Exception {
+        super(outFile, Info.getClassSchema());
     }
 
     @Override

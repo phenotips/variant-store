@@ -5,6 +5,7 @@ import htsjdk.variant.variantcontext.Genotype;
 import htsjdk.variant.variantcontext.VariantContext;
 import htsjdk.variant.vcf.VCFHeader;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.*;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.log4j.Logger;
@@ -19,8 +20,8 @@ public class VariantWriter extends AbstractParquetWriter {
 
     private Logger logger = Logger.getLogger(VariantWriter.class);
 
-    public VariantWriter(String filename, String outdir) throws Exception {
-        super(filename, outdir, GAVariant.getClassSchema());
+    public VariantWriter(Path outFile) throws Exception {
+        super(outFile, GAVariant.getClassSchema());
     }
 
     /**

@@ -15,9 +15,9 @@ public abstract class AbstractParquetWriter {
     Logger logger = Logger.getLogger(AbstractParquetWriter.class);
     AvroParquetWriter avroWriter;
 
-    public AbstractParquetWriter(String filename, String outdir, Schema schema) throws IOException {
-        logger.debug("Parquet -> " + new File(outdir, filename + ".parquet").getAbsolutePath());
-        File f = new File(outdir, filename + ".parquet");
+    public AbstractParquetWriter(java.nio.file.Path outFile, Schema schema) throws IOException {
+        logger.debug("Parquet -> " + outFile);
+        File f = new File(outFile.toString());
 
         // Delete/overwrite the file if exists. Parquet doesn't support appends..
         if (f.exists() && !f.isDirectory()) {

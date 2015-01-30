@@ -45,13 +45,13 @@
     <orderEntry type="library" name="Maven: org.seqdoop:cofoja:1.1-r150" level="project" />
     <orderEntry type="library" name="Maven: com.twitter:parquet-avro:1.5.0" level="project" />
     <orderEntry type="library" name="Maven: com.twitter:parquet-column:1.5.0" level="project" />
-    <orderEntry type="library" name="Maven: com.twitter:parquet-common:1.5.1-drill-r4" level="project" />
-    <orderEntry type="library" name="Maven: com.twitter:parquet-encoding:1.5.1-drill-r4" level="project" />
+    <orderEntry type="library" name="Maven: com.twitter:parquet-common:1.5.0" level="project" />
+    <orderEntry type="library" name="Maven: com.twitter:parquet-encoding:1.5.0" level="project" />
     <orderEntry type="library" name="Maven: com.twitter:parquet-generator:1.5.1-drill-r4" level="project" />
     <orderEntry type="library" name="Maven: commons-codec:commons-codec:1.4" level="project" />
     <orderEntry type="library" name="Maven: com.twitter:parquet-hadoop:1.5.0" level="project" />
     <orderEntry type="library" name="Maven: com.twitter:parquet-format:2.1.0" level="project" />
-    <orderEntry type="library" name="Maven: com.twitter:parquet-jackson:1.5.1-drill-r4" level="project" />
+    <orderEntry type="library" name="Maven: com.twitter:parquet-jackson:1.5.0" level="project" />
     <orderEntry type="library" name="Maven: org.apache.hadoop:hadoop-core:1.1.0" level="project" />
     <orderEntry type="library" name="Maven: commons-cli:commons-cli:1.2" level="project" />
     <orderEntry type="library" name="Maven: xmlenc:xmlenc:0.52" level="project" />
@@ -232,9 +232,5 @@
     <orderEntry type="library" name="Maven: org.apache.hive:hive-hbase-handler:0.13.1" level="project" />
     <orderEntry type="library" name="Maven: org.apache.drill.contrib.storage-hive:drill-storage-hive-core:tests:0.7.0-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: pentaho:mondrian-data-foodmart-json:0.3.2" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.drill.exec:drill-jdbc-all:0.7.0-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: ch.qos.logback:logback-classic:1.0.13" level="project" />
-    <orderEntry type="library" name="Maven: ch.qos.logback:logback-core:1.0.13" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.drill.exec:drill-interpreter:0.7.0-SNAPSHOT" level="project" />
   </component>
 </module>

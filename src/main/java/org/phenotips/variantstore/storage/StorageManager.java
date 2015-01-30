@@ -1,6 +1,7 @@
 package org.phenotips.variantstore.storage;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
@@ -13,14 +14,14 @@ public class StorageManager {
     private Logger logger = Logger.getLogger(StorageManager.class);
     private Executor executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
-    private String outDir;
+    private Path outDir;
 
-    public StorageManager(String outDir) {
+    public StorageManager(Path outDir) {
         this.outDir = outDir;
     }
 
-    public Future add(String fileName) {
-        FutureTask<String> task = new FutureTask<String>(new ProcessSingleVCFTask(fileName, outDir));
+    public Future add(Path filePath) {
+        FutureTask<String> task = new FutureTask<String>(new ProcessSingleVCFTask(filePath, outDir));
         executor.execute(task);
         return task;
     }

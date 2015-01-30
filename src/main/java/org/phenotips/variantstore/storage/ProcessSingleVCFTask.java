@@ -4,6 +4,7 @@ import htsjdk.variant.variantcontext.VariantContext;
 import htsjdk.variant.vcf.VCFFileReader;
 import htsjdk.variant.vcf.VCFHeader;
 import java.io.File;
+import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.concurrent.Callable;
 import org.apache.log4j.Logger;
@@ -18,11 +19,11 @@ import org.phenotips.variantstore.writers.VariantWriter;
  */
 public class ProcessSingleVCFTask implements Callable {
     Logger logger = Logger.getLogger(ProcessSingleVCFTask.class);
-    private String outDir;
+    private Path outDir;
     File vcfFile;
 
-    public ProcessSingleVCFTask(String fileName, String outDir) {
-        vcfFile = new File(fileName);
+    public ProcessSingleVCFTask(Path filePath, Path outDir) {
+        vcfFile = new File(filePath.toString());
         this.outDir = outDir;
     }
 
@@ -45,8 +46,8 @@ public class ProcessSingleVCFTask implements Callable {
 
         Iterator<VariantContext> it = vcfReader.iterator();
 
-        VariantWriter variantWriter = new VariantWriter(vcfFile.getName(), outDir);
-        InfoWriter infoWriter = new InfoWriter(vcfFile.getName(), outDir);
+        VariantWriter variantWriter = new VariantWriter(outDir.resolve(vcfFile.getName() + ".parquet"));
+        InfoWriter infoWriter = new InfoWriter(outDir.resolve(vcfFile.getName() + ".info.parquet"));
 
         GAVariant gaVariant;
         Info typedInfo;

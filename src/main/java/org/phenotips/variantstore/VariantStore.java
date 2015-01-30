@@ -1,6 +1,10 @@
 package org.phenotips.variantstore;
 
+import java.io.File;
+import java.nio.file.Path;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Future;
 import org.apache.log4j.Logger;
 import org.phenotips.variantstore.storage.DrillManager;
@@ -10,8 +14,7 @@ import org.phenotips.variantstore.storage.StorageManager;
  * The Variant Store enables the storage of many many variants.
  */
 public class VariantStore {
-    private String vcfDir;
-    private String outDir;
+    private Path outDir;
     private static Logger logger = Logger.getLogger(VariantStore.class);
 
     private DrillManager drillManager;
@@ -20,9 +23,9 @@ public class VariantStore {
     /**
      *
      * @param drillPath Drill's configuration string, same as you would pass to sqlline
+     * @param outDir
      */
-    public VariantStore(String drillPath, String vcfDir, String outDir) throws VariantStoreException {
-        this.vcfDir = vcfDir;
+    public VariantStore(String drillPath, Path outDir) throws VariantStoreException {
         this.outDir = outDir;
 
         storageManager = new StorageManager(this.outDir);
@@ -34,8 +37,8 @@ public class VariantStore {
         }
     }
 
-    public VariantStore(String vcfDir, String outDir) throws VariantStoreException {
-        this("jdbc:drill:zk=local", vcfDir, outDir);
+    public VariantStore(Path vcfDir) throws VariantStoreException {
+        this("jdbc:drill:zk=local", vcfDir);
     }
 
     public Connection connection() {
@@ -50,20 +53,44 @@ public class VariantStore {
         }
     }
 
-    public Future addFile(String filePath) {
+    public Future addFile(Path filePath) {
         return storageManager.add(filePath);
     }
 
+    /**
+     * Add all the VCF files found in the given directory to the store.
+     * @param dirPath
+     * @return a List of Futures, each one
+     */
+    public List<Future> addFilesFromDirectory(Path dirPath) {
+        File dir = new File(dirPath.toString());
+        File[] directoryListing = dir.listFiles();
+        List<Future> futures = new ArrayList<>();
+        if (directoryListing != null) {
+            for (File vcfFile : directoryListing) {
+
+                logger.debug("Queueing " + dirPath.resolve(vcfFile.getName()));
+                futures.add(this.addFile(dirPath.resolve(vcfFile.getName())));
+            }
+        } else {
+            return null;
+        }
+
+        return futures;
+    }
+
     public static void main(String[] args) throws SQLException, ClassNotFoundException {
-        Class.forName("org.apache.drill.jdbc.Driver");
-        Connection connection = DriverManager.getConnection("jdbc:drill:zk=local", null);
-        String query = "select N_NAME from dfs.`/home/meatcar/dev/drill/apache-drill-0.7.0/sample-data/nation.parquet`";
-
-        Statement statement = connection.createStatement();
-
-        // hangs here
-        System.out.println("About to hang..");
-        ResultSet rs = statement.executeQuery(query);
-        System.out.println("Didn't hang!!!");
+        /** DRILL JDBC headache **/
+//        Class.forName("org.apache.drill.jdbc.Driver");
+//        Connection connection = DriverManager.getConnection("jdbc:drill:zk=local", null);
+//        String query = "select N_NAME from dfs.`/home/meatcar/dev/drill/apache-drill-0.7.0/sample-data/nation.parquet`";
+//
+//        Statement statement = connection.createStatement();
+//
+//        // hangs here
+//        System.out.println("About to hang..");
+//        ResultSet rs = statement.executeQuery(query);
+//        System.out.println("Didn't hang!!!");
+        /**/
     }
 }
