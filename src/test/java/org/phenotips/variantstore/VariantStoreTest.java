@@ -13,6 +13,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.phenotips.variantstore.storage.InvalidFileFormatException;
 
 import static org.junit.Assert.*;
 
@@ -64,7 +65,7 @@ public class VariantStoreTest {
 
     @Ignore("unfinished")
     @Test
-    public void testAddFilesFromDirectory() throws Exception {
+    public void testAddFilesFromDirectory() throws InvalidFileFormatException, InterruptedException {
         Path vcfDir = Paths.get("/home/meatcar/dev/drill/vcf");
 
         List<Future> futures = store.addFilesFromDirectory(vcfDir);

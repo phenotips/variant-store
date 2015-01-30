@@ -9,6 +9,7 @@ import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.phenotips.variantstore.storage.InvalidFileFormatException;
 
 /**
  * Created by meatcar on 1/30/15.
@@ -29,7 +30,7 @@ public class VariantStoreBenchmarkTest {
     }
 
     @Test
-    public void testParseBzippedVCFsToParquet() throws InterruptedException {
+    public void testParseBzippedVCFsToParquet() throws InterruptedException, InvalidFileFormatException {
         Path vcfDir = benchmarkDir.resolve("vcf/");
 
         List<Future> futures = store.addFilesFromDirectory(vcfDir);

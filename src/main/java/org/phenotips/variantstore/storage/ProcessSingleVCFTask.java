@@ -23,7 +23,7 @@ public class ProcessSingleVCFTask implements Callable {
     File vcfFile;
 
     public ProcessSingleVCFTask(Path filePath, Path outDir) {
-        vcfFile = new File(filePath.toString());
+        vcfFile = filePath.toFile();
         this.outDir = outDir;
     }
 

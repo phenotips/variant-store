@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.concurrent.Future;
 import org.apache.log4j.Logger;
 import org.phenotips.variantstore.storage.DrillManager;
+import org.phenotips.variantstore.storage.InvalidFileFormatException;
 import org.phenotips.variantstore.storage.StorageManager;
 
 /**
@@ -53,7 +54,7 @@ public class VariantStore {
         }
     }
 
-    public Future addFile(Path filePath) {
+    public Future addFile(Path filePath) throws InvalidFileFormatException {
         return storageManager.add(filePath);
     }
 
@@ -62,7 +63,7 @@ public class VariantStore {
      * @param dirPath
      * @return a List of Futures, each one
      */
-    public List<Future> addFilesFromDirectory(Path dirPath) {
+    public List<Future> addFilesFromDirectory(Path dirPath) throws InvalidFileFormatException {
         File dir = new File(dirPath.toString());
         File[] directoryListing = dir.listFiles();
         List<Future> futures = new ArrayList<>();
