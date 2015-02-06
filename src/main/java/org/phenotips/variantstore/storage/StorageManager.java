@@ -1,11 +1,12 @@
 package org.phenotips.variantstore.storage;
 
-import java.io.File;
 import java.nio.file.Path;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.*;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOCase;
+import org.apache.commons.io.filefilter.SuffixFileFilter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.phenotips.variantstore.VariantStoreException;
@@ -16,9 +17,11 @@ import org.phenotips.variantstore.VariantStoreException;
 public class StorageManager {
     private Logger logger = Logger.getLogger(StorageManager.class);
     private Executor executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-    private final String supportedExtensions = "gz;vcf";
 
     private Path outDir;
+
+    private static final List<String> supportedExtensions = Arrays.asList(".vcf", ".gz");
+    private static final SuffixFileFilter fileFilter = new SuffixFileFilter(supportedExtensions, IOCase.INSENSITIVE);
 
     public StorageManager(Path outDir) {
         this.outDir = outDir;
@@ -33,20 +36,23 @@ public class StorageManager {
      * @throws VariantStoreException
      */
     public Future add(Path filePath) throws InvalidFileFormatException{
+
         // check for unsupported extensions
-        for (String ext : supportedExtensions.split(";")) {
-            if (!filePath.endsWith(ext)) {
-                throw new InvalidFileFormatException(
-                        String.format("Supported VCF file extensions should be %s,  encountered %s.",
-                                StringUtils.join(supportedExtensions.split(";"), " or "),
-                                FilenameUtils.getExtension(filePath.toString())
-                        )
-                );
-            }
+        if (!fileFilter.accept(filePath.toFile())) {
+            throw new InvalidFileFormatException(
+                    String.format("Supported VCF file extensions should be \"%s\",  encountered \"%s.\"",
+                            StringUtils.join(supportedExtensions, "\" or \""),
+                            FilenameUtils.getExtension(filePath.toString())
+                    )
+            );
         }
 
         FutureTask<String> task = new FutureTask<String>(new ProcessSingleVCFTask(filePath, outDir));
         executor.execute(task);
         return task;
+    }
+
+    public static SuffixFileFilter getSupportedFileFilter() {
+        return fileFilter;
     }
 }

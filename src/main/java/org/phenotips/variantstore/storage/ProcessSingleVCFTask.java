@@ -20,16 +20,17 @@ import org.phenotips.variantstore.writers.VariantWriter;
 public class ProcessSingleVCFTask implements Callable {
     Logger logger = Logger.getLogger(ProcessSingleVCFTask.class);
     private Path outDir;
-    File vcfFile;
+    private final File vcfFile;
+    private final VCFFileReader vcfReader;
 
     public ProcessSingleVCFTask(Path filePath, Path outDir) {
         vcfFile = filePath.toFile();
+        vcfReader = new VCFFileReader(vcfFile, false);
         this.outDir = outDir;
     }
 
     @Override
     public Object call() throws Exception {
-        VCFFileReader vcfReader = new VCFFileReader(vcfFile, false);
         VCFHeader vcfHeader = vcfReader.getFileHeader();
         String id = null;
 
@@ -66,7 +67,6 @@ public class ProcessSingleVCFTask implements Callable {
              * Write Parquet file
              */
 
-            //TODO: remove file if it exists.
             variantWriter.write(vcfRow);
             infoWriter.write(vcfRow);
         }

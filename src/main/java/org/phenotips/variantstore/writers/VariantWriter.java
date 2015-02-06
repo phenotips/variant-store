@@ -140,6 +140,12 @@ public class VariantWriter extends AbstractParquetWriter {
 
             info.put(entry.getKey(), list);
         }
+        info.put("EXOMISER_GENE", Arrays.<CharSequence>asList("HYDIN"));
+        info.put("EXOMISER_VARIANT_SCORE", Arrays.<CharSequence>asList(String.valueOf(Math.random())));
+        info.put("EXOMISER_GENE_PHENO_SCORE", Arrays.<CharSequence>asList(String.valueOf(Math.random())));
+        info.put("EXOMISER_GENE_VARIANT_SCORE", Arrays.<CharSequence>asList(String.valueOf(Math.random())));
+        info.put("EXOMISER_GENE_COMBINED_SCORE", Arrays.<CharSequence>asList(String.valueOf(Math.random())));
+        info.put("EXOMISER_EFFECT", Arrays.<CharSequence>asList("MISSENSE"));
         return info;
     }
 
@@ -148,7 +154,7 @@ public class VariantWriter extends AbstractParquetWriter {
      * @param alleles a list of htsjdk Alleles
      * @return a list of String representations of each allele
      */
-    private List<CharSequence> stringifyAlleles(List<Allele> alleles) {
+    public static List<CharSequence> stringifyAlleles(List<Allele> alleles) {
         List<CharSequence> alts = new ArrayList<>();
         for (Allele a : alleles) {
             alts.add(a.getDisplayString());

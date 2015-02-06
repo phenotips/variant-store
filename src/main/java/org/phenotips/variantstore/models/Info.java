@@ -10,9 +10,14 @@ by apache drill, the each info key that we need is typed and stored as a field,
 instead of as a map of {<string>: <string>} as in ga4gh API. */
 @org.apache.avro.specific.AvroGenerated
 public class Info extends org.apache.avro.specific.SpecificRecordBase implements org.apache.avro.specific.SpecificRecord {
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"Info\",\"namespace\":\"org.phenotips.variantstore.models\",\"doc\":\"This metadata represents VCF INFO fields. In order to be queried and filtered\\nby apache drill, the each info key that we need is typed and stored as a field,\\ninstead of as a map of {<string>: <string>} as in ga4gh API.\",\"fields\":[{\"name\":\"variantId\",\"type\":\"string\"},{\"name\":\"ExomiserGene\",\"type\":[\"null\",\"string\"],\"default\":null},{\"name\":\"ExomiserGenePhenoScore\",\"type\":[\"null\",\"double\"],\"default\":null},{\"name\":\"ExomiserVariantScore\",\"type\":[\"null\",\"double\"],\"default\":null},{\"name\":\"ExomiserGeneVariantScore\",\"type\":[\"null\",\"double\"],\"default\":null},{\"name\":\"ExomiserGeneCominedScore\",\"type\":[\"null\",\"double\"],\"default\":null}]}");
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"Info\",\"namespace\":\"org.phenotips.variantstore.models\",\"doc\":\"This metadata represents VCF INFO fields. In order to be queried and filtered\\nby apache drill, the each info key that we need is typed and stored as a field,\\ninstead of as a map of {<string>: <string>} as in ga4gh API.\",\"fields\":[{\"name\":\"variantId\",\"type\":\"string\"},{\"name\":\"referenceName\",\"type\":\"string\"},{\"name\":\"start\",\"type\":\"long\"},{\"name\":\"end\",\"type\":\"long\"},{\"name\":\"referenceBases\",\"type\":\"string\"},{\"name\":\"alternateBases\",\"type\":{\"type\":\"array\",\"items\":\"string\"},\"default\":[]},{\"name\":\"ExomiserGene\",\"type\":[\"null\",\"string\"],\"default\":null},{\"name\":\"ExomiserGenePhenoScore\",\"type\":[\"null\",\"double\"],\"default\":null},{\"name\":\"ExomiserVariantScore\",\"type\":[\"null\",\"double\"],\"default\":null},{\"name\":\"ExomiserGeneVariantScore\",\"type\":[\"null\",\"double\"],\"default\":null},{\"name\":\"ExomiserGeneCominedScore\",\"type\":[\"null\",\"double\"],\"default\":null}]}");
   public static org.apache.avro.Schema getClassSchema() { return SCHEMA$; }
   @Deprecated public java.lang.CharSequence variantId;
+  @Deprecated public java.lang.CharSequence referenceName;
+  @Deprecated public long start;
+  @Deprecated public long end;
+  @Deprecated public java.lang.CharSequence referenceBases;
+  @Deprecated public java.util.List<java.lang.CharSequence> alternateBases;
   @Deprecated public java.lang.CharSequence ExomiserGene;
   @Deprecated public java.lang.Double ExomiserGenePhenoScore;
   @Deprecated public java.lang.Double ExomiserVariantScore;
@@ -29,8 +34,13 @@ public class Info extends org.apache.avro.specific.SpecificRecordBase implements
   /**
    * All-args constructor.
    */
-  public Info(java.lang.CharSequence variantId, java.lang.CharSequence ExomiserGene, java.lang.Double ExomiserGenePhenoScore, java.lang.Double ExomiserVariantScore, java.lang.Double ExomiserGeneVariantScore, java.lang.Double ExomiserGeneCominedScore) {
+  public Info(java.lang.CharSequence variantId, java.lang.CharSequence referenceName, java.lang.Long start, java.lang.Long end, java.lang.CharSequence referenceBases, java.util.List<java.lang.CharSequence> alternateBases, java.lang.CharSequence ExomiserGene, java.lang.Double ExomiserGenePhenoScore, java.lang.Double ExomiserVariantScore, java.lang.Double ExomiserGeneVariantScore, java.lang.Double ExomiserGeneCominedScore) {
     this.variantId = variantId;
+    this.referenceName = referenceName;
+    this.start = start;
+    this.end = end;
+    this.referenceBases = referenceBases;
+    this.alternateBases = alternateBases;
     this.ExomiserGene = ExomiserGene;
     this.ExomiserGenePhenoScore = ExomiserGenePhenoScore;
     this.ExomiserVariantScore = ExomiserVariantScore;
@@ -43,11 +53,16 @@ public class Info extends org.apache.avro.specific.SpecificRecordBase implements
   public java.lang.Object get(int field$) {
     switch (field$) {
     case 0: return variantId;
-    case 1: return ExomiserGene;
-    case 2: return ExomiserGenePhenoScore;
-    case 3: return ExomiserVariantScore;
-    case 4: return ExomiserGeneVariantScore;
-    case 5: return ExomiserGeneCominedScore;
+    case 1: return referenceName;
+    case 2: return start;
+    case 3: return end;
+    case 4: return referenceBases;
+    case 5: return alternateBases;
+    case 6: return ExomiserGene;
+    case 7: return ExomiserGenePhenoScore;
+    case 8: return ExomiserVariantScore;
+    case 9: return ExomiserGeneVariantScore;
+    case 10: return ExomiserGeneCominedScore;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -56,11 +71,16 @@ public class Info extends org.apache.avro.specific.SpecificRecordBase implements
   public void put(int field$, java.lang.Object value$) {
     switch (field$) {
     case 0: variantId = (java.lang.CharSequence)value$; break;
-    case 1: ExomiserGene = (java.lang.CharSequence)value$; break;
-    case 2: ExomiserGenePhenoScore = (java.lang.Double)value$; break;
-    case 3: ExomiserVariantScore = (java.lang.Double)value$; break;
-    case 4: ExomiserGeneVariantScore = (java.lang.Double)value$; break;
-    case 5: ExomiserGeneCominedScore = (java.lang.Double)value$; break;
+    case 1: referenceName = (java.lang.CharSequence)value$; break;
+    case 2: start = (java.lang.Long)value$; break;
+    case 3: end = (java.lang.Long)value$; break;
+    case 4: referenceBases = (java.lang.CharSequence)value$; break;
+    case 5: alternateBases = (java.util.List<java.lang.CharSequence>)value$; break;
+    case 6: ExomiserGene = (java.lang.CharSequence)value$; break;
+    case 7: ExomiserGenePhenoScore = (java.lang.Double)value$; break;
+    case 8: ExomiserVariantScore = (java.lang.Double)value$; break;
+    case 9: ExomiserGeneVariantScore = (java.lang.Double)value$; break;
+    case 10: ExomiserGeneCominedScore = (java.lang.Double)value$; break;
     default: throw new org.apache.avro.AvroRuntimeException("Bad index");
     }
   }
@@ -78,6 +98,81 @@ public class Info extends org.apache.avro.specific.SpecificRecordBase implements
    */
   public void setVariantId(java.lang.CharSequence value) {
     this.variantId = value;
+  }
+
+  /**
+   * Gets the value of the 'referenceName' field.
+   */
+  public java.lang.CharSequence getReferenceName() {
+    return referenceName;
+  }
+
+  /**
+   * Sets the value of the 'referenceName' field.
+   * @param value the value to set.
+   */
+  public void setReferenceName(java.lang.CharSequence value) {
+    this.referenceName = value;
+  }
+
+  /**
+   * Gets the value of the 'start' field.
+   */
+  public java.lang.Long getStart() {
+    return start;
+  }
+
+  /**
+   * Sets the value of the 'start' field.
+   * @param value the value to set.
+   */
+  public void setStart(java.lang.Long value) {
+    this.start = value;
+  }
+
+  /**
+   * Gets the value of the 'end' field.
+   */
+  public java.lang.Long getEnd() {
+    return end;
+  }
+
+  /**
+   * Sets the value of the 'end' field.
+   * @param value the value to set.
+   */
+  public void setEnd(java.lang.Long value) {
+    this.end = value;
+  }
+
+  /**
+   * Gets the value of the 'referenceBases' field.
+   */
+  public java.lang.CharSequence getReferenceBases() {
+    return referenceBases;
+  }
+
+  /**
+   * Sets the value of the 'referenceBases' field.
+   * @param value the value to set.
+   */
+  public void setReferenceBases(java.lang.CharSequence value) {
+    this.referenceBases = value;
+  }
+
+  /**
+   * Gets the value of the 'alternateBases' field.
+   */
+  public java.util.List<java.lang.CharSequence> getAlternateBases() {
+    return alternateBases;
+  }
+
+  /**
+   * Sets the value of the 'alternateBases' field.
+   * @param value the value to set.
+   */
+  public void setAlternateBases(java.util.List<java.lang.CharSequence> value) {
+    this.alternateBases = value;
   }
 
   /**
@@ -177,6 +272,11 @@ public class Info extends org.apache.avro.specific.SpecificRecordBase implements
     implements org.apache.avro.data.RecordBuilder<Info> {
 
     private java.lang.CharSequence variantId;
+    private java.lang.CharSequence referenceName;
+    private long start;
+    private long end;
+    private java.lang.CharSequence referenceBases;
+    private java.util.List<java.lang.CharSequence> alternateBases;
     private java.lang.CharSequence ExomiserGene;
     private java.lang.Double ExomiserGenePhenoScore;
     private java.lang.Double ExomiserVariantScore;
@@ -195,25 +295,45 @@ public class Info extends org.apache.avro.specific.SpecificRecordBase implements
         this.variantId = data().deepCopy(fields()[0].schema(), other.variantId);
         fieldSetFlags()[0] = true;
       }
-      if (isValidValue(fields()[1], other.ExomiserGene)) {
-        this.ExomiserGene = data().deepCopy(fields()[1].schema(), other.ExomiserGene);
+      if (isValidValue(fields()[1], other.referenceName)) {
+        this.referenceName = data().deepCopy(fields()[1].schema(), other.referenceName);
         fieldSetFlags()[1] = true;
       }
-      if (isValidValue(fields()[2], other.ExomiserGenePhenoScore)) {
-        this.ExomiserGenePhenoScore = data().deepCopy(fields()[2].schema(), other.ExomiserGenePhenoScore);
+      if (isValidValue(fields()[2], other.start)) {
+        this.start = data().deepCopy(fields()[2].schema(), other.start);
         fieldSetFlags()[2] = true;
       }
-      if (isValidValue(fields()[3], other.ExomiserVariantScore)) {
-        this.ExomiserVariantScore = data().deepCopy(fields()[3].schema(), other.ExomiserVariantScore);
+      if (isValidValue(fields()[3], other.end)) {
+        this.end = data().deepCopy(fields()[3].schema(), other.end);
         fieldSetFlags()[3] = true;
       }
-      if (isValidValue(fields()[4], other.ExomiserGeneVariantScore)) {
-        this.ExomiserGeneVariantScore = data().deepCopy(fields()[4].schema(), other.ExomiserGeneVariantScore);
+      if (isValidValue(fields()[4], other.referenceBases)) {
+        this.referenceBases = data().deepCopy(fields()[4].schema(), other.referenceBases);
         fieldSetFlags()[4] = true;
       }
-      if (isValidValue(fields()[5], other.ExomiserGeneCominedScore)) {
-        this.ExomiserGeneCominedScore = data().deepCopy(fields()[5].schema(), other.ExomiserGeneCominedScore);
+      if (isValidValue(fields()[5], other.alternateBases)) {
+        this.alternateBases = data().deepCopy(fields()[5].schema(), other.alternateBases);
         fieldSetFlags()[5] = true;
+      }
+      if (isValidValue(fields()[6], other.ExomiserGene)) {
+        this.ExomiserGene = data().deepCopy(fields()[6].schema(), other.ExomiserGene);
+        fieldSetFlags()[6] = true;
+      }
+      if (isValidValue(fields()[7], other.ExomiserGenePhenoScore)) {
+        this.ExomiserGenePhenoScore = data().deepCopy(fields()[7].schema(), other.ExomiserGenePhenoScore);
+        fieldSetFlags()[7] = true;
+      }
+      if (isValidValue(fields()[8], other.ExomiserVariantScore)) {
+        this.ExomiserVariantScore = data().deepCopy(fields()[8].schema(), other.ExomiserVariantScore);
+        fieldSetFlags()[8] = true;
+      }
+      if (isValidValue(fields()[9], other.ExomiserGeneVariantScore)) {
+        this.ExomiserGeneVariantScore = data().deepCopy(fields()[9].schema(), other.ExomiserGeneVariantScore);
+        fieldSetFlags()[9] = true;
+      }
+      if (isValidValue(fields()[10], other.ExomiserGeneCominedScore)) {
+        this.ExomiserGeneCominedScore = data().deepCopy(fields()[10].schema(), other.ExomiserGeneCominedScore);
+        fieldSetFlags()[10] = true;
       }
     }
     
@@ -224,25 +344,45 @@ public class Info extends org.apache.avro.specific.SpecificRecordBase implements
         this.variantId = data().deepCopy(fields()[0].schema(), other.variantId);
         fieldSetFlags()[0] = true;
       }
-      if (isValidValue(fields()[1], other.ExomiserGene)) {
-        this.ExomiserGene = data().deepCopy(fields()[1].schema(), other.ExomiserGene);
+      if (isValidValue(fields()[1], other.referenceName)) {
+        this.referenceName = data().deepCopy(fields()[1].schema(), other.referenceName);
         fieldSetFlags()[1] = true;
       }
-      if (isValidValue(fields()[2], other.ExomiserGenePhenoScore)) {
-        this.ExomiserGenePhenoScore = data().deepCopy(fields()[2].schema(), other.ExomiserGenePhenoScore);
+      if (isValidValue(fields()[2], other.start)) {
+        this.start = data().deepCopy(fields()[2].schema(), other.start);
         fieldSetFlags()[2] = true;
       }
-      if (isValidValue(fields()[3], other.ExomiserVariantScore)) {
-        this.ExomiserVariantScore = data().deepCopy(fields()[3].schema(), other.ExomiserVariantScore);
+      if (isValidValue(fields()[3], other.end)) {
+        this.end = data().deepCopy(fields()[3].schema(), other.end);
         fieldSetFlags()[3] = true;
       }
-      if (isValidValue(fields()[4], other.ExomiserGeneVariantScore)) {
-        this.ExomiserGeneVariantScore = data().deepCopy(fields()[4].schema(), other.ExomiserGeneVariantScore);
+      if (isValidValue(fields()[4], other.referenceBases)) {
+        this.referenceBases = data().deepCopy(fields()[4].schema(), other.referenceBases);
         fieldSetFlags()[4] = true;
       }
-      if (isValidValue(fields()[5], other.ExomiserGeneCominedScore)) {
-        this.ExomiserGeneCominedScore = data().deepCopy(fields()[5].schema(), other.ExomiserGeneCominedScore);
+      if (isValidValue(fields()[5], other.alternateBases)) {
+        this.alternateBases = data().deepCopy(fields()[5].schema(), other.alternateBases);
         fieldSetFlags()[5] = true;
+      }
+      if (isValidValue(fields()[6], other.ExomiserGene)) {
+        this.ExomiserGene = data().deepCopy(fields()[6].schema(), other.ExomiserGene);
+        fieldSetFlags()[6] = true;
+      }
+      if (isValidValue(fields()[7], other.ExomiserGenePhenoScore)) {
+        this.ExomiserGenePhenoScore = data().deepCopy(fields()[7].schema(), other.ExomiserGenePhenoScore);
+        fieldSetFlags()[7] = true;
+      }
+      if (isValidValue(fields()[8], other.ExomiserVariantScore)) {
+        this.ExomiserVariantScore = data().deepCopy(fields()[8].schema(), other.ExomiserVariantScore);
+        fieldSetFlags()[8] = true;
+      }
+      if (isValidValue(fields()[9], other.ExomiserGeneVariantScore)) {
+        this.ExomiserGeneVariantScore = data().deepCopy(fields()[9].schema(), other.ExomiserGeneVariantScore);
+        fieldSetFlags()[9] = true;
+      }
+      if (isValidValue(fields()[10], other.ExomiserGeneCominedScore)) {
+        this.ExomiserGeneCominedScore = data().deepCopy(fields()[10].schema(), other.ExomiserGeneCominedScore);
+        fieldSetFlags()[10] = true;
       }
     }
 
@@ -271,6 +411,129 @@ public class Info extends org.apache.avro.specific.SpecificRecordBase implements
       return this;
     }
 
+    /** Gets the value of the 'referenceName' field */
+    public java.lang.CharSequence getReferenceName() {
+      return referenceName;
+    }
+    
+    /** Sets the value of the 'referenceName' field */
+    public org.phenotips.variantstore.models.Info.Builder setReferenceName(java.lang.CharSequence value) {
+      validate(fields()[1], value);
+      this.referenceName = value;
+      fieldSetFlags()[1] = true;
+      return this; 
+    }
+    
+    /** Checks whether the 'referenceName' field has been set */
+    public boolean hasReferenceName() {
+      return fieldSetFlags()[1];
+    }
+    
+    /** Clears the value of the 'referenceName' field */
+    public org.phenotips.variantstore.models.Info.Builder clearReferenceName() {
+      referenceName = null;
+      fieldSetFlags()[1] = false;
+      return this;
+    }
+
+    /** Gets the value of the 'start' field */
+    public java.lang.Long getStart() {
+      return start;
+    }
+    
+    /** Sets the value of the 'start' field */
+    public org.phenotips.variantstore.models.Info.Builder setStart(long value) {
+      validate(fields()[2], value);
+      this.start = value;
+      fieldSetFlags()[2] = true;
+      return this; 
+    }
+    
+    /** Checks whether the 'start' field has been set */
+    public boolean hasStart() {
+      return fieldSetFlags()[2];
+    }
+    
+    /** Clears the value of the 'start' field */
+    public org.phenotips.variantstore.models.Info.Builder clearStart() {
+      fieldSetFlags()[2] = false;
+      return this;
+    }
+
+    /** Gets the value of the 'end' field */
+    public java.lang.Long getEnd() {
+      return end;
+    }
+    
+    /** Sets the value of the 'end' field */
+    public org.phenotips.variantstore.models.Info.Builder setEnd(long value) {
+      validate(fields()[3], value);
+      this.end = value;
+      fieldSetFlags()[3] = true;
+      return this; 
+    }
+    
+    /** Checks whether the 'end' field has been set */
+    public boolean hasEnd() {
+      return fieldSetFlags()[3];
+    }
+    
+    /** Clears the value of the 'end' field */
+    public org.phenotips.variantstore.models.Info.Builder clearEnd() {
+      fieldSetFlags()[3] = false;
+      return this;
+    }
+
+    /** Gets the value of the 'referenceBases' field */
+    public java.lang.CharSequence getReferenceBases() {
+      return referenceBases;
+    }
+    
+    /** Sets the value of the 'referenceBases' field */
+    public org.phenotips.variantstore.models.Info.Builder setReferenceBases(java.lang.CharSequence value) {
+      validate(fields()[4], value);
+      this.referenceBases = value;
+      fieldSetFlags()[4] = true;
+      return this; 
+    }
+    
+    /** Checks whether the 'referenceBases' field has been set */
+    public boolean hasReferenceBases() {
+      return fieldSetFlags()[4];
+    }
+    
+    /** Clears the value of the 'referenceBases' field */
+    public org.phenotips.variantstore.models.Info.Builder clearReferenceBases() {
+      referenceBases = null;
+      fieldSetFlags()[4] = false;
+      return this;
+    }
+
+    /** Gets the value of the 'alternateBases' field */
+    public java.util.List<java.lang.CharSequence> getAlternateBases() {
+      return alternateBases;
+    }
+    
+    /** Sets the value of the 'alternateBases' field */
+    public org.phenotips.variantstore.models.Info.Builder setAlternateBases(java.util.List<java.lang.CharSequence> value) {
+      validate(fields()[5], value);
+      this.alternateBases = value;
+      fieldSetFlags()[5] = true;
+      return this; 
+    }
+    
+    /** Checks whether the 'alternateBases' field has been set */
+    public boolean hasAlternateBases() {
+      return fieldSetFlags()[5];
+    }
+    
+    /** Clears the value of the 'alternateBases' field */
+    public org.phenotips.variantstore.models.Info.Builder clearAlternateBases() {
+      alternateBases = null;
+      fieldSetFlags()[5] = false;
+      return this;
+    }
+
     /** Gets the value of the 'ExomiserGene' field */
     public java.lang.CharSequence getExomiserGene() {
       return ExomiserGene;
@@ -278,21 +541,21 @@ public class Info extends org.apache.avro.specific.SpecificRecordBase implements
     
     /** Sets the value of the 'ExomiserGene' field */
     public org.phenotips.variantstore.models.Info.Builder setExomiserGene(java.lang.CharSequence value) {
-      validate(fields()[1], value);
+      validate(fields()[6], value);
       this.ExomiserGene = value;
-      fieldSetFlags()[1] = true;
+      fieldSetFlags()[6] = true;
       return this; 
     }
     
     /** Checks whether the 'ExomiserGene' field has been set */
     public boolean hasExomiserGene() {
-      return fieldSetFlags()[1];
+      return fieldSetFlags()[6];
     }
     
     /** Clears the value of the 'ExomiserGene' field */
     public org.phenotips.variantstore.models.Info.Builder clearExomiserGene() {
       ExomiserGene = null;
-      fieldSetFlags()[1] = false;
+      fieldSetFlags()[6] = false;
       return this;
     }
 
@@ -303,21 +566,21 @@ public class Info extends org.apache.avro.specific.SpecificRecordBase implements
     
     /** Sets the value of the 'ExomiserGenePhenoScore' field */
     public org.phenotips.variantstore.models.Info.Builder setExomiserGenePhenoScore(java.lang.Double value) {
-      validate(fields()[2], value);
+      validate(fields()[7], value);
       this.ExomiserGenePhenoScore = value;
-      fieldSetFlags()[2] = true;
+      fieldSetFlags()[7] = true;
       return this; 
     }
     
     /** Checks whether the 'ExomiserGenePhenoScore' field has been set */
     public boolean hasExomiserGenePhenoScore() {
-      return fieldSetFlags()[2];
+      return fieldSetFlags()[7];
     }
     
     /** Clears the value of the 'ExomiserGenePhenoScore' field */
     public org.phenotips.variantstore.models.Info.Builder clearExomiserGenePhenoScore() {
       ExomiserGenePhenoScore = null;
-      fieldSetFlags()[2] = false;
+      fieldSetFlags()[7] = false;
       return this;
     }
 
@@ -328,21 +591,21 @@ public class Info extends org.apache.avro.specific.SpecificRecordBase implements
     
     /** Sets the value of the 'ExomiserVariantScore' field */
     public org.phenotips.variantstore.models.Info.Builder setExomiserVariantScore(java.lang.Double value) {
-      validate(fields()[3], value);
+      validate(fields()[8], value);
       this.ExomiserVariantScore = value;
-      fieldSetFlags()[3] = true;
+      fieldSetFlags()[8] = true;
       return this; 
     }
     
     /** Checks whether the 'ExomiserVariantScore' field has been set */
     public boolean hasExomiserVariantScore() {
-      return fieldSetFlags()[3];
+      return fieldSetFlags()[8];
     }
     
     /** Clears the value of the 'ExomiserVariantScore' field */
     public org.phenotips.variantstore.models.Info.Builder clearExomiserVariantScore() {
       ExomiserVariantScore = null;
-      fieldSetFlags()[3] = false;
+      fieldSetFlags()[8] = false;
       return this;
     }
 
@@ -353,21 +616,21 @@ public class Info extends org.apache.avro.specific.SpecificRecordBase implements
     
     /** Sets the value of the 'ExomiserGeneVariantScore' field */
     public org.phenotips.variantstore.models.Info.Builder setExomiserGeneVariantScore(java.lang.Double value) {
-      validate(fields()[4], value);
+      validate(fields()[9], value);
       this.ExomiserGeneVariantScore = value;
-      fieldSetFlags()[4] = true;
+      fieldSetFlags()[9] = true;
       return this; 
     }
     
     /** Checks whether the 'ExomiserGeneVariantScore' field has been set */
     public boolean hasExomiserGeneVariantScore() {
-      return fieldSetFlags()[4];
+      return fieldSetFlags()[9];
     }
     
     /** Clears the value of the 'ExomiserGeneVariantScore' field */
     public org.phenotips.variantstore.models.Info.Builder clearExomiserGeneVariantScore() {
       ExomiserGeneVariantScore = null;
-      fieldSetFlags()[4] = false;
+      fieldSetFlags()[9] = false;
       return this;
     }
 
@@ -378,21 +641,21 @@ public class Info extends org.apache.avro.specific.SpecificRecordBase implements
     
     /** Sets the value of the 'ExomiserGeneCominedScore' field */
     public org.phenotips.variantstore.models.Info.Builder setExomiserGeneCominedScore(java.lang.Double value) {
-      validate(fields()[5], value);
+      validate(fields()[10], value);
       this.ExomiserGeneCominedScore = value;
-      fieldSetFlags()[5] = true;
+      fieldSetFlags()[10] = true;
       return this; 
     }
     
     /** Checks whether the 'ExomiserGeneCominedScore' field has been set */
     public boolean hasExomiserGeneCominedScore() {
-      return fieldSetFlags()[5];
+      return fieldSetFlags()[10];
     }
     
     /** Clears the value of the 'ExomiserGeneCominedScore' field */
     public org.phenotips.variantstore.models.Info.Builder clearExomiserGeneCominedScore() {
       ExomiserGeneCominedScore = null;
-      fieldSetFlags()[5] = false;
+      fieldSetFlags()[10] = false;
       return this;
     }
 
@@ -401,11 +664,16 @@ public class Info extends org.apache.avro.specific.SpecificRecordBase implements
       try {
         Info record = new Info();
         record.variantId = fieldSetFlags()[0] ? this.variantId : (java.lang.CharSequence) defaultValue(fields()[0]);
-        record.ExomiserGene = fieldSetFlags()[1] ? this.ExomiserGene : (java.lang.CharSequence) defaultValue(fields()[1]);
-        record.ExomiserGenePhenoScore = fieldSetFlags()[2] ? this.ExomiserGenePhenoScore : (java.lang.Double) defaultValue(fields()[2]);
-        record.ExomiserVariantScore = fieldSetFlags()[3] ? this.ExomiserVariantScore : (java.lang.Double) defaultValue(fields()[3]);
-        record.ExomiserGeneVariantScore = fieldSetFlags()[4] ? this.ExomiserGeneVariantScore : (java.lang.Double) defaultValue(fields()[4]);
-        record.ExomiserGeneCominedScore = fieldSetFlags()[5] ? this.ExomiserGeneCominedScore : (java.lang.Double) defaultValue(fields()[5]);
+        record.referenceName = fieldSetFlags()[1] ? this.referenceName : (java.lang.CharSequence) defaultValue(fields()[1]);
+        record.start = fieldSetFlags()[2] ? this.start : (java.lang.Long) defaultValue(fields()[2]);
+        record.end = fieldSetFlags()[3] ? this.end : (java.lang.Long) defaultValue(fields()[3]);
+        record.referenceBases = fieldSetFlags()[4] ? this.referenceBases : (java.lang.CharSequence) defaultValue(fields()[4]);
+        record.alternateBases = fieldSetFlags()[5] ? this.alternateBases : (java.util.List<java.lang.CharSequence>) defaultValue(fields()[5]);
+        record.ExomiserGene = fieldSetFlags()[6] ? this.ExomiserGene : (java.lang.CharSequence) defaultValue(fields()[6]);
+        record.ExomiserGenePhenoScore = fieldSetFlags()[7] ? this.ExomiserGenePhenoScore : (java.lang.Double) defaultValue(fields()[7]);
+        record.ExomiserVariantScore = fieldSetFlags()[8] ? this.ExomiserVariantScore : (java.lang.Double) defaultValue(fields()[8]);
+        record.ExomiserGeneVariantScore = fieldSetFlags()[9] ? this.ExomiserGeneVariantScore : (java.lang.Double) defaultValue(fields()[9]);
+        record.ExomiserGeneCominedScore = fieldSetFlags()[10] ? this.ExomiserGeneCominedScore : (java.lang.Double) defaultValue(fields()[10]);
         return record;
       } catch (Exception e) {
         throw new org.apache.avro.AvroRuntimeException(e);

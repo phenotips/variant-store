@@ -3,6 +3,7 @@ package org.phenotips.variantstore.writers;
 import htsjdk.variant.variantcontext.VariantContext;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
 import org.phenotips.variantstore.models.Info;
 
@@ -17,12 +18,18 @@ public class InfoWriter extends AbstractParquetWriter {
 
     @Override
     public void write(VariantContext vcfRow) throws IOException {
-        CharSequence variantId = vcfRow.getID();
         Info avro = new Info();
         Map<String, Object> info = vcfRow.getCommonInfo().getAttributes();
         Object tmp;
 
-        avro.setVariantId(variantId);
+        avro.setVariantId(vcfRow.getID());
+        avro.setReferenceName(vcfRow.getChr());
+        avro.setStart((long) vcfRow.getStart());
+        avro.setEnd((long) vcfRow.getEnd());
+        avro.setReferenceBases(vcfRow.getReference().getBaseString());
+        // ALT
+        List<CharSequence> alts = VariantWriter.stringifyAlleles(vcfRow.getAlternateAlleles());
+        avro.setAlternateBases(alts);
 
         if ((tmp = info.get("EXOMISER_GENE")) != null) {
             avro.setExomiserGene((CharSequence) tmp);

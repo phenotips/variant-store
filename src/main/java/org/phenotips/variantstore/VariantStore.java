@@ -1,6 +1,5 @@
 package org.phenotips.variantstore;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.sql.*;
 import java.util.ArrayList;
@@ -60,18 +59,34 @@ public class VariantStore {
 
     /**
      * Add all the VCF files found in the given directory to the store.
-     * @param dirPath
-     * @return a List of Futures, each one
+     * If an invalid file is encountered, an exception will be thrown.
+     * @param dirPath the path to the directory containing VCF Files
+     * @return a List of Futures, each future bound to the completion of each file's progress.
      */
     public List<Future> addFilesFromDirectory(Path dirPath) throws InvalidFileFormatException {
-        File dir = new File(dirPath.toString());
-        File[] directoryListing = dir.listFiles();
+        return addFilesFromDirectory(dirPath, false);
+    }
+
+    /**
+     * Add all the VCF files found in the given directory to the store.
+     * @param dirPath the path to the directory containing VCF Files
+     * @param ignoreInvalidFiles whether to throw warnings when an invalid file is encountered.
+     * @return a List of Futures, each future bound to the completion of each file's progress.
+     */
+    public List<Future> addFilesFromDirectory(Path dirPath, boolean ignoreInvalidFiles) throws InvalidFileFormatException {
+
+        String[] directoryListing = dirPath.toFile().list(StorageManager.getSupportedFileFilter());
         List<Future> futures = new ArrayList<>();
         if (directoryListing != null) {
-            for (File vcfFile : directoryListing) {
-
-                logger.debug("Queueing " + dirPath.resolve(vcfFile.getName()));
-                futures.add(this.addFile(dirPath.resolve(vcfFile.getName())));
+            for (String vcfFile : directoryListing) {
+                logger.debug("Queueing " + dirPath.resolve(vcfFile));
+                try {
+                    futures.add(this.addFile(dirPath.resolve(vcfFile)));
+                } catch (InvalidFileFormatException e) {
+                    if (!ignoreInvalidFiles) {
+                        throw e;
+                    }
+                }
             }
         } else {
             return null;

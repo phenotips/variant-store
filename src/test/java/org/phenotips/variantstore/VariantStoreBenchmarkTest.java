@@ -33,7 +33,7 @@ public class VariantStoreBenchmarkTest {
     public void testParseBzippedVCFsToParquet() throws InterruptedException, InvalidFileFormatException {
         Path vcfDir = benchmarkDir.resolve("vcf/");
 
-        List<Future> futures = store.addFilesFromDirectory(vcfDir);
+        List<Future> futures = store.addFilesFromDirectory(vcfDir, true);
 
         // Wait for all the tasks to finish to make this method sync.
         // If a task finished before another, `get()` will return immideately
