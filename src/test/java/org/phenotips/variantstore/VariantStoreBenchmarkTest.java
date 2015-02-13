@@ -8,6 +8,7 @@ import java.util.concurrent.Future;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.phenotips.variantstore.storage.InvalidFileFormatException;
 
@@ -30,6 +31,7 @@ public class VariantStoreBenchmarkTest {
     }
 
     @Test
+    @Ignore
     public void testParseBzippedVCFsToParquet() throws InterruptedException, InvalidFileFormatException {
         Path vcfDir = benchmarkDir.resolve("vcf/");
 
