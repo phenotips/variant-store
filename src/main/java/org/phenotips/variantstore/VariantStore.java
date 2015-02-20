@@ -1,189 +1,52 @@
 package org.phenotips.variantstore;
 
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.Reader;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.sql.*;
-import java.text.DecimalFormat;
-import java.util.*;
-import java.util.Date;
+import java.util.List;
 import java.util.concurrent.Future;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVRecord;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.log4j.Logger;
-import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.response.QueryResponse;
-import org.phenotips.variantstore.storage.DrillManager;
-import org.phenotips.variantstore.storage.InvalidFileFormatException;
-import org.phenotips.variantstore.storage.SolrController;
-import org.phenotips.variantstore.storage.StorageManager;
+import org.ga4gh.GAVariant;
 
 /**
- * The Variant Store enables the storage of many many variants.
+ * The Variant Store is capable of storing a large number of individuals genomic variants for further
+ * querying and sorting
  */
 public class VariantStore {
-    private Path outDir;
-    private static Logger logger = Logger.getLogger(VariantStore.class);
+    public VariantStore() {
 
-    private DrillManager drillManager;
-    private StorageManager storageManager;
-
-    /**
-     *
-     * @param drillPath Drill's configuration string, same as you would pass to sqlline
-     * @param outDir
-     */
-    public VariantStore(String drillPath, Path outDir) throws VariantStoreException {
-        this.outDir = outDir;
-
-        storageManager = new StorageManager(this.outDir);
-
-        try {
-            drillManager = new DrillManager(drillPath);
-        } catch (Exception e) {
-            throw new VariantStoreException(e.getMessage(), e);
-        }
-    }
-
-    public VariantStore(Path vcfDir) throws VariantStoreException {
-        this("jdbc:drill:zk=local", vcfDir);
-    }
-
-    public Connection connection() {
-        return drillManager.connection();
-    }
-
-    public void stop() throws VariantStoreException {
-        try {
-            drillManager.stop();
-        } catch (SQLException e) {
-            throw new VariantStoreException(e.getMessage(), e);
-        }
-    }
-
-    public Future addFile(Path filePath) throws InvalidFileFormatException {
-        return storageManager.add(filePath);
     }
 
     /**
-     * Add all the VCF files found in the given directory to the store.
-     * If an invalid file is encountered, an exception will be thrown.
-     * @param dirPath the path to the directory containing VCF Files
-     * @return a List of Futures, each future bound to the completion of each file's progress.
+     * Add an individual to the variant store. This is an asynchronous operation.
+     * In case of application failure, the individual would have to be remove and re-inserted.
+     * @param id a unique id that represents the individual.
+     * @param isPublic whether to include this individual's data in aggregate queries.
+     *                 This does not prevent the data to be queried by the individual's id.
+     * @param file the path to the file on the local filesystem where the data is stored.
+     * @return a Future that completes when the individual is fully inserted into the variant store,
+     *         and is ready to be queried.
      */
-    public List<Future> addFilesFromDirectory(Path dirPath) throws InvalidFileFormatException {
-        return addFilesFromDirectory(dirPath, false);
+    public Future addIndividual(String id, boolean isPublic, Path file) {
+
+        return null;
     }
 
     /**
-     * Add all the VCF files found in the given directory to the store.
-     * @param dirPath the path to the directory containing VCF Files
-     * @param ignoreInvalidFiles whether to throw warnings when an invalid file is encountered.
-     * @return a List of Futures, each future bound to the completion of each file's progress.
+     * Remove any information associated with the specified individual from the variant store
+     * @param id the individual's id
+     * @return a Future that completes when the individual is fully removed from the variant store.
      */
-    public List<Future> addFilesFromDirectory(Path dirPath, boolean ignoreInvalidFiles) throws InvalidFileFormatException {
-
-        String[] directoryListing = dirPath.toFile().list(StorageManager.getSupportedFileFilter());
-        List<Future> futures = new ArrayList<>();
-        if (directoryListing != null) {
-            for (String vcfFile : directoryListing) {
-                logger.debug("Queueing " + dirPath.resolve(vcfFile));
-                try {
-                    futures.add(this.addFile(dirPath.resolve(vcfFile)));
-                } catch (InvalidFileFormatException e) {
-                    if (!ignoreInvalidFiles) {
-                        throw e;
-                    }
-                }
-            }
-        } else {
-            return null;
-        }
-
-        return futures;
+    public Future removeIndividual(String id) {
+        return null;
     }
 
-    public static void main(String[] args) throws SQLException, ClassNotFoundException {
-        /** DRILL JDBC headache **/
-//        Class.forName("org.apache.drill.jdbc.Driver");
-//        Connection connection = DriverManager.getConnection("jdbc:drill:zk=local", null);
-//        String query = "select N_NAME from dfs.`/home/meatcar/dev/drill/apache-drill-0.7.0/sample-data/nation.parquet`";
-//
-//        Statement statement = connection.createStatement();
-//
-//        // hangs here
-//        System.out.println("About to hang..");
-//        ResultSet rs = statement.executeQuery(query);
-//        System.out.println("Didn't hang!!!");
-        /**/
-
-        logger.debug("starting");
-        Path solrHome = Paths.get("/data/solr");
-        SolrController controller = new SolrController(solrHome);
-
-        try {
-            List<Path> paths = Arrays.asList(
-            );
-
-
-            boolean add = true;
-            for (Path path : paths) {
-                String patient = FilenameUtils.removeExtension(path.getFileName().toString());
-
-                if (add) {
-                    logger.debug(new Date() + " Parsing " + path);
-                    Reader in = new FileReader(path.toString());
-                    CSVParser csv = CSVFormat.DEFAULT.parse(in);
-
-                    for (CSVRecord record: csv) {
-                        controller.add(record.iterator(), patient );
-                    }
-
-                    logger.debug("Committing");
-                    controller.getConnection().commit();
-                    logger.debug(new Date() + " DONE");
-                }
-
-                SolrQuery query = new SolrQuery();
-                query.setQuery("*")
-                        .addFilterQuery("exomiser_variant_score:[0.9999999 TO *]");
-                controller.query("SELECT * FROM vcfs WHERE exomiser_variant_score > 0.9999999", query, true);
-
-                query = new SolrQuery();
-                query.setQuery("*");
-                int fetchSize = 100;
-                int offset = 0;
-                long numFound = 1;
-                while (offset < numFound) {
-                    query.setStart(offset);
-                    query.setRows(fetchSize);
-                    numFound = controller.query("SELECT * FROM vcfs", query, true).getResults().getNumFound();
-                    offset += fetchSize;
-                    break;
-                }
-
-
-
-            }
-
-
-        } catch (SolrServerException e) {
-            e.printStackTrace();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (VariantStoreException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            logger.debug("Stopping");
-            controller.stop();
-        }
+    /**
+     * Get the top n most harmful variants for a specified individual.
+     * @param id the individuals id
+     * @param n the number of variants to return
+     * @return a List of harmful variants for the specified individual
+     */
+    public List<GAVariant> getTopHarmfullVariants(String id, int n) {
+        return null;
     }
+
+    /*TODO: other query methods*/
 }
