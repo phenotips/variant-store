@@ -16,6 +16,8 @@ import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.core.CoreContainer;
 import org.phenotips.variantstore.VariantStoreException;
@@ -26,10 +28,11 @@ import org.phenotips.variantstore.VariantStoreException;
 public class SolrController {
     private static Logger logger = Logger.getLogger(SolrController.class);
     private CoreContainer cores;
+    private SolrInputDocument doc;
 
     private EmbeddedSolrServer server;
 
-    final List<String> schema =  Arrays.asList(
+    final List<String> csvSchema =  Arrays.asList(
             "chrom",
             "pos",
             "var_id",
@@ -66,10 +69,26 @@ public class SolrController {
             "exomiser_gene_variant_score"
     );
 
+    final List<String> solrSchema = Arrays.asList(
+            "chrom",
+            "pos",
+            "ref",
+            "alt",
+            "qual",
+            "filter",
+            "exomiser_variant_score",
+            "exomiser_gene_pheno_score",
+            "exomiser_gene",
+            "exomiser_effect",
+            "exomiser_gene_combined_score",
+            "exomiser_gene_variant_score"
+    );
+
     public SolrController(Path solrHome) {
         cores = new CoreContainer(solrHome.toString());
         cores.load();
         server = new EmbeddedSolrServer(cores, "variants");
+        doc = new SolrInputDocument();
     }
 
     public EmbeddedSolrServer getConnection() {
@@ -81,39 +100,51 @@ public class SolrController {
         server.shutdown();
     }
 
-    public void add(Iterator<String> values) throws VariantStoreException, IOException, SolrServerException {
-        SolrInputDocument doc = new SolrInputDocument();
+    public void add(Iterator<String> values, String patientName) throws VariantStoreException, IOException, SolrServerException {
 
-        for (String field: schema) {
-            if (!values.hasNext()) {
-                throw new VariantStoreException("Wrong number of fields provided!");
+        if (!doc.getField("patient").equals(patientName)) {
+            doc.addField("patient", patientName);
+        }
+
+        for (String field: csvSchema) {
+            String value = values.next();
+
+            for (String solrField : solrSchema) {
+                if (solrField.equals(field)) {
+                    doc.addField(field, value);
+                    break;
+                }
             }
-            doc.addField(field, values.next());
         }
 
         server.add(doc);
     }
+
     public QueryResponse query(String desc, SolrQuery query) throws SolrServerException {
         return query(desc, query, false);
     }
 
     public QueryResponse query(String desc, SolrQuery query, boolean printResults) throws SolrServerException {
+        SolrDocumentList results;
         long startTime = System.nanoTime();
-
         QueryResponse rsp = server.query(query);
-
         long endTime   = System.nanoTime();
 
-        System.out.println("Query: " + desc + ";");
+        results = rsp.getResults();
+
+        logger.debug(String.format("Query: %s; %d of %d", desc, query.getStart(), results.getNumFound()));
 
         if (printResults) {
-            System.out.println(rsp);
+            for (SolrDocument doc : results) {
+                logger.debug(doc);
+            }
         }
 
-        System.out.println("Number of results found: " + rsp.getResults().getNumFound());
-        System.out.println("Time taken: " +
-                new DecimalFormat("#.##########").format((double)(endTime - startTime)/1000000000) +
+        logger.debug("Time taken: " +
+                new DecimalFormat("#.##########").format((double) (endTime - startTime) / 1000000000) +
                 " s");
+
+
         return rsp;
     }
 }
