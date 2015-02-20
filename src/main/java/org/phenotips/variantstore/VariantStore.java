@@ -1,17 +1,27 @@
 package org.phenotips.variantstore;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.concurrent.Future;
+import org.apache.hadoop.hdfs.server.common.Storage;
 import org.ga4gh.GAVariant;
+import org.phenotips.variantstore.input.InputHandler;
+import org.phenotips.variantstore.input.csv.CSVHandler;
+import org.phenotips.variantstore.storage.StorageController;
+import org.phenotips.variantstore.storage.solr.SolrController;
 
 /**
  * The Variant Store is capable of storing a large number of individuals genomic variants for further
  * querying and sorting
  */
 public class VariantStore {
-    public VariantStore() {
+    private InputHandler inputHandler;
+    private StorageController storageController;
 
+    public VariantStore(InputHandler inputHandler, StorageController storageController) {
+        this.inputHandler = inputHandler;
+        this.storageController = storageController;
     }
 
     /**
@@ -49,4 +59,11 @@ public class VariantStore {
     }
 
     /*TODO: other query methods*/
+
+    public static void main(String[] args) {
+        VariantStore vs = new VariantStore(
+                new CSVHandler(),
+                new SolrController(Paths.get("/data/solr"))
+        );
+    }
 }
