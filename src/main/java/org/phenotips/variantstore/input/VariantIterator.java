@@ -6,10 +6,11 @@ import java.util.NoSuchElementException;
 import org.ga4gh.GAVariant;
 
 /**
- * An Iterator that extracts and exposes ga4gh-standard Variants from some other representation.
+ * An Iterator that wraps around a file, and enables the access of the variants stored in the file. The variants are
+ * exposed as GA4GH GAVariant objects.
  */
 public abstract class VariantIterator implements Iterator<GAVariant> {
-    private Path path;
+    protected Path path;
     private String individualId;
 
     public VariantIterator(Path path, String individualId) {
