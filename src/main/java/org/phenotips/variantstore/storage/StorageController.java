@@ -8,11 +8,14 @@ import org.phenotips.variantstore.input.VariantIterator;
  * Created by meatcar on 2/20/15.
  */
 public abstract class StorageController {
-    private Path storePath;
+    protected Path storePath;
     public StorageController(Path storePath) {
         this.storePath = storePath;
     }
 
-    public abstract Future addIndividual(String id, VariantIterator iterator);
-    public abstract Future removeIndividual(String id);
+    public abstract void stop();
+
+    public abstract Future addIndividual(String id, VariantIterator iterator) throws StorageException;
+
+    public abstract Future removeIndividual(String id) throws StorageException;
 }
