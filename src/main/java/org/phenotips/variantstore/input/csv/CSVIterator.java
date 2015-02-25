@@ -55,7 +55,7 @@ public class CSVIterator extends VariantIterator {
 
         GAVariant variant = new GAVariant();
 
-        Map<CharSequence, List<CharSequence>> info = new HashMap<>();
+        Map<String, List<String>> info = new HashMap<>();
 
         int i = 0;
         for (String field : csvRecordIterator.next()) {
@@ -72,31 +72,31 @@ public class CSVIterator extends VariantIterator {
                     variant.setReferenceBases(field);
                     break;
                 case ALT:
-                    variant.setAlternateBases(Arrays.<CharSequence>asList(field.split(",")));
+                    variant.setAlternateBases(Arrays.asList(field.split(",")));
                     break;
                 case QUAL:
-                    info.put("QUAL", Arrays.<CharSequence>asList(field));
+                    info.put("QUAL", Arrays.asList(field));
                     break;
                 case FILTER:
-                    info.put("FILTER", Arrays.<CharSequence>asList(field));
+                    info.put("FILTER", Arrays.asList(field));
                     break;
                 case EXOMISER_VARIANT_SCORE:
-                    info.put("EXOMISER_VARIANT_SCORE", Arrays.<CharSequence>asList(field));
+                    info.put("EXOMISER_VARIANT_SCORE", Arrays.asList(field));
                     break;
                 case EXOMISER_GENE_PHENO_SCORE:
-                    info.put("EXOMISER_GENE_PHENO_SCORE", Arrays.<CharSequence>asList(field));
+                    info.put("EXOMISER_GENE_PHENO_SCORE", Arrays.asList(field));
                     break;
                 case EXOMISER_GENE:
-                    info.put("EXOMISER_GENE", Arrays.<CharSequence>asList(field));
+                    info.put("EXOMISER_GENE", Arrays.asList(field));
                     break;
                 case EXOMISER_EFFECT:
-                    info.put("EXOMISER_EFFECT", Arrays.<CharSequence>asList(field));
+                    info.put("EXOMISER_EFFECT", Arrays.asList(field));
                     break;
                 case EXOMISER_GENE_COMBINED_SCORE:
-                    info.put("EXOMISER_GENE_COMBINED_SCORE", Arrays.<CharSequence>asList(field));
+                    info.put("EXOMISER_GENE_COMBINED_SCORE", Arrays.asList(field));
                     break;
                 case EXOMISER_GENE_VARIANT_SCORE:
-                    info.put("EXOMISER_GENE_VARIANT_SCORE", Arrays.<CharSequence>asList(field));
+                    info.put("EXOMISER_GENE_VARIANT_SCORE", Arrays.asList(field));
                     break;
                 case VAR_ID:
                 case AC:

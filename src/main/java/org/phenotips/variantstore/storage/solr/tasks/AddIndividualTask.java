@@ -35,24 +35,24 @@ public class AddIndividualTask implements Callable<Object> {
         doc.addField("patient", id);
 
         GAVariant variant;
-        Map<CharSequence, List<CharSequence>> info;
+        Map<String, List<String>> info;
 
         while (iterator.hasNext()) {
             variant = iterator.next();
             info = variant.getInfo();
 
-            doc.addField("chrom", variant.getReferenceName());
-            doc.addField("pos", variant.getStart());
-            doc.addField("ref", variant.getReferenceBases());
-            doc.addField("alt", StringUtils.join(variant.getAlternateBases(), ","));
-            doc.addField("qual", info.get("QUAL"));
-            doc.addField("filter", info.get("FILTER"));
-            doc.addField("exomiser_variant_score", info.get("EXOMISER_VARIANT_SCORE"));
-            doc.addField("exomiser_gene_pheno_score", info.get("EXOMISER_GENE_PHENO_SCORE"));
-            doc.addField("exomiser_gene", info.get("EXOMISER_GENE"));
-            doc.addField("exomiser_effect", info.get("EXOMISER_EFFECT"));
-            doc.addField("exomiser_gene_variant_score", info.get("EXOMISER_GENE_VARIANT_SCORE"));
-            doc.addField("exomiser_gene_combined_score", info.get("EXOMISER_GENE_COMBINED_SCORE"));
+            doc.setField("chrom", variant.getReferenceName());
+            doc.setField("pos", variant.getStart());
+            doc.setField("ref", variant.getReferenceBases());
+            doc.setField("alt", StringUtils.join(variant.getAlternateBases(), ","));
+            doc.setField("qual", info.get("QUAL").get(0));
+            doc.setField("filter", info.get("FILTER").get(0));
+            doc.setField("exomiser_variant_score", Double.valueOf(info.get("EXOMISER_VARIANT_SCORE").get(0)));
+            doc.setField("exomiser_gene_pheno_score", info.get("EXOMISER_GENE_PHENO_SCORE").get(0));
+            doc.setField("exomiser_gene", info.get("EXOMISER_GENE").get(0));
+            doc.setField("exomiser_effect", info.get("EXOMISER_EFFECT").get(0));
+            doc.setField("exomiser_gene_variant_score", info.get("EXOMISER_GENE_VARIANT_SCORE").get(0));
+            doc.setField("exomiser_gene_combined_score", info.get("EXOMISER_GENE_COMBINED_SCORE").get(0));
 
             try {
                 server.add(doc);
