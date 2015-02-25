@@ -15,7 +15,7 @@ public abstract class StorageController {
 
     public abstract void stop();
 
-    public abstract Future addIndividual(String id, VariantIterator iterator) throws StorageException;
+    public abstract Future addIndividual(VariantIterator iterator) throws StorageException;
 
     public abstract Future removeIndividual(String id) throws StorageException;
 }

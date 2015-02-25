@@ -11,12 +11,14 @@ import org.ga4gh.GAVariant;
  */
 public abstract class VariantIterator implements Iterator<GAVariant> {
     protected Path path;
-    private String individualId;
+    protected VariantHeader header;
 
-    public VariantIterator(Path path, String individualId) {
+    public VariantIterator(Path path, VariantHeader header) {
         this.path = path;
-        this.individualId = individualId;
+        this.header = header;
     }
+
+    public VariantHeader getHeader() { return header; }
 
     @Override
     public boolean hasNext() {

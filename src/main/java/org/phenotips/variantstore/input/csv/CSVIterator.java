@@ -12,6 +12,7 @@ import org.apache.commons.csv.CSVRecord;
 import org.apache.log4j.Logger;
 import org.ga4gh.GAVariant;
 import org.phenotips.variantstore.input.InputException;
+import org.phenotips.variantstore.input.VariantHeader;
 import org.phenotips.variantstore.input.VariantIterator;
 
 /**
@@ -24,8 +25,8 @@ public class CSVIterator extends VariantIterator {
     private CSVParser csvParser;
     private Iterator<CSVRecord> csvRecordIterator;
 
-    public CSVIterator(Path path, String individualId) throws InputException {
-        super(path, individualId);
+    public CSVIterator(Path path, VariantHeader variantHeader) throws InputException {
+        super(path, variantHeader);
 
         try {
             this.reader = new FileReader(this.path.toString());

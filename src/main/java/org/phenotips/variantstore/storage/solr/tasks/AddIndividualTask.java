@@ -18,12 +18,10 @@ import org.phenotips.variantstore.storage.StorageException;
 public class AddIndividualTask implements Callable<Object> {
 
     private final SolrServer server;
-    private final String id;
     private final VariantIterator iterator;
 
-    public AddIndividualTask(SolrServer server, String id, VariantIterator iterator) {
+    public AddIndividualTask(SolrServer server, VariantIterator iterator) {
         this.server = server;
-        this.id = id;
         this.iterator = iterator;
     }
 
@@ -32,7 +30,8 @@ public class AddIndividualTask implements Callable<Object> {
         // we will be reusing the document to speed up inserts as per SolrJ docs.
         SolrInputDocument doc = new SolrInputDocument();
 
-        doc.addField("patient", id);
+        doc.setField("individual", iterator.getHeader().getIndividualId());
+        doc.setField("is_public", iterator.getHeader().isPublic());
 
         GAVariant variant;
         Map<String, List<String>> info;

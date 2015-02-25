@@ -37,13 +37,14 @@ public class SolrController extends StorageController {
 
     @Override
     public void stop() {
+        executor.shutdownNow();
         server.shutdown();
         cores.shutdown();
     }
 
     @Override
-    public Future addIndividual(final String id, final VariantIterator iterator) {
-        FutureTask task = new FutureTask<Object>(new AddIndividualTask(server, id, iterator));
+    public Future addIndividual(final VariantIterator iterator) {
+        FutureTask task = new FutureTask<Object>(new AddIndividualTask(server, iterator));
 
         executor.execute(task);
 
