@@ -3,11 +3,15 @@ package org.phenotips.variantstore;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import org.apache.log4j.Logger;
 import org.ga4gh.GAVariant;
+import org.phenotips.variantstore.input.InputException;
 import org.phenotips.variantstore.input.InputHandler;
 import org.phenotips.variantstore.input.csv.CSVHandler;
 import org.phenotips.variantstore.storage.StorageController;
+import org.phenotips.variantstore.storage.StorageException;
 import org.phenotips.variantstore.storage.solr.SolrController;
 
 /**
@@ -15,12 +19,17 @@ import org.phenotips.variantstore.storage.solr.SolrController;
  * querying and sorting
  */
 public class VariantStore {
+    private static Logger logger = Logger.getLogger(VariantStore.class);
     private InputHandler inputHandler;
     private StorageController storageController;
 
     public VariantStore(InputHandler inputHandler, StorageController storageController) {
         this.inputHandler = inputHandler;
         this.storageController = storageController;
+    }
+
+    public void stop() {
+        storageController.stop();
     }
 
     /**
@@ -33,9 +42,8 @@ public class VariantStore {
      * @return a Future that completes when the individual is fully inserted into the variant store,
      *         and is ready to be queried.
      */
-    public Future addIndividual(String id, boolean isPublic, Path file) {
-
-        return null;
+    public Future addIndividual(String id, boolean isPublic, Path file) throws VariantStoreException {
+        return this.storageController.addIndividual(this.inputHandler.getIteratorForFile(file, id, isPublic));
     }
 
     /**
@@ -43,8 +51,8 @@ public class VariantStore {
      * @param id the individual's id
      * @return a Future that completes when the individual is fully removed from the variant store.
      */
-    public Future removeIndividual(String id) {
-        return null;
+    public Future removeIndividual(String id) throws VariantStoreException {
+        return this.storageController.removeIndividual(id);
     }
 
     /**
@@ -64,5 +72,24 @@ public class VariantStore {
                 new CSVHandler(),
                 new SolrController(Paths.get("/data/"))
         );
+
+        logger.debug("Started");
+
+        String id = "P000001";
+        try {
+            vs.addIndividual(id, true, Paths.get("/data/vcf/completegenomics/vcfBeta-HG00731-200-37-ASM.csv")).get();
+            logger.debug("Added.");
+            vs.removeIndividual(id).get();
+            logger.debug("Removed.");
+        } catch (VariantStoreException e) {
+            logger.error("ERROR!!", e);
+        } catch (InterruptedException e) {
+            logger.error("Shouldn't happen", e);
+        } catch (ExecutionException e) {
+            logger.error("ERROR!!", e);
+        }
+
+        vs.stop();
+        logger.debug("Stopped");
     }
 }

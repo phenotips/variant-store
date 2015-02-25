@@ -62,6 +62,8 @@ public class AddIndividualTask implements Callable<Object> {
             }
         }
 
+        // Solr should commit the fields at it's own optimal pace.
+        // We want to commit once at the end to make sure any leftovers in solr buffers are available for querying.
         server.commit();
         return null;
     }

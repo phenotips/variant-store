@@ -1,10 +1,7 @@
 package org.phenotips.variantstore.storage.solr;
 
 import java.nio.file.Path;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
+import java.util.concurrent.*;
 import org.apache.log4j.Logger;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
@@ -20,7 +17,7 @@ import org.phenotips.variantstore.storage.solr.tasks.RemoveIndividualTask;
  */
 public class SolrController extends StorageController {
     private Logger logger = Logger.getLogger(SolrController.class);
-    private Executor executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+    private ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
     private CoreContainer cores;
     private SolrServer server;
@@ -46,7 +43,7 @@ public class SolrController extends StorageController {
     public Future addIndividual(final VariantIterator iterator) {
         FutureTask task = new FutureTask<Object>(new AddIndividualTask(server, iterator));
 
-        executor.execute(task);
+        executor.submit(task);
 
         return task;
     }
@@ -55,7 +52,7 @@ public class SolrController extends StorageController {
     public Future removeIndividual(String id) throws StorageException {
         FutureTask task = new FutureTask<Object>(new RemoveIndividualTask(server, id));
 
-        executor.execute(task);
+        executor.submit(task);
 
         return task;
     }

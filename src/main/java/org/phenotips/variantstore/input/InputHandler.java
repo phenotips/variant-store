@@ -11,7 +11,8 @@ public interface InputHandler {
      * Given a file, get the VariantIterator
      * @param path
      * @param individualId
+     * @param isPublic
      * @return
      */
-    public VariantIterator getIteratorForFile(Path path, String individualId) throws InputException;
+    public VariantIterator getIteratorForFile(Path path, String individualId, boolean isPublic) throws InputException;
 }
