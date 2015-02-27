@@ -9,7 +9,7 @@ import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.common.SolrInputDocument;
 import org.ga4gh.GAVariant;
-import org.phenotips.variantstore.input.VariantIterator;
+import org.phenotips.variantstore.input.AbstractVariantIterator;
 import org.phenotips.variantstore.storage.StorageException;
 
 /**
@@ -18,9 +18,9 @@ import org.phenotips.variantstore.storage.StorageException;
 public class AddIndividualTask implements Callable<Object> {
 
     private final SolrServer server;
-    private final VariantIterator iterator;
+    private final AbstractVariantIterator iterator;
 
-    public AddIndividualTask(SolrServer server, VariantIterator iterator) {
+    public AddIndividualTask(SolrServer server, AbstractVariantIterator iterator) {
         this.server = server;
         this.iterator = iterator;
     }

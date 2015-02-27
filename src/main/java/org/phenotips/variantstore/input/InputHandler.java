@@ -14,5 +14,5 @@ public interface InputHandler {
      * @param isPublic
      * @return
      */
-    public VariantIterator getIteratorForFile(Path path, String individualId, boolean isPublic) throws InputException;
+    public AbstractVariantIterator getIteratorForFile(Path path, String individualId, boolean isPublic) throws InputException;
 }

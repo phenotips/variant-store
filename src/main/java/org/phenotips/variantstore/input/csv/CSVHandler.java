@@ -4,7 +4,7 @@ import java.nio.file.Path;
 import org.phenotips.variantstore.input.InputException;
 import org.phenotips.variantstore.input.InputHandler;
 import org.phenotips.variantstore.input.VariantHeader;
-import org.phenotips.variantstore.input.VariantIterator;
+import org.phenotips.variantstore.input.AbstractVariantIterator;
 
 /**
  * Th
@@ -19,7 +19,7 @@ public class CSVHandler implements InputHandler {
      * @return the VariantIterator
      */
     @Override
-    public VariantIterator getIteratorForFile(Path path, String individualId, boolean isPublic) throws InputException {
+    public AbstractVariantIterator getIteratorForFile(Path path, String individualId, boolean isPublic) throws InputException {
         return new CSVIterator(path, new VariantHeader(individualId, isPublic));
     }
 }

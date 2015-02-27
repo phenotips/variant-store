@@ -9,11 +9,11 @@ import org.ga4gh.GAVariant;
  * An Iterator that wraps around a file, and enables the access of the variants stored in the file. The variants are
  * exposed as GA4GH GAVariant objects.
  */
-public abstract class VariantIterator implements Iterator<GAVariant> {
+public abstract class AbstractVariantIterator implements Iterator<GAVariant> {
     protected Path path;
     protected VariantHeader header;
 
-    public VariantIterator(Path path, VariantHeader header) {
+    public AbstractVariantIterator(Path path, VariantHeader header) {
         this.path = path;
         this.header = header;
     }

@@ -7,10 +7,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import org.apache.log4j.Logger;
 import org.ga4gh.GAVariant;
-import org.phenotips.variantstore.input.InputException;
 import org.phenotips.variantstore.input.InputHandler;
 import org.phenotips.variantstore.input.csv.CSVHandler;
-import org.phenotips.variantstore.storage.StorageController;
+import org.phenotips.variantstore.storage.AbstractStorageController;
 import org.phenotips.variantstore.storage.StorageException;
 import org.phenotips.variantstore.storage.solr.SolrController;
 
@@ -21,9 +20,9 @@ import org.phenotips.variantstore.storage.solr.SolrController;
 public class VariantStore {
     private static Logger logger = Logger.getLogger(VariantStore.class);
     private InputHandler inputHandler;
-    private StorageController storageController;
+    private AbstractStorageController storageController;
 
-    public VariantStore(InputHandler inputHandler, StorageController storageController) {
+    public VariantStore(InputHandler inputHandler, AbstractStorageController storageController) {
         this.inputHandler = inputHandler;
         this.storageController = storageController;
     }
@@ -68,15 +67,22 @@ public class VariantStore {
     /*TODO: other query methods*/
 
     public static void main(String[] args) {
-        VariantStore vs = new VariantStore(
-                new CSVHandler(),
-                new SolrController(Paths.get("/data/"))
-        );
-
+        logger.debug("Starting");
+        VariantStore vs = null;
+        try {
+            vs = new VariantStore(
+                    new CSVHandler(),
+                    new SolrController(Paths.get("/data/"))
+            );
+        } catch (StorageException e) {
+            logger.error(e, e.getCause());
+            return;
+        }
         logger.debug("Started");
 
         String id = "P000001";
         try {
+            logger.debug("Adding");
             vs.addIndividual(id, true, Paths.get("/data/vcf/completegenomics/vcfBeta-HG00731-200-37-ASM.csv")).get();
             logger.debug("Added.");
             vs.removeIndividual(id).get();

@@ -13,13 +13,13 @@ import org.apache.log4j.Logger;
 import org.ga4gh.GAVariant;
 import org.phenotips.variantstore.input.InputException;
 import org.phenotips.variantstore.input.VariantHeader;
-import org.phenotips.variantstore.input.VariantIterator;
+import org.phenotips.variantstore.input.AbstractVariantIterator;
 
 /**
  * Wrap around a CSV file flattened by vcfflatten, with exomiser results appened to the end of each line. Expose each
  * line as a ga4gh GAVariant object.
  */
-public class CSVIterator extends VariantIterator {
+public class CSVIterator extends AbstractVariantIterator {
     private Logger logger = Logger.getLogger(CSVIterator.class);
     private Reader reader;
     private CSVParser csvParser;
