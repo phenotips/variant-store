@@ -98,12 +98,24 @@
        based on the hash code of some other fields.  This has overwriteDupes
        set to false since we are using the id field as the signatureField and Solr
        will maintain uniqueness based on that anyway. -->
-  <updateRequestProcessorChain name="dedupe">
+  <updateRequestProcessorChain name="dedupe_id">
     <processor class="org.apache.solr.update.processor.SignatureUpdateProcessorFactory">
       <bool name="enabled">true</bool>
       <bool name="overwriteDupes">false</bool>
-      <str name="signatureField">cksum</str>
-      <str name="fields">patient,chrom,pos,ref,alt</str>
+      <str name="signatureField">id</str>
+      <str name="fields">chrom,pos,ref,alt,individual</str>
+      <str name="signatureClass">org.apache.solr.update.processor.Lookup3Signature</str>
+    </processor>
+    <processor class="solr.LogUpdateProcessorFactory" />
+    <processor class="solr.RunUpdateProcessorFactory" />
+  </updateRequestProcessorChain>
+
+  <updateRequestProcessorChain name="dedupe_variant_id">
+    <processor class="org.apache.solr.update.processor.SignatureUpdateProcessorFactory">
+      <bool name="enabled">true</bool>
+      <bool name="overwriteDupes">false</bool>
+      <str name="signatureField">variant_id</str>
+      <str name="fields">chrom,pos,ref,alt</str>
       <str name="signatureClass">org.apache.solr.update.processor.Lookup3Signature</str>
     </processor>
     <processor class="solr.LogUpdateProcessorFactory" />
@@ -472,7 +484,8 @@
     -->
   <requestHandler name="/update" class="solr.UpdateRequestHandler">
     <lst name="defaults">
-      <str name="update.chain">dedupe</str>
+      <str name="update.chain">dedupe_id</str>
+      <str name="update.chain">dedupe_variant_id</str>
     </lst>
   </requestHandler>
 

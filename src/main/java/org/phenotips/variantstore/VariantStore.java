@@ -9,9 +9,9 @@ import org.apache.log4j.Logger;
 import org.ga4gh.GAVariant;
 import org.phenotips.variantstore.input.InputHandler;
 import org.phenotips.variantstore.input.csv.CSVHandler;
-import org.phenotips.variantstore.storage.AbstractStorageController;
-import org.phenotips.variantstore.storage.StorageException;
-import org.phenotips.variantstore.storage.solr.SolrController;
+import org.phenotips.variantstore.db.AbstractDatabaseController;
+import org.phenotips.variantstore.db.DatabaseException;
+import org.phenotips.variantstore.db.solr.SolrController;
 
 /**
  * The Variant Store is capable of storing a large number of individuals genomic variants for further
@@ -19,16 +19,22 @@ import org.phenotips.variantstore.storage.solr.SolrController;
  */
 public class VariantStore {
     private static Logger logger = Logger.getLogger(VariantStore.class);
+    private final Path path;
     private InputHandler inputHandler;
-    private AbstractStorageController storageController;
+    private AbstractDatabaseController dbController;
 
-    public VariantStore(InputHandler inputHandler, AbstractStorageController storageController) {
+    public VariantStore(Path path, InputHandler inputHandler, AbstractDatabaseController dbController) {
+        this.path = path;
         this.inputHandler = inputHandler;
-        this.storageController = storageController;
+        this.dbController = dbController;
+    }
+
+    public void init() throws VariantStoreException {
+        dbController.init(this.path.resolve("db"));
     }
 
     public void stop() {
-        storageController.stop();
+        dbController.stop();
     }
 
     /**
@@ -42,7 +48,7 @@ public class VariantStore {
      *         and is ready to be queried.
      */
     public Future addIndividual(String id, boolean isPublic, Path file) throws VariantStoreException {
-        return this.storageController.addIndividual(this.inputHandler.getIteratorForFile(file, id, isPublic));
+        return this.dbController.addIndividual(this.inputHandler.getIteratorForFile(file, id, isPublic));
     }
 
     /**
@@ -51,7 +57,7 @@ public class VariantStore {
      * @return a Future that completes when the individual is fully removed from the variant store.
      */
     public Future removeIndividual(String id) throws VariantStoreException {
-        return this.storageController.removeIndividual(id);
+        return this.dbController.removeIndividual(id);
     }
 
     /**
@@ -66,27 +72,32 @@ public class VariantStore {
 
     /*TODO: other query methods*/
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws DatabaseException {
         logger.debug("Starting");
         VariantStore vs = null;
+
+        vs = new VariantStore(Paths.get("/data/dev-variant-store"),
+                new CSVHandler(),
+                new SolrController()
+        );
+
         try {
-            vs = new VariantStore(
-                    new CSVHandler(),
-                    new SolrController(Paths.get("/data/"))
-            );
-        } catch (StorageException e) {
-            logger.error(e, e.getCause());
-            return;
+            vs.init();
+        } catch (VariantStoreException e) {
+            e.printStackTrace();
         }
+
         logger.debug("Started");
 
         String id = "P000001";
         try {
+
             logger.debug("Adding");
             vs.addIndividual(id, true, Paths.get("/data/vcf/completegenomics/vcfBeta-HG00731-200-37-ASM.csv")).get();
             logger.debug("Added.");
             vs.removeIndividual(id).get();
             logger.debug("Removed.");
+
         } catch (VariantStoreException e) {
             logger.error("ERROR!!", e);
         } catch (InterruptedException e) {
