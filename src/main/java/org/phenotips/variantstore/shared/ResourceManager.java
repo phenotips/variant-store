@@ -1,5 +1,6 @@
 package org.phenotips.variantstore.shared;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -12,15 +13,27 @@ import org.apache.log4j.Logger;
 import org.phenotips.variantstore.db.DatabaseException;
 
 /**
- * Created by meatcar on 2/26/15.
+ * Manage the resources for the application. Set them up, clean them up, the whole 9 yards.
  */
 public class ResourceManager {
     private static Logger logger = Logger.getLogger(ResourceManager.class);
 
+    /**
+     * Copy resources bundled with the application to a specified folder.
+     * @param source the path of the resources relative to the resource folder
+     * @param dest the destination
+     * @throws DatabaseException
+     */
     public static void copyResourcesToPath(String source, Path dest) throws DatabaseException {
         copyResourcesToPath(Paths.get(source), dest);
     }
 
+    /**
+     * Copy resources bundled with the application to a specified folder.
+     * @param source the path of the resources relative to the resource folder
+     * @param dest the destination
+     * @throws DatabaseException
+     */
     public static void copyResourcesToPath(final Path source, Path dest) throws DatabaseException {
         // Check if storage dirs exists
         if (Files.isDirectory(dest)) {
@@ -33,63 +46,28 @@ public class ResourceManager {
         }
 
         // Get path to where the resources are stored
-        Path resourceContainerPath = null;
         Class clazz = ResourceManager.class;
-        if (clazz.getProtectionDomain().getCodeSource() != null) {
-            resourceContainerPath = Paths.get(clazz.getProtectionDomain().getCodeSource().getLocation().getPath());
-        } else {
+
+        if (clazz.getProtectionDomain().getCodeSource() == null) {
             throw new DatabaseException("This is running in a jar loaded from the system class loader. Don't know how to handle this.");
         }
 
+        Path resourcesPath = Paths.get(clazz.getProtectionDomain().getCodeSource().getLocation().getPath());
+
         try {
 
-            logger.debug("Copying resources from " + source + " to " + dest);
-            logger.debug("Making dir " + dest);
+            // make destination folder
             Files.createDirectories(dest);
 
-            // The resources can be in a jar that we are running in or on the filesystem.
-            if ("jar".equals(FilenameUtils.getExtension(resourceContainerPath.toString()))) {
+            // if we are running in a jar, get the resources from the jar
+            if ("jar".equals(FilenameUtils.getExtension(resourcesPath.toString()))) {
 
-                // run from a jar
-                JarFile jar = new JarFile(resourceContainerPath.toFile());
+                copyResourcesFromJar(resourcesPath, source, dest);
 
-                for (JarEntry entry : Collections.list(jar.entries())) {
-
-                    if (entry.getName().startsWith(source.toString())) {
-                        if (entry.isDirectory()) {
-                            logger.debug("Making dir " + entry.getName());
-                            Files.createDirectory(dest.resolve(entry.getName()));
-                        } else {
-                            logger.debug("Copying " + entry.getName());
-                            Files.copy(jar.getInputStream(entry), dest.resolve(entry.getName()));
-                        }
-                    }
-
-                }
-
+            // if running from an IDE or the filesystem, get the resources from the folder
             } else {
 
-                // run from an IDE / filesystem
-                final Path resourcePath = resourceContainerPath.resolve(source);
-
-                final Path finalDest = dest;
-                Files.walkFileTree(resourcePath, new SimpleFileVisitor<Path>() {
-                    @Override
-                    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                        Path relFile = source.resolve(resourcePath.relativize(file));
-                        logger.debug("Copying " + file + " to " + finalDest.resolve(relFile));
-                        Files.copy(file, finalDest.resolve(relFile));
-                        return FileVisitResult.CONTINUE;
-                    }
-
-                    @Override
-                    public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-                        Path relDir = source.resolve(resourcePath.relativize(dir));
-                        logger.debug("Making dir " + finalDest.resolve(relDir));
-                        Files.createDirectory(finalDest.resolve(relDir));
-                        return FileVisitResult.CONTINUE;
-                    }
-                });
+                copyResourcesFromFilesystem(resourcesPath.resolve(source), dest.resolve(source));
 
             }
         } catch (IOException e) {
@@ -98,6 +76,59 @@ public class ResourceManager {
 
     }
 
+    /**
+     * Copy resources recursively from a path on the filesystem to the destination folder
+     * @param source
+     * @param dest
+     * @throws IOException
+     */
+    private static void copyResourcesFromFilesystem(final Path source, final Path dest) throws IOException {
+        Files.walkFileTree(source, new SimpleFileVisitor<Path>() {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                Path relative = source.relativize(file);
+                Files.copy(file, dest.resolve(relative));
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                Path relative = source.relativize(dir);
+                Files.createDirectory(dest.resolve(relative));
+                return FileVisitResult.CONTINUE;
+            }
+        });
+    }
+
+    /**
+     * Copy resources recursively from a folder specified by source in a jar file specified by jarPath to a destination folder on
+     * the filesystem dest
+     * @param jarPath the jar file
+     * @param source the folder on the filesystem
+     * @param dest the destination
+     * @throws IOException
+     */
+    private static void copyResourcesFromJar(Path jarPath, Path source, Path dest) throws IOException {
+        JarFile jar = new JarFile(jarPath.toFile());
+
+        for (JarEntry entry : Collections.list(jar.entries())) {
+
+            if (entry.getName().startsWith(source.toString())) {
+                if (entry.isDirectory()) {
+                    Files.createDirectory(dest.resolve(entry.getName()));
+                } else {
+                    Files.copy(jar.getInputStream(entry), dest.resolve(entry.getName()));
+                }
+            }
+
+        }
+    }
+
+    /**
+     * Delete the directory and any files in the path provided
+     * @param path
+     * @throws DatabaseException
+     */
     public static void clearResources(Path path) throws DatabaseException {
         try {
             FileUtils.deleteDirectory(path.toFile());

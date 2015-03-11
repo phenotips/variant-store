@@ -86,6 +86,11 @@
       <artifactId>logback-classic</artifactId>
       <version>1.0.13</version>
     </dependency>
+    <dependency>
+      <groupId>de.charite.compbio</groupId>
+      <artifactId>jannovar-cli</artifactId>
+      <version>0.12</version>
+    </dependency>
   </dependencies>
 
   <build>

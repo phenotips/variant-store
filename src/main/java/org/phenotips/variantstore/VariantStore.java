@@ -1,5 +1,15 @@
 package org.phenotips.variantstore;
 
+import de.charite.compbio.jannovar.JannovarOptions;
+import de.charite.compbio.jannovar.annotation.AnnotationException;
+import de.charite.compbio.jannovar.cmd.annotate_vcf.AnnotatedVCFWriter;
+import de.charite.compbio.jannovar.cmd.annotate_vcf.AnnotatedVariantWriter;
+import de.charite.compbio.jannovar.io.JannovarData;
+import de.charite.compbio.jannovar.io.JannovarDataSerializer;
+import de.charite.compbio.jannovar.io.SerializationException;
+import htsjdk.variant.variantcontext.VariantContext;
+import htsjdk.variant.vcf.VCFFileReader;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -20,21 +30,27 @@ import org.phenotips.variantstore.db.solr.SolrController;
 public class VariantStore {
     private static Logger logger = Logger.getLogger(VariantStore.class);
     private final Path path;
+    private final VCFManager vcf;
+    private final JannovarController jannovar;
     private InputHandler inputHandler;
-    private AbstractDatabaseController dbController;
+    private AbstractDatabaseController db;
 
-    public VariantStore(Path path, InputHandler inputHandler, AbstractDatabaseController dbController) {
+    public VariantStore(Path path, InputHandler inputHandler, AbstractDatabaseController db) {
         this.path = path;
         this.inputHandler = inputHandler;
-        this.dbController = dbController;
+        this.db = db;
+        this.vcf = new VCFManager();
+        this.jannovar = new JannovarController();
     }
 
     public void init() throws VariantStoreException {
-        dbController.init(this.path.resolve("db"));
+        db.init(this.path.resolve("db"));
+        vcf.init(this.path.resolve("vcf"));
+        jannovar.init(this.path.resolve("jannovar"));
     }
 
     public void stop() {
-        dbController.stop();
+        db.stop();
     }
 
     /**
@@ -48,7 +64,15 @@ public class VariantStore {
      *         and is ready to be queried.
      */
     public Future addIndividual(String id, boolean isPublic, Path file) throws VariantStoreException {
-        return this.dbController.addIndividual(this.inputHandler.getIteratorForFile(file, id, isPublic));
+        // copy file to file cache
+        vcf.addIndividual(id, file);
+
+        // filter exonic variants with jannovar
+//        jannovar.annotate(vcf.getIndividual(id));
+        // run them through exomiser
+        // add them to solr
+        // add all variants to solr
+        return this.db.addIndividual(this.inputHandler.getIteratorForFile(file, id, isPublic));
     }
 
     /**
@@ -57,7 +81,7 @@ public class VariantStore {
      * @return a Future that completes when the individual is fully removed from the variant store.
      */
     public Future removeIndividual(String id) throws VariantStoreException {
-        return this.dbController.removeIndividual(id);
+        return this.db.removeIndividual(id);
     }
 
     /**
