@@ -28,12 +28,23 @@ public class VCFIterator extends AbstractVariantIterator {
     private VariantContext nextRow = null;
 
     public VCFIterator(Path path, VariantHeader header) {
-        this(path, null, header);
+        this(path, null, header, null);
+    }
+    public VCFIterator(Path path, Path index, VariantHeader header) {
+        this(path, index, header, null);
+    }
+    public VCFIterator(Path path, VariantHeader header, Map<String, List<String>> filter) {
+        this(path, null, header, filter);
     }
 
-    public VCFIterator(Path path, Path index, VariantHeader header) {
+    /**
+     * Set a filter for the Info fields. Any VCF row with info fields that match this filter will be skipped.
+     * @param filter A Map of Info field -> List of values to exclude
+     */
+    public VCFIterator(Path path, Path index, VariantHeader header, Map<String, List<String>> filter) {
         super(path, header);
 
+        this.filter = filter;
         if (index == null) {
             this.reader = new VCFFileReader(path.toFile(), false);
         } else {
@@ -44,13 +55,6 @@ public class VCFIterator extends AbstractVariantIterator {
         this.nextRow = this.nextFiltered();
     }
 
-    /**
-     * Set a filter for the Info fields. Any VCF row with info fields that match this filter will be skipped.
-     * @param filter A Map of Info field -> List of values to exclude
-     */
-    public void setInfoFilter(Map<String, List<String>> filter) {
-        this.filter = filter;
-    }
 
     public boolean hasNext() {
         return nextRow == null;
@@ -82,6 +86,7 @@ public class VCFIterator extends AbstractVariantIterator {
 
         variant.setInfo(info);
 
+        this.nextRow = this.nextFiltered();
         if (!hasNext()) {
             iterator.close();
         }
@@ -94,8 +99,12 @@ public class VCFIterator extends AbstractVariantIterator {
      */
     private VariantContext nextFiltered() {
 
+        // no next
+        if (!iterator.hasNext()) {
+            return null;
+        }
         // no filter, don't do extra work.
-        if (this.filter == null) {
+        if (this.filter == null ) {
             return iterator.next();
         }
 
