@@ -2,14 +2,14 @@ package org.phenotips.variantstore.input.csv;
 
 import java.nio.file.Path;
 import org.phenotips.variantstore.input.InputException;
-import org.phenotips.variantstore.input.InputHandler;
+import org.phenotips.variantstore.input.InputManager;
 import org.phenotips.variantstore.input.VariantHeader;
 import org.phenotips.variantstore.input.AbstractVariantIterator;
 
 /**
  * Th
  */
-public class CSVHandler implements InputHandler {
+public class CSVManager implements InputManager {
     /**
      * Given a file, get the VariantIterator
      *

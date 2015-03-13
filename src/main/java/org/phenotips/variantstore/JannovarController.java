@@ -16,17 +16,20 @@ import htsjdk.variant.vcf.VCFFileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.zip.GZIPInputStream;
+import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.phenotips.variantstore.db.DatabaseException;
 
 /**
  * Created by meatcar on 3/6/15.
  */
-public class JannovarController {
+public class JannovarController implements Service {
     private Path path;
     private Path dataDir;
     private Path vcfDir;
 
-    public void init(Path path) throws DatabaseException {
+    public void init(Path path) throws VariantStoreException{
         this.path = path;
         this.dataDir = path.resolve("data");
         this.vcfDir = path.resolve("vcf");
@@ -81,8 +84,9 @@ public class JannovarController {
         return this.dataDir.resolve("hg19_ucsc.ser");
     }
 
-    public void annotate(Path vcf) {
+    public Path annotate(Path vcf) {
         VCFFileReader reader = new VCFFileReader(vcf.toFile(), false);
+        Path outFile = null;
         try {
             JannovarData data = new JannovarDataSerializer(this.getDataFile().toString()).load();
 
@@ -98,6 +102,8 @@ public class JannovarController {
                 writer.put(vc);
             }
 
+            outFile = Paths.get(writer.getOutFileName());
+
             // close parser writer again
             reader.close();
             writer.close();
@@ -106,6 +112,8 @@ public class JannovarController {
         } catch (AnnotationException e) {
             e.printStackTrace();
         }
+
+        return outFile;
     }
 
 }

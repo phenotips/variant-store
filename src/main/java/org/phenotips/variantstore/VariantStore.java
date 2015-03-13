@@ -1,15 +1,5 @@
 package org.phenotips.variantstore;
 
-import de.charite.compbio.jannovar.JannovarOptions;
-import de.charite.compbio.jannovar.annotation.AnnotationException;
-import de.charite.compbio.jannovar.cmd.annotate_vcf.AnnotatedVCFWriter;
-import de.charite.compbio.jannovar.cmd.annotate_vcf.AnnotatedVariantWriter;
-import de.charite.compbio.jannovar.io.JannovarData;
-import de.charite.compbio.jannovar.io.JannovarDataSerializer;
-import de.charite.compbio.jannovar.io.SerializationException;
-import htsjdk.variant.variantcontext.VariantContext;
-import htsjdk.variant.vcf.VCFFileReader;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -17,11 +7,12 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import org.apache.log4j.Logger;
 import org.ga4gh.GAVariant;
-import org.phenotips.variantstore.input.InputHandler;
-import org.phenotips.variantstore.input.csv.CSVHandler;
+import org.phenotips.variantstore.input.InputManager;
+import org.phenotips.variantstore.input.csv.CSVManager;
 import org.phenotips.variantstore.db.AbstractDatabaseController;
 import org.phenotips.variantstore.db.DatabaseException;
 import org.phenotips.variantstore.db.solr.SolrController;
+import org.phenotips.variantstore.input.vcf.VCFManager;
 
 /**
  * The Variant Store is capable of storing a large number of individuals genomic variants for further
@@ -32,19 +23,19 @@ public class VariantStore {
     private final Path path;
     private final VCFManager vcf;
     private final JannovarController jannovar;
-    private InputHandler inputHandler;
+    private InputManager inputManager;
     private AbstractDatabaseController db;
 
-    public VariantStore(Path path, InputHandler inputHandler, AbstractDatabaseController db) {
+    public VariantStore(Path path, InputManager inputManager, AbstractDatabaseController db) {
         this.path = path;
-        this.inputHandler = inputHandler;
+        this.inputManager = inputManager;
         this.db = db;
         this.vcf = new VCFManager();
         this.jannovar = new JannovarController();
     }
 
     public void init() throws VariantStoreException {
-        db.init(this.path.resolve("db"));
+//        db.init(this.path.resolve("db"));
         vcf.init(this.path.resolve("vcf"));
         jannovar.init(this.path.resolve("jannovar"));
     }
@@ -67,12 +58,14 @@ public class VariantStore {
         // copy file to file cache
         vcf.addIndividual(id, file);
 
-        // filter exonic variants with jannovar
-//        jannovar.annotate(vcf.getIndividual(id));
+        // annotate VCF with jannovar
+        jannovar.annotate(vcf.getIndividual(id));
+        // filter down to exonic variants
         // run them through exomiser
         // add them to solr
         // add all variants to solr
-        return this.db.addIndividual(this.inputHandler.getIteratorForFile(file, id, isPublic));
+//        return this.db.addIndividual(this.inputHandler.getIteratorForFile(file, id, isPublic));
+        return null;
     }
 
     /**
@@ -101,7 +94,7 @@ public class VariantStore {
         VariantStore vs = null;
 
         vs = new VariantStore(Paths.get("/data/dev-variant-store"),
-                new CSVHandler(),
+                new CSVManager(),
                 new SolrController()
         );
 
@@ -115,9 +108,8 @@ public class VariantStore {
 
         String id = "P000001";
         try {
-
             logger.debug("Adding");
-            vs.addIndividual(id, true, Paths.get("/data/vcf/completegenomics/vcfBeta-HG00731-200-37-ASM.csv")).get();
+            vs.addIndividual(id, true, Paths.get("/data/vcf/completegenomics/vcfBeta-HG00731-200-37-ASM.vcf.gz")).get();
             logger.debug("Added.");
             vs.removeIndividual(id).get();
             logger.debug("Removed.");
