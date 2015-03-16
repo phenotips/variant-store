@@ -89,7 +89,7 @@ public class VariantStore {
 
     /*TODO: other query methods*/
 
-    public static void main(String[] args) throws DatabaseException {
+    public static void main(String[] args) {
         logger.debug("Starting");
         VariantStore vs = null;
 
@@ -101,7 +101,8 @@ public class VariantStore {
         try {
             vs.init();
         } catch (VariantStoreException e) {
-            e.printStackTrace();
+            logger.error("Error initializing VariantStore", e);
+            return;
         }
 
         logger.debug("Started");

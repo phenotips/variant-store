@@ -44,7 +44,7 @@ public class JannovarController implements Service {
      * Ensure the nescessary Jannovar data files are present. If not, download them them.
      * @throws DatabaseException
      */
-    private void ensureDataExists() throws DatabaseException {
+    private void ensureDataExists() throws VariantStoreException {
         if (Files.exists(this.path)) {
             return;
         }
@@ -53,7 +53,7 @@ public class JannovarController implements Service {
             Files.createDirectories(this.dataDir);
             Files.createDirectories(this.vcfDir);
         } catch (IOException e) {
-            throw new DatabaseException("Unable to create directory", e);
+            throw new VariantStoreException("Unable to create directory", e);
         }
 
         JannovarOptions options = new JannovarOptions();
@@ -70,7 +70,7 @@ public class JannovarController implements Service {
 
             serializer.save(data);
         } catch (InvalidDataSourceException | TranscriptParseException | SerializationException | FileDownloadException e) {
-            e.printStackTrace();
+            throw new VariantStoreException("Error fetching Jannovar data", e);
         }
     }
 
@@ -78,7 +78,7 @@ public class JannovarController implements Service {
         return this.dataDir.resolve("hg19_ucsc.ser");
     }
 
-    public Path annotate(Path vcf) {
+    public Path annotate(Path vcf) throws VariantStoreException {
         VCFFileReader reader = new VCFFileReader(vcf.toFile(), false);
         Path outFile = null;
         try {
@@ -102,7 +102,7 @@ public class JannovarController implements Service {
             reader.close();
             writer.close();
         } catch (SerializationException | AnnotationException e) {
-            e.printStackTrace();
+            throw new VariantStoreException("Error annotating VCF with Jannovar", e);
         }
 
         return outFile;
