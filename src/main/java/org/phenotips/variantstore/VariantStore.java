@@ -114,12 +114,10 @@ public class VariantStore {
             vs.removeIndividual(id).get();
             logger.debug("Removed.");
 
-        } catch (VariantStoreException e) {
+        } catch (VariantStoreException | ExecutionException e) {
             logger.error("ERROR!!", e);
         } catch (InterruptedException e) {
             logger.error("Shouldn't happen", e);
-        } catch (ExecutionException e) {
-            logger.error("ERROR!!", e);
         }
 
         vs.stop();

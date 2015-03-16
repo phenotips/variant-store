@@ -69,13 +69,7 @@ public class JannovarController implements Service {
             JannovarDataSerializer serializer = new JannovarDataSerializer(this.getDataFile().toString());
 
             serializer.save(data);
-        } catch (InvalidDataSourceException e) {
-            e.printStackTrace();
-        } catch (TranscriptParseException e) {
-            e.printStackTrace();
-        } catch (FileDownloadException e) {
-            e.printStackTrace();
-        } catch (SerializationException e) {
+        } catch (InvalidDataSourceException | TranscriptParseException | SerializationException | FileDownloadException e) {
             e.printStackTrace();
         }
     }
@@ -107,9 +101,7 @@ public class JannovarController implements Service {
             // close parser writer again
             reader.close();
             writer.close();
-        } catch (SerializationException e) {
-            e.printStackTrace();
-        } catch (AnnotationException e) {
+        } catch (SerializationException | AnnotationException e) {
             e.printStackTrace();
         }
 

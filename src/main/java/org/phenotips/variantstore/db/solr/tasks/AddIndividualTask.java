@@ -77,9 +77,7 @@ public class AddIndividualTask implements Callable<Object> {
         try {
             server.add(doc);
             doc.clear();
-        } catch (SolrServerException e) {
-            throw new DatabaseException(String.format("Error adding variants to solr"), e);
-        } catch (IOException e) {
+        } catch (SolrServerException | IOException e) {
             throw new DatabaseException(String.format("Error adding variants to solr"), e);
         }
     }

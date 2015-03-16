@@ -23,9 +23,7 @@ public class RemoveIndividualTask implements Callable<Object> {
     public Object call() throws Exception {
         try {
             server.deleteByQuery(String.format("patient:%s", id));
-        } catch (SolrServerException e) {
-            throw new DatabaseException(String.format("Error removing individual from solr"), e);
-        } catch (IOException e) {
+        } catch (SolrServerException | IOException e) {
             throw new DatabaseException(String.format("Error removing individual from solr"), e);
         }
         return null;
