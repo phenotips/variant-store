@@ -2,16 +2,22 @@ package org.phenotips.variantstore;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import org.apache.commons.collections.ListUtils;
 import org.apache.log4j.Logger;
 import org.ga4gh.GAVariant;
 import org.phenotips.variantstore.input.InputManager;
+import org.phenotips.variantstore.input.VariantHeader;
 import org.phenotips.variantstore.input.csv.CSVManager;
 import org.phenotips.variantstore.db.AbstractDatabaseController;
 import org.phenotips.variantstore.db.DatabaseException;
 import org.phenotips.variantstore.db.solr.SolrController;
+import org.phenotips.variantstore.input.vcf.VCFIterator;
 import org.phenotips.variantstore.input.vcf.VCFManager;
 
 /**
@@ -59,13 +65,15 @@ public class VariantStore {
         vcf.addIndividual(id, file);
 
         // annotate VCF with jannovar
-        jannovar.annotate(vcf.getIndividual(id));
+        Path jPath = jannovar.annotate(vcf.getIndividual(id));
         // filter down to exonic variants
+        Map<String,List<String>> filter = new HashMap<>();
+        filter.put("EFFECT", Arrays.asList("UPSTREAM", "DOWNSTREAM", "INTRONIC", "INTERGENIC", "ERROR"));
+        VCFIterator it = new VCFIterator(jPath, Paths.get(jPath.toString() + ".idx"), new VariantHeader(id, true), filter);
         // run them through exomiser
         // add them to solr
         // add all variants to solr
-//        return this.db.addIndividual(this.inputHandler.getIteratorForFile(file, id, isPublic));
-        return null;
+        return this.db.addIndividual(this.inputManager.getIteratorForFile(file, id, isPublic));
     }
 
     /**

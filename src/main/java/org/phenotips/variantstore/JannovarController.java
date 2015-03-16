@@ -20,6 +20,7 @@ import java.nio.file.Paths;
 import java.util.zip.GZIPInputStream;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.phenotips.variantstore.db.DatabaseException;
+import org.phenotips.variantstore.input.AbstractVariantIterator;
 
 /**
  * Created by meatcar on 3/6/15.
