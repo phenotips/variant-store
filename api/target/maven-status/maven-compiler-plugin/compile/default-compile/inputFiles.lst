@@ -1,0 +1,11 @@
+/Users/matthew/Documents/variant-store-integration/api/src/main/java/org/phenotips/variantStoreIntegration/Events/VCFUploadCompleteEvent.java
+/Users/matthew/Documents/variant-store-integration/api/src/main/java/org/phenotips/variantStoreIntegration/DefaultVCFUploadManager.java
+/Users/matthew/Documents/variant-store-integration/api/src/main/java/org/phenotips/variantStoreIntegration/MockVariantStore.java
+/Users/matthew/Documents/variant-store-integration/api/src/main/java/org/phenotips/variantStoreIntegration/VCFUploadJob.java
+/Users/matthew/Documents/variant-store-integration/api/src/main/java/org/phenotips/variantStoreIntegration/Events/VCFEvent.java
+/Users/matthew/Documents/variant-store-integration/api/src/main/java/org/phenotips/variantStoreIntegration/script/VCFStorageScriptService.java
+/Users/matthew/Documents/variant-store-integration/api/src/main/java/org/phenotips/variantStoreIntegration/MockProcessingTask.java
+/Users/matthew/Documents/variant-store-integration/api/src/main/java/org/phenotips/variantStoreIntegration/FutureManager.java
+/Users/matthew/Documents/variant-store-integration/api/src/main/java/org/phenotips/variantStoreIntegration/VCFRemovalJob.java
+/Users/matthew/Documents/variant-store-integration/api/src/main/java/org/phenotips/variantStoreIntegration/VCFUploadManager.java
+/Users/matthew/Documents/variant-store-integration/api/src/main/java/org/phenotips/variantStoreIntegration/Events/VCFRemovalCompleteEvent.java
