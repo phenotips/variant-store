@@ -57,7 +57,7 @@ public class VCFIterator extends AbstractVariantIterator {
 
 
     public boolean hasNext() {
-        return nextRow == null;
+        return nextRow != null;
     }
 
     public GAVariant next() {
