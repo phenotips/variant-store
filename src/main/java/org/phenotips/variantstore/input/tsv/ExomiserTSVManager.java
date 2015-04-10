@@ -1,18 +1,16 @@
-package org.phenotips.variantstore.input.csv;
+package org.phenotips.variantstore.input.tsv;
 
 import java.nio.file.Path;
+import org.phenotips.variantstore.input.AbstractVariantIterator;
 import org.phenotips.variantstore.input.InputException;
 import org.phenotips.variantstore.input.InputManager;
 import org.phenotips.variantstore.input.VariantHeader;
-import org.phenotips.variantstore.input.AbstractVariantIterator;
 import org.phenotips.variantstore.shared.VariantStoreException;
 
 /**
- * This is a class we used for benchmarking solr using generated mock data. Realistically, we'll never see patient data
- * passed around in CSV format.
+ * Th
  */
-@Deprecated
-public class CSVManager implements InputManager {
+public class ExomiserTSVManager implements InputManager {
     /**
      * Given a file, get the VariantIterator
      *
@@ -22,7 +20,7 @@ public class CSVManager implements InputManager {
      * @return the VariantIterator
      */
     public AbstractVariantIterator getIteratorForFile(Path path, String individualId, boolean isPublic) throws InputException {
-        return new CSVIterator(path, new VariantHeader(individualId, isPublic));
+        return new ExomiserTSVIterator(path, new VariantHeader(individualId, isPublic));
     }
 
     @Override

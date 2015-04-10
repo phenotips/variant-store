@@ -1,6 +1,6 @@
 package org.phenotips.variantstore.input;
 
-import org.phenotips.variantstore.VariantStoreException;
+import org.phenotips.variantstore.shared.VariantStoreException;
 
 /**
  * An exception thrown by the input handlers

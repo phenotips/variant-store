@@ -10,11 +10,11 @@ import org.apache.log4j.Logger;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.core.CoreContainer;
+import org.phenotips.variantstore.db.solr.tasks.AddIndividualTask;
 import org.phenotips.variantstore.input.AbstractVariantIterator;
 import org.phenotips.variantstore.db.AbstractDatabaseController;
 import org.phenotips.variantstore.db.DatabaseException;
 import org.phenotips.variantstore.shared.ResourceManager;
-import org.phenotips.variantstore.db.solr.tasks.AddIndividualTask;
 import org.phenotips.variantstore.db.solr.tasks.RemoveIndividualTask;
 
 /**

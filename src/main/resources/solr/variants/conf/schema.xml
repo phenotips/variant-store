@@ -51,6 +51,7 @@
   </types>
 
   <fields>
+    <field name="_version_" type="int" indexed="true" stored="true" multiValued="false"/>
 
     <!-- a hash of chrom, pos, ref, alt, individual -->
     <field name="id" type="string" indexed="true" stored="true" required="false" />

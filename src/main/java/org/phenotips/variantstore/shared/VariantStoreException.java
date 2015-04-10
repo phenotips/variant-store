@@ -1,4 +1,4 @@
-package org.phenotips.variantstore;
+package org.phenotips.variantstore.shared;
 
 /**
  * A general Exception thrown by the Variant Store

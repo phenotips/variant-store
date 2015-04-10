@@ -1,4 +1,4 @@
-package org.phenotips.variantstore.input.csv;
+package org.phenotips.variantstore.input.tsv;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -11,22 +11,21 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.log4j.Logger;
 import org.ga4gh.GAVariant;
+import org.phenotips.variantstore.input.AbstractVariantIterator;
 import org.phenotips.variantstore.input.InputException;
 import org.phenotips.variantstore.input.VariantHeader;
-import org.phenotips.variantstore.input.AbstractVariantIterator;
 
 /**
  * Wrap around a CSV file flattened by vcfflatten, with exomiser results appened to the end of each line. Expose each
  * line as a ga4gh GAVariant object.
  */
-@Deprecated
-public class CSVIterator extends AbstractVariantIterator {
-    private Logger logger = Logger.getLogger(CSVIterator.class);
+public class ExomiserTSVIterator extends AbstractVariantIterator {
+    private Logger logger = Logger.getLogger(ExomiserTSVIterator.class);
     private Reader reader;
     private CSVParser csvParser;
     private Iterator<CSVRecord> csvRecordIterator;
 
-    public CSVIterator(Path path, VariantHeader variantHeader) throws InputException {
+    public ExomiserTSVIterator(Path path, VariantHeader variantHeader) throws InputException {
         super(path, variantHeader);
 
         try {
@@ -61,7 +60,7 @@ public class CSVIterator extends AbstractVariantIterator {
 
         int i = 0;
         for (String field : csvRecordIterator.next()) {
-            CSVColumn column = CSVColumn.values()[i++];
+            ExomiserTSVColumn column = ExomiserTSVColumn.values()[i++];
 
             switch (column) {
                 case CHROM:
@@ -91,37 +90,33 @@ public class CSVIterator extends AbstractVariantIterator {
                 case EXOMISER_GENE:
                     info.put("EXOMISER_GENE", Arrays.asList(field));
                     break;
-                case EXOMISER_EFFECT:
-                    info.put("EXOMISER_EFFECT", Arrays.asList(field));
-                    break;
                 case EXOMISER_GENE_COMBINED_SCORE:
                     info.put("EXOMISER_GENE_COMBINED_SCORE", Arrays.asList(field));
                     break;
                 case EXOMISER_GENE_VARIANT_SCORE:
                     info.put("EXOMISER_GENE_VARIANT_SCORE", Arrays.asList(field));
                     break;
-                case VAR_ID:
-                case AC:
-                case AN:
-                case CGA_BF:
-                case CGA_BNDG:
-                case CGA_BNDGO:
-                case CGA_FI:
-                case CGA_MEDEL:
-                case CGA_MIRB:
-                case CGA_PFAM:
-                case CGA_RPT:
-                case CGA_SDO:
-                case CGA_WINEND:
-                case CGA_XR:
-                case CIPOS:
-                case ENDD:
-                case MATEID:
-                case MEINFO:
-                case NS:
-                case SVLEN:
-                case SVTYPE:
-                case IMPRECISE:
+                case FUNCTIONAL_CLASS:
+                    info.put("EFFECT", Arrays.asList(field));
+                case GENOTYPE:
+                case COVERAGE:
+                case HGVS:
+                case CADD:
+                case POLYPHEN:
+                case MUTATIONTASTER:
+                case SIFT:
+                case DBSNP_ID:
+                case MAX_FREQUENCY:
+                case DBSNP_FREQUENCY:
+                case EVS_EA_FREQUENCY:
+                case EVS_AA_FREQUENCY:
+                case EXAC_AFR_FREQ:
+                case EXAC_AMR_FREQ:
+                case EXAC_EAS_FREQ:
+                case EXAC_FIN_FREQ:
+                case EXAC_NFE_FREQ:
+                case EXAC_SAS_FREQ:
+                case EXAC_OTH_FREQ:
                 default:
                     break;
             }

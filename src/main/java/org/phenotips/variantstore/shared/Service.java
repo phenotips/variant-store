@@ -1,4 +1,4 @@
-package org.phenotips.variantstore;
+package org.phenotips.variantstore.shared;
 
 import java.nio.file.Path;
 

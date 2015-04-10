@@ -81,14 +81,19 @@ public class VCFIterator extends AbstractVariantIterator {
         variant.setAlternateBases(alts);
 
         // INFO
-        info.put("QUAL", Arrays.<String>asList(String.valueOf(context.getPhredScaledQual())));
+        info.put("QUAL", Collections.singletonList(String.valueOf(context.getPhredScaledQual())));
         info.put("FILTER", new ArrayList<String>(context.getFilters()));
+
+        if (context.hasAttribute("AF")) {
+            info.put("AF", Collections.singletonList((String) context.getAttribute("AF")));
+        }
 
         variant.setInfo(info);
 
         this.nextRow = this.nextFiltered();
         if (!hasNext()) {
             iterator.close();
+            reader.close();
         }
 
         return variant;

@@ -89,7 +89,17 @@
     <dependency>
       <groupId>de.charite.compbio</groupId>
       <artifactId>jannovar-cli</artifactId>
-      <version>0.12</version>
+      <version>0.13-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>de.charite.compbio</groupId>
+      <artifactId>exomiser-cli</artifactId>
+      <version>6.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>de.charite.compbio</groupId>
+      <artifactId>exomiser-core</artifactId>
+      <version>6.0.0</version>
     </dependency>
   </dependencies>
 

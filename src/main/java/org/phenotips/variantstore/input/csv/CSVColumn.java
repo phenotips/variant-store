@@ -3,6 +3,7 @@ package org.phenotips.variantstore.input.csv;
 /**
  * The columns in the supported CSV file, in the order that they come.
  */
+@Deprecated
 public enum CSVColumn {
     CHROM,
     POS,

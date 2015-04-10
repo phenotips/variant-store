@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.common.SolrInputDocument;
@@ -27,9 +28,6 @@ public class AddIndividualTask implements Callable<Object> {
 
     @Override
     public Object call() throws Exception {
-        // we will be reusing the document to speed up inserts as per SolrJ docs.
-        SolrInputDocument doc = new SolrInputDocument();
-
         GAVariant variant;
         Map<String, List<String>> info;
 
@@ -37,14 +35,8 @@ public class AddIndividualTask implements Callable<Object> {
             variant = iterator.next();
             info = variant.getInfo();
 
-            doc.setField("chrom", variant.getReferenceName());
-            doc.setField("pos", variant.getStart());
-            doc.setField("ref", variant.getReferenceBases());
-            doc.setField("alt", StringUtils.join(variant.getAlternateBases(), ","));
-            doc.setField("individuals", iterator.getHeader().getIndividualId());
-
-            addDoc(doc);
-
+            // we will be reusing the document to speed up inserts as per SolrJ docs.
+            SolrInputDocument doc = new SolrInputDocument();
             doc.setField("chrom", variant.getReferenceName());
             doc.setField("pos", variant.getStart());
             doc.setField("ref", variant.getReferenceBases());
@@ -55,14 +47,20 @@ public class AddIndividualTask implements Callable<Object> {
                 doc.setField("is_public", true);
             }
 
+            if (info.containsKey("AF")) {
+                doc.setField("AF", info.get("AF").get(0));
+            } else {
+                SolrQuery query = new SolrQuery();
+            }
+
             doc.setField("qual", info.get("QUAL").get(0));
-            doc.setField("filter", info.get("FILTER").get(0));
-            doc.setField("exomiser_variant_score", Double.valueOf(info.get("EXOMISER_VARIANT_SCORE").get(0)));
-            doc.setField("exomiser_gene_pheno_score", info.get("EXOMISER_GENE_PHENO_SCORE").get(0));
-            doc.setField("exomiser_gene", info.get("EXOMISER_GENE").get(0));
-            doc.setField("exomiser_effect", info.get("EXOMISER_EFFECT").get(0));
-            doc.setField("exomiser_gene_variant_score", info.get("EXOMISER_GENE_VARIANT_SCORE").get(0));
-            doc.setField("exomiser_gene_combined_score", info.get("EXOMISER_GENE_COMBINED_SCORE").get(0));
+//            doc.setField("filter", info.get("FILTER").get(0));
+//            doc.setField("exomiser_variant_score", Double.valueOf(info.get("EXOMISER_VARIANT_SCORE").get(0)));
+//            doc.setField("exomiser_gene_pheno_score", info.get("EXOMISER_GENE_PHENO_SCORE").get(0));
+//            doc.setField("exomiser_gene", info.get("EXOMISER_GENE").get(0));
+//            doc.setField("exomiser_effect", info.get("EXOMISER_EFFECT").get(0));
+//            doc.setField("exomiser_gene_variant_score", info.get("EXOMISER_GENE_VARIANT_SCORE").get(0));
+//            doc.setField("exomiser_gene_combined_score", info.get("EXOMISER_GENE_COMBINED_SCORE").get(0));
 
             addDoc(doc);
         }
