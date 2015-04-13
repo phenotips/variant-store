@@ -31,6 +31,23 @@ public class VariantStore {
     private InputManager inputManager;
     private AbstractDatabaseController db;
 
+    /**
+     * Use VCF and Solr by default
+     * @param path
+     */
+    public VariantStore(Path path) {
+        this.path = path;
+        this.inputManager = new VCFManager();
+        this.db = new SolrController();
+        this.jannovar = new JannovarController();
+    }
+
+    /**
+     * Specify your own DB and Input format
+     * @param path
+     * @param inputManager
+     * @param db
+     */
     public VariantStore(Path path, InputManager inputManager, AbstractDatabaseController db) {
         this.path = path;
         this.inputManager = inputManager;
