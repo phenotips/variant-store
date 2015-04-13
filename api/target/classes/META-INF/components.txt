@@ -1,2 +1,0 @@
-org.phenotips.variantStoreIntegration.DefaultVCFUploadManager
-package org.phenotips.variantStoreIntegration.script.VCFStorageScriptService
