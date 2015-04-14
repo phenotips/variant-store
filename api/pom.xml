@@ -61,9 +61,19 @@
       <classifier>jdk15</classifier>
     </dependency>
     <dependency>
+      <groupId>org.xwiki.commons</groupId>
+      <artifactId>xwiki-commons-observation-api</artifactId>
+      <version>${xwiki.version}</version>
+    </dependency>
+    <dependency>
     	<groupId>org.xwiki.commons</groupId>
     	<artifactId>xwiki-commons-repository-model</artifactId>
     	<version>5.4.5</version>
+    </dependency>
+    <dependency>
+      <groupId>org.phenotips</groupId>
+      <artifactId>variant-store</artifactId>
+      <version>1.0-SNAPSHOT</version>
     </dependency>
     <!-- Test dependencies -->
     <dependency>
@@ -71,6 +81,11 @@
       <artifactId>xwiki-commons-test-component</artifactId>
       <version>${xwiki.version}</version>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.phenotips</groupId>
+      <artifactId>variant-store</artifactId>
+      <version>1.0-SNAPSHOT</version>
     </dependency>
   </dependencies>
 </project>

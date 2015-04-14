@@ -19,17 +19,24 @@
  */
 package org.phenotips.variantStoreIntegration;
 
+import org.phenotips.variantstore.VariantStoreInterface;
+import org.phenotips.variantstore.shared.VariantStoreException;
+
 import java.nio.file.Path;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+
+import org.ga4gh.GAVariant;
 
 /**
  * A mock variant store.
  *
  * @version $Id$
  */
-public class MockVariantStore
+public class MockVariantStore implements VariantStoreInterface
 {
     /**
      * Start up the variant store.
@@ -38,9 +45,15 @@ public class MockVariantStore
     {
     }
 
+    @Override
+    public void init(Path path) throws VariantStoreException {
+
+    }
+
     /**
      * Not used yet.
      */
+    @Override
     public void stop()
     {
     };
@@ -51,6 +64,7 @@ public class MockVariantStore
      * @param file asdf
      * @return Future sdf
      */
+    @Override
     public Future<Boolean> addIndividual(String id, boolean isPublic, Path file)
     {
         Callable<Boolean> task = new MockProcessingTask();
@@ -61,10 +75,31 @@ public class MockVariantStore
      * @param id w/e
      * @return w/e
      */
+    @Override
     public Future<Boolean> removeIndividual(String id)
     {
         Callable<Boolean> task = new MockProcessingTask();
         return new FutureTask<Boolean>(task);
+    }
+
+    @Override
+    public List<GAVariant> getTopHarmfullVariants(String s, int i) {
+        return null;
+    }
+
+    @Override
+    public Map<String, List<GAVariant>> getIndividualGivenGene(String s, List<String> list, Map<String, Double> map) {
+        return null;
+    }
+
+    @Override
+    public Map<String, List<GAVariant>> getIndividualGivenVariant(String s, int i, String s1, String s2) {
+        return null;
+    }
+
+    @Override
+    public List<String> getIndividuals() {
+        return null;
     }
 
 }
