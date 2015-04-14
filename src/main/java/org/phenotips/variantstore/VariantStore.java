@@ -9,6 +9,7 @@ import org.phenotips.variantstore.shared.VariantStoreException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -74,6 +75,35 @@ public class VariantStore implements VariantStoreInterface
 
     @Override
     public List<GAVariant> getTopHarmfullVariants(String id, int n) {
+        return null;
+    }
+
+    /**
+     * Get the individuals that have variants with the given gene symbol, exhibiting the given variant effects,
+     * and with the given allele frequencies. Sort the list of patients by descending variant harmfulness
+     *
+     * @param geneSymbol
+     * @param variantEffects
+     * @param alleleFrequencies
+     * @return
+     */
+    @Override
+    public Map<String, List<GAVariant>> getIndividualGivenGene(String geneSymbol, List<String> variantEffects, Map<String, Double> alleleFrequencies) {
+        return null;
+    }
+
+    @Override
+    public Map<String, List<GAVariant>> getIndividualGivenVariant(String chr, int pos, String ref, String alt) {
+        return null;
+    }
+
+    /**
+     * Get a list of all the individual IDs stored in the variant store.
+     *
+     * @return a list of individual IDs.
+     */
+    @Override
+    public List<String> getIndividuals() {
         return null;
     }
 
