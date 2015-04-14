@@ -25,6 +25,7 @@ import org.phenotips.variantStoreIntegration.VariantStoreService;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.observation.EventListener;
 import org.xwiki.observation.event.ApplicationStartedEvent;
+import org.xwiki.observation.event.ApplicationStoppedEvent;
 import org.xwiki.observation.event.Event;
 
 import java.util.Arrays;
@@ -57,11 +58,17 @@ public class VariantStoreInitializer implements EventListener
 
     @Override
     public List<Event> getEvents() {
-        return Arrays.<Event>asList(new ApplicationStartedEvent());
+        return Arrays.<Event>asList(
+                new ApplicationStartedEvent(),
+                new ApplicationStoppedEvent()
+        );
     }
 
     @Override
     public void onEvent(Event event, Object o, Object o2) {
         // don't do anything, just injecting the service.
+        if (event instanceof ApplicationStoppedEvent) {
+            service.stop();
+        }
     }
 }

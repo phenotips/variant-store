@@ -61,4 +61,9 @@ public class DefaultVariantStoreService implements Initializable, VariantStoreSe
     public List<GAVariant> getTopHarmfulVariants(String id, int n) {
         return null;
     }
+
+    @Override
+    public void stop() {
+        variantStore.stop();
+    }
 }

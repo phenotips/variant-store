@@ -42,4 +42,9 @@ public interface VariantStoreService
      * @return a list of GAVariants that are the most harmful
      */
     List<GAVariant> getTopHarmfulVariants(String id, int n);
+
+    /**
+     * Safely stop the VariantStore.
+     */
+    void stop();
 }
