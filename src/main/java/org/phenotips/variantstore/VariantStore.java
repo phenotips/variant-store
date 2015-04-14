@@ -88,12 +88,12 @@ public class VariantStore implements VariantStoreInterface
      * @return
      */
     @Override
-    public Map<String, List<GAVariant>> getIndividualGivenGene(String geneSymbol, List<String> variantEffects, Map<String, Double> alleleFrequencies) {
+    public Map<String, List<GAVariant>> getIndividualsWithGene(String geneSymbol, List<String> variantEffects, Map<String, Double> alleleFrequencies) {
         return null;
     }
 
     @Override
-    public Map<String, List<GAVariant>> getIndividualGivenVariant(String chr, int pos, String ref, String alt) {
+    public Map<String, List<GAVariant>> getIndividualsWithVariant(String chr, int pos, String ref, String alt) {
         return null;
     }
 

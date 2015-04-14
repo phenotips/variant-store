@@ -53,11 +53,19 @@ public interface VariantStoreInterface extends Service
      * @param alleleFrequencies
      * @return
      */
-    Map<String, List<GAVariant>> getIndividualGivenGene(String geneSymbol,
+    Map<String, List<GAVariant>> getIndividualsWithGene(String geneSymbol,
                                                      List<String> variantEffects,
                                                      Map<String, Double> alleleFrequencies);
 
-    Map<String, List<GAVariant>> getIndividualGivenVariant(String chr, int pos, String ref, String alt);
+    /**
+     * Get all the individuals that exhibit the given variant, as well as the variant itself.
+     * @param chr
+     * @param pos
+     * @param ref
+     * @param alt
+     * @return
+     */
+    Map<String, List<GAVariant>> getIndividualsWithVariant(String chr, int pos, String ref, String alt);
 
     /**
      * Get a list of all the individual IDs stored in the variant store.
