@@ -3,11 +3,14 @@ package org.phenotips.variantstore;
 import org.phenotips.variantstore.db.AbstractDatabaseController;
 import org.phenotips.variantstore.db.solr.SolrController;
 import org.phenotips.variantstore.input.InputManager;
+import org.phenotips.variantstore.input.tsv.ExomiserTSVManager;
 import org.phenotips.variantstore.input.vcf.VCFManager;
 import org.phenotips.variantstore.shared.VariantStoreException;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -51,7 +54,7 @@ public class VariantStore implements VariantStoreInterface
     public void init(Path path) throws VariantStoreException {
         this.path = path;
         db.init(this.path.resolve("db"));
-        inputManager.init(this.path.resolve("vcf"));
+        inputManager.init(this.path.resolve("tsv"));
     }
 
     public void stop() {
@@ -75,36 +78,22 @@ public class VariantStore implements VariantStoreInterface
 
     @Override
     public List<GAVariant> getTopHarmfullVariants(String id, int n) {
-        return null;
+        return new ArrayList<>();
     }
 
-    /**
-     * Get the individuals that have variants with the given gene symbol, exhibiting the given variant effects,
-     * and with the given allele frequencies. Sort the list of patients by descending variant harmfulness
-     *
-     * @param geneSymbol
-     * @param variantEffects
-     * @param alleleFrequencies
-     * @return
-     */
     @Override
     public Map<String, List<GAVariant>> getIndividualsWithGene(String geneSymbol, List<String> variantEffects, Map<String, Double> alleleFrequencies) {
-        return null;
+        return new HashMap<>();
     }
 
     @Override
     public Map<String, List<GAVariant>> getIndividualsWithVariant(String chr, int pos, String ref, String alt) {
-        return null;
+        return new HashMap<>();
     }
 
-    /**
-     * Get a list of all the individual IDs stored in the variant store.
-     *
-     * @return a list of individual IDs.
-     */
     @Override
     public List<String> getIndividuals() {
-        return null;
+        return new ArrayList<>();
     }
 
     public static void main(String[] args) {
@@ -112,7 +101,7 @@ public class VariantStore implements VariantStoreInterface
         VariantStore vs = null;
 
         vs = new VariantStore(
-                new VCFManager(),
+                new ExomiserTSVManager(),
                 new SolrController()
         );
 
@@ -128,7 +117,7 @@ public class VariantStore implements VariantStoreInterface
         String id = "P000001";
         try {
             logger.debug("Adding");
-            vs.addIndividual(id, true, Paths.get("/data/vcf/P0000210/P0000210-original.vcf")).get();
+            vs.addIndividual(id, true, Paths.get("/data/vcf/c4r/F0000009/F0000009.variants.tsv")).get();
             logger.debug("Added.");
             vs.removeIndividual(id).get();
             logger.debug("Removed.");

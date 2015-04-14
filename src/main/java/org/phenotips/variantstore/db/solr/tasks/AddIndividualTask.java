@@ -37,30 +37,29 @@ public class AddIndividualTask implements Callable<Object> {
 
             // we will be reusing the document to speed up inserts as per SolrJ docs.
             SolrInputDocument doc = new SolrInputDocument();
+            doc.setField("individual", iterator.getHeader().getIndividualId());
+
             doc.setField("chrom", variant.getReferenceName());
             doc.setField("pos", variant.getStart());
             doc.setField("ref", variant.getReferenceBases());
             doc.setField("alt", StringUtils.join(variant.getAlternateBases(), ","));
-            doc.setField("individual", iterator.getHeader().getIndividualId());
 
             if (iterator.getHeader().isPublic()) {
                 doc.setField("is_public", true);
             }
 
-            if (info.containsKey("AF")) {
-                doc.setField("AF", info.get("AF").get(0));
-            } else {
-                SolrQuery query = new SolrQuery();
-            }
-
             doc.setField("qual", info.get("QUAL").get(0));
-//            doc.setField("filter", info.get("FILTER").get(0));
-//            doc.setField("exomiser_variant_score", Double.valueOf(info.get("EXOMISER_VARIANT_SCORE").get(0)));
-//            doc.setField("exomiser_gene_pheno_score", info.get("EXOMISER_GENE_PHENO_SCORE").get(0));
-//            doc.setField("exomiser_gene", info.get("EXOMISER_GENE").get(0));
-//            doc.setField("exomiser_effect", info.get("EXOMISER_EFFECT").get(0));
-//            doc.setField("exomiser_gene_variant_score", info.get("EXOMISER_GENE_VARIANT_SCORE").get(0));
-//            doc.setField("exomiser_gene_combined_score", info.get("EXOMISER_GENE_COMBINED_SCORE").get(0));
+            doc.setField("filter", info.get("FILTER").get(0));
+
+            doc.setField("exomiser_variant_score", Double.valueOf(info.get("EXOMISER_VARIANT_SCORE").get(0)));
+            doc.setField("exomiser_gene_pheno_score", info.get("EXOMISER_GENE_PHENO_SCORE").get(0));
+            doc.setField("exomiser_gene_variant_score", info.get("EXOMISER_GENE_VARIANT_SCORE").get(0));
+            doc.setField("exomiser_gene_combined_score", info.get("EXOMISER_GENE_COMBINED_SCORE").get(0));
+            doc.setField("gene", info.get("GENE").get(0));
+            doc.setField("gene_effect", info.get("GENE_EFFECT").get(0));
+
+            doc.setField("exac_af", info.get("EXAC_AF").get(0));
+
 
             addDoc(doc);
         }
@@ -76,7 +75,7 @@ public class AddIndividualTask implements Callable<Object> {
             server.add(doc);
             doc.clear();
         } catch (SolrServerException | IOException e) {
-            throw new DatabaseException(String.format("Error adding variants to solr"), e);
+            throw new DatabaseException(String.format("Error adding variants to Solr"), e);
         }
     }
 }

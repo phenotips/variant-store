@@ -36,3 +36,5 @@ public enum ExomiserTSVColumn {
     EXOMISER_GENE_VARIANT_SCORE,
     EXOMISER_GENE_COMBINED_SCORE
 }
+
+

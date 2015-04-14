@@ -65,21 +65,20 @@
 
     <field name="is_public" type="bool" indexed="true" stored="true" required="false" default="false"/>
 
-    <field multiValued="true" name="individuals" type="string" indexed="true" stored="true" required="false" />
-
-    <!-- INDIVIDUAL-DEPENDANT FIELDS -->
-
     <field name="individual" type="string" indexed="true" stored="true" required="false" default="reference" />
 
     <field name="qual" type="string" indexed="false" stored="true" required="false" />
     <field name="filter" type="string" indexed="false" stored="true" required="false" />
 
-    <field name="exomiser_gene" type="string" indexed="true" stored="true" required="false" />
-    <field name="exomiser_effect" type="string" indexed="true" stored="true" required="false" />
     <field name="exomiser_variant_score" type="float" indexed="true" stored="true" required="false" />
     <field name="exomiser_gene_pheno_score" type="float" indexed="true" stored="true" required="false" />
     <field name="exomiser_gene_combined_score" type="float" indexed="true" stored="true" required="false" />
     <field name="exomiser_gene_variant_score" type="float" indexed="true" stored="true" required="false" />
+
+    <field name="gene" type="string" indexed="true" stored="true" required="false" />
+    <field name="gene_effect" type="string" indexed="true" stored="true" required="false" />
+
+    <field name="exac_af" type="string" indexed="true" stored="true" required="false" />
 
     <!-- TODO: add DP, DP4, SB, QD -->
     <!-- Ignore everyting else -->

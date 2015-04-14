@@ -85,6 +85,7 @@ public class VCFIterator extends AbstractVariantIterator {
         info.put("FILTER", new ArrayList<String>(context.getFilters()));
 
         if (context.hasAttribute("AF")) {
+            // handling ExAC VCF file
             info.put("AF", Collections.singletonList((String) context.getAttribute("AF")));
         }
 

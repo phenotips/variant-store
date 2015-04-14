@@ -21,31 +21,35 @@ import org.phenotips.variantstore.input.VariantHeader;
  */
 public class ExomiserTSVIterator extends AbstractVariantIterator {
     private Logger logger = Logger.getLogger(ExomiserTSVIterator.class);
-    private Reader reader;
-    private CSVParser csvParser;
-    private Iterator<CSVRecord> csvRecordIterator;
+    private CSVParser tsvParser;
+    private Iterator<CSVRecord> tsvRecordIterator;
 
-    public ExomiserTSVIterator(Path path, VariantHeader variantHeader) throws InputException {
+    public ExomiserTSVIterator(Path path, VariantHeader variantHeader) {
         super(path, variantHeader);
 
+        Reader reader = null;
         try {
-            this.reader = new FileReader(this.path.toString());
+            reader = new FileReader(this.path.toString());
         } catch (FileNotFoundException e) {
-            throw new InputException(String.format("Error when opening file %s", this.path), e);
+            logger.error(String.format("Error when opening file %s, this should NOT be happening", this.path), e);
         }
 
         try {
-            this.csvParser = CSVFormat.DEFAULT.parse(this.reader);
+            this.tsvParser = CSVFormat.TDF.parse(reader);
         } catch (IOException e) {
-            throw new InputException(String.format("Error when opening file %s", this.path), e);
+            logger.error(String.format("Error when opening file %s, this should NOT be happening", this.path), e);
         }
 
-        this.csvRecordIterator = csvParser.iterator();
+        this.tsvRecordIterator = tsvParser.iterator();
+        // skip first row >.>
+        if (this.hasNext()) {
+            tsvRecordIterator.next();
+        }
     }
 
     @Override
     public boolean hasNext() {
-        return this.csvRecordIterator.hasNext();
+        return this.tsvRecordIterator.hasNext();
     }
 
     @Override
@@ -58,8 +62,10 @@ public class ExomiserTSVIterator extends AbstractVariantIterator {
 
         Map<String, List<String>> info = new HashMap<>();
 
+        double exacFreq = (double) 0;
+
         int i = 0;
-        for (String field : csvRecordIterator.next()) {
+        for (String field : tsvRecordIterator.next()) {
             ExomiserTSVColumn column = ExomiserTSVColumn.values()[i++];
 
             switch (column) {
@@ -76,28 +82,40 @@ public class ExomiserTSVIterator extends AbstractVariantIterator {
                     variant.setAlternateBases(Arrays.asList(field.split(",")));
                     break;
                 case QUAL:
-                    info.put("QUAL", Arrays.asList(field));
+                    info.put("QUAL", Collections.singletonList(field));
                     break;
                 case FILTER:
-                    info.put("FILTER", Arrays.asList(field));
+                    info.put("FILTER", Collections.singletonList(field));
                     break;
                 case EXOMISER_VARIANT_SCORE:
-                    info.put("EXOMISER_VARIANT_SCORE", Arrays.asList(field));
+                    info.put("EXOMISER_VARIANT_SCORE", Collections.singletonList(field));
                     break;
                 case EXOMISER_GENE_PHENO_SCORE:
-                    info.put("EXOMISER_GENE_PHENO_SCORE", Arrays.asList(field));
-                    break;
-                case EXOMISER_GENE:
-                    info.put("EXOMISER_GENE", Arrays.asList(field));
+                    info.put("EXOMISER_GENE_PHENO_SCORE", Collections.singletonList(field));
                     break;
                 case EXOMISER_GENE_COMBINED_SCORE:
-                    info.put("EXOMISER_GENE_COMBINED_SCORE", Arrays.asList(field));
+                    info.put("EXOMISER_GENE_COMBINED_SCORE", Collections.singletonList(field));
                     break;
                 case EXOMISER_GENE_VARIANT_SCORE:
-                    info.put("EXOMISER_GENE_VARIANT_SCORE", Arrays.asList(field));
+                    info.put("EXOMISER_GENE_VARIANT_SCORE", Collections.singletonList(field));
+                    break;
+                case EXOMISER_GENE:
+                    info.put("GENE", Collections.singletonList(field));
                     break;
                 case FUNCTIONAL_CLASS:
-                    info.put("EFFECT", Arrays.asList(field));
+                    info.put("GENE_EFFECT", Collections.singletonList(field));
+                    break;
+                case EXAC_AFR_FREQ:
+                case EXAC_AMR_FREQ:
+                case EXAC_EAS_FREQ:
+                case EXAC_FIN_FREQ:
+                case EXAC_NFE_FREQ:
+                case EXAC_SAS_FREQ:
+                case EXAC_OTH_FREQ:
+                    if (!".".equals(field)) {
+                        exacFreq = Math.max(exacFreq, Double.parseDouble(field));
+                    }
+                    break;
                 case GENOTYPE:
                 case COVERAGE:
                 case HGVS:
@@ -110,17 +128,12 @@ public class ExomiserTSVIterator extends AbstractVariantIterator {
                 case DBSNP_FREQUENCY:
                 case EVS_EA_FREQUENCY:
                 case EVS_AA_FREQUENCY:
-                case EXAC_AFR_FREQ:
-                case EXAC_AMR_FREQ:
-                case EXAC_EAS_FREQ:
-                case EXAC_FIN_FREQ:
-                case EXAC_NFE_FREQ:
-                case EXAC_SAS_FREQ:
-                case EXAC_OTH_FREQ:
                 default:
                     break;
             }
         }
+
+        info.put("EXAC_AF", Collections.singletonList(String.valueOf(exacFreq)));
 
         variant.setEnd(variant.getStart() + variant.getReferenceBases().length());
         variant.setInfo(info);
@@ -128,7 +141,7 @@ public class ExomiserTSVIterator extends AbstractVariantIterator {
         if (!this.hasNext()) {
             // Cleanup
             try {
-                csvParser.close();
+                tsvParser.close();
             } catch (IOException e) {
                 logger.error(String.format("Error when closing file %s", this.path), e);
             }
