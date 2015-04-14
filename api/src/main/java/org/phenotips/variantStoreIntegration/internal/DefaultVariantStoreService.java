@@ -30,6 +30,7 @@ import org.xwiki.environment.Environment;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
@@ -37,6 +38,9 @@ import java.util.concurrent.Future;
 import javax.inject.Inject;
 
 import org.ga4gh.GAVariant;
+
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 
 /**
  * @version $Id: 1f3bc36ff53b79ba95f90d7f1eaa24fa48d6bf4a $
@@ -50,35 +54,38 @@ public class DefaultVariantStoreService implements Initializable, VariantStoreSe
     private VariantStore variantStore;
 
     @Override
-    public void initialize() throws InitializationException {
-        variantStore = new VariantStore();
+    public void initialize() throws InitializationException
+    {
+        this.variantStore = new VariantStore();
 
         try {
-            variantStore.init(Paths.get(this.env.getPermanentDirectory().getPath()).resolve("variant-store"));
+            this.variantStore.init(Paths.get(this.env.getPermanentDirectory().getPath()).resolve("variant-store"));
         } catch (VariantStoreException e) {
             throw new InitializationException("Error setting up Variant Store", e);
         }
     }
 
     @Override
-    public void stop() {
-        variantStore.stop();
+    public void stop()
+    {
+        this.variantStore.stop();
     }
 
     /**
-     * Add an individual to the variant store. This is an asynchronous operation.
-     * In case of application failure, the individual would have to be remove and re-inserted.
+     * Add an individual to the variant store. This is an asynchronous operation. In case of application failure, the
+     * individual would have to be remove and re-inserted.
      *
-     * @param id       a unique ID that represents the individual.
-     * @param isPublic whether to include this individual's data in aggregate queries.
-     *                 This does not prevent the data to be queried by the individual's ID.
-     * @param file     the path to the file on the local filesystem where the data is stored.
-     * @return a Future that completes when the individual is fully inserted into the variant store,
-     * and is ready to be queried.
+     * @param id a unique ID that represents the individual.
+     * @param isPublic whether to include this individual's data in aggregate queries. This does not prevent the data to
+     *            be queried by the individual's ID.
+     * @param file the path to the file on the local filesystem where the data is stored.
+     * @return a Future that completes when the individual is fully inserted into the variant store, and is ready to be
+     *         queried.
      */
     @Override
-    public Future addIndividual(String id, boolean isPublic, Path file) throws VariantStoreException {
-        return variantStore.addIndividual(id, isPublic, file);
+    public Future addIndividual(String id, boolean isPublic, Path file) throws VariantStoreException
+    {
+        return this.variantStore.addIndividual(id, isPublic, file);
     }
 
     /**
@@ -88,25 +95,33 @@ public class DefaultVariantStoreService implements Initializable, VariantStoreSe
      * @return a Future that completes when the individual is fully removed from the variant store.
      */
     @Override
-    public Future removeIndividual(String id) throws VariantStoreException {
-        return variantStore.removeIndividual(id);
+    public Future removeIndividual(String id) throws VariantStoreException
+    {
+        return this.variantStore.removeIndividual(id);
     }
 
     /**
      * Get the top n most harmful variants for a specified individual.
      *
      * @param id the individuals ID
-     * @param n  the number of variants to return
+     * @param n the number of variants to return
      * @return a List of harmful variants for the specified individual
      */
     @Override
-    public List<GAVariant> getTopHarmfullVariants(String id, int n) {
-        return variantStore.getTopHarmfullVariants(id, n);
+    public JSONArray getTopHarmfullVariants(String id, int n)
+    {
+        List<GAVariant> rawVs = this.variantStore.getTopHarmfullVariants(id, n);
+        JSONArray variants = new JSONArray();
+        for (GAVariant rawV : rawVs) {
+            JSONObject v = this.variantToJSON(rawV);
+            variants.add(v);
+        }
+        return variants;
     }
 
     /**
-     * Get the individuals that have variants with the given gene symbol, exhibiting the given variant effects,
-     * and with the given allele frequencies. Sort the list of patients by descending variant harmfulness
+     * Get the individuals that have variants with the given gene symbol, exhibiting the given variant effects, and with
+     * the given allele frequencies. Sort the list of patients by descending variant harmfulness
      *
      * @param geneSymbol
      * @param variantEffects
@@ -114,8 +129,36 @@ public class DefaultVariantStoreService implements Initializable, VariantStoreSe
      * @return
      */
     @Override
-    public Map<String, List<GAVariant>> getIndividualsWithGene(String geneSymbol, List<String> variantEffects, Map<String, Double> alleleFrequencies) {
-        return variantStore.getIndividualsWithGene(geneSymbol, variantEffects, alleleFrequencies);
+    public Map<String, JSONArray> getIndividualsWithGene(String geneSymbol, List<String> variantEffects,
+        Map<String, Double> alleleFrequencies)
+    {
+        Map<String, List<GAVariant>> raw =
+            this.variantStore.getIndividualsWithGene(geneSymbol, variantEffects, alleleFrequencies);
+
+        Map<String, JSONArray> result = new HashMap<String, JSONArray>();
+        for (String id : raw.keySet()) {
+            JSONArray variants = new JSONArray();
+            for (GAVariant rawV : raw.get(id)) {
+                JSONObject v = this.variantToJSON(rawV);
+                variants.add(v);
+            }
+            result.put(id, variants);
+        }
+        return result;
+    }
+
+    private JSONObject variantToJSON(GAVariant rawV)
+    {
+        JSONObject v = new JSONObject();
+        v.put("pos", rawV.getStart());
+        v.put("ref", rawV.getReferenceBases());
+        v.put("score", Double.parseDouble(rawV.getInfo().get("EXOMISER_VARIANT_SCORE").get(0)));
+        v.put("chr", rawV.getReferenceName());
+        v.put("effect", rawV.getInfo().get("GENE_EFFECT").get(0));
+        // TODO:fix this
+        v.put("alt", rawV.getAlternateBases().get(0));
+        v.put("geneSymbol", rawV.getInfo().get("GENE").get(0));
+        return v;
     }
 
     /**
@@ -128,8 +171,19 @@ public class DefaultVariantStoreService implements Initializable, VariantStoreSe
      * @return
      */
     @Override
-    public Map<String, List<GAVariant>> getIndividualsWithVariant(String chr, int pos, String ref, String alt) {
-        return variantStore.getIndividualsWithVariant(chr, pos, ref, alt);
+    public Map<String, JSONArray> getIndividualsWithVariant(String chr, int pos, String ref, String alt)
+    {
+        Map<String, List<GAVariant>> raw = this.variantStore.getIndividualsWithVariant(chr, pos, ref, alt);
+        Map<String, JSONArray> result = new HashMap<String, JSONArray>();
+        for (String id : raw.keySet()) {
+            JSONArray variants = new JSONArray();
+            for (GAVariant rawV : raw.get(id)) {
+                JSONObject v = this.variantToJSON(rawV);
+                variants.add(v);
+            }
+            result.put(id, variants);
+        }
+        return result;
     }
 
     /**
@@ -138,9 +192,9 @@ public class DefaultVariantStoreService implements Initializable, VariantStoreSe
      * @return a list of individual IDs.
      */
     @Override
-    public List<String> getIndividuals() {
-        return variantStore.getIndividuals();
+    public List<String> getIndividuals()
+    {
+        return this.variantStore.getIndividuals();
     }
-
 
 }

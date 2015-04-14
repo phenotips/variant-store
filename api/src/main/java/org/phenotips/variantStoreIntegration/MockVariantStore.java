@@ -46,7 +46,8 @@ public class MockVariantStore implements VariantStoreInterface
     }
 
     @Override
-    public void init(Path path) throws VariantStoreException {
+    public void init(Path path) throws VariantStoreException
+    {
 
     }
 
@@ -83,22 +84,29 @@ public class MockVariantStore implements VariantStoreInterface
     }
 
     @Override
-    public List<GAVariant> getTopHarmfullVariants(String s, int i) {
+    public List<GAVariant> getTopHarmfullVariants(String s, int i)
+    {
         return null;
     }
 
     @Override
-    public Map<String, List<GAVariant>> getIndividualGivenGene(String s, List<String> list, Map<String, Double> map) {
+    public List<String> getIndividuals()
+    {
         return null;
     }
 
     @Override
-    public Map<String, List<GAVariant>> getIndividualGivenVariant(String s, int i, String s1, String s2) {
+    public Map<String, List<GAVariant>> getIndividualsWithGene(String geneSymbol, List<String> variantEffects,
+        Map<String, Double> alleleFrequencies)
+    {
+        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public List<String> getIndividuals() {
+    public Map<String, List<GAVariant>> getIndividualsWithVariant(String chr, int pos, String ref, String alt)
+    {
+        // TODO Auto-generated method stub
         return null;
     }
 
