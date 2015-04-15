@@ -128,7 +128,7 @@ public class VariantStore implements VariantStoreInterface
                         return FileVisitResult.CONTINUE;
                     }
                     String id = file.getFileName().toString();
-                    id = StringUtils.removeEnd(id, ".variant.tsv");
+                    id = StringUtils.removeEnd(id, ".variants.tsv");
                     ids.add(id);
                     return FileVisitResult.CONTINUE;
                 }
@@ -137,14 +137,16 @@ public class VariantStore implements VariantStoreInterface
             logger.error("Error getting all individuals", e);
         }
 
+        logger.debug(ids);
+
         try {
-            for (String id: ids) {
-                Path path = Paths.get("/data/vcf/c4r/vcfs/" + id + ".variants.tsv");
+            for (String id : ids) {
+                if (true) continue;
+                Path path = Paths.get("/data/vcf/c4r/tsvs/" + id + ".variants.tsv");
                 logger.debug("Adding " + path);
                 vs.addIndividual(id, true, path).get();
                 logger.debug("Added.");
             }
-
 
 //            vs.removeIndividual(id).get();
 //            logger.debug("Removed.");
@@ -154,12 +156,18 @@ public class VariantStore implements VariantStoreInterface
             logger.error("Shouldn't happen", e);
         }
 
-        vs.getIndividualsWithVariant("chr1", 246859033, "AGTGT", "AGTGTGT");
+        Map<String, List<GAVariant>> map;
+
+        logger.debug(vs.getIndividuals());
+        map = vs.getIndividualsWithVariant("chr1", 246859033, "AGTGT", "AGTGTGT");
+        logger.debug("MAP: " + map);
         Map<String, Double> af = new HashMap<>();
         af.put("EXAC", (double) 0.1);
-        vs.getIndividualsWithGene("CNST", Arrays.asList("MISSENSE", "INTERGENIC"), af);
+        map = vs.getIndividualsWithGene("CNST", Arrays.asList("MISSENSE", "INTERGENIC"), af);
 
-        vs.stop();
+
+
+//        vs.stop();
         logger.debug("Stopped");
     }
 

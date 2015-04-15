@@ -90,8 +90,8 @@ public class ExomiserTSVManager implements InputManager {
                     if (attrs.isDirectory()) {
                         return FileVisitResult.CONTINUE;
                     }
-                    String id = file.getFileName().toString();
-                    id = StringUtils.removeEnd(id, suffix);
+                    String filename = file.getFileName().toString();
+                    String id = StringUtils.removeEnd(filename, suffix);
                     list.add(id);
                     return FileVisitResult.CONTINUE;
                 }
