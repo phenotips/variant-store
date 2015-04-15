@@ -1,6 +1,8 @@
 package org.phenotips.variantstore.input;
 
 import java.nio.file.Path;
+import java.util.List;
+
 import org.phenotips.variantstore.shared.Service;
 import org.phenotips.variantstore.shared.VariantStoreException;
 
@@ -19,4 +21,10 @@ public interface InputManager extends Service {
      * @return
      */
     public AbstractVariantIterator getIteratorForIndividual(String id, boolean isPublic);
+
+    /**
+     * Get All individuals stored in the variant store.
+     * @return a list of individual IDs
+     */
+    List<String> getAllIndividuals();
 }

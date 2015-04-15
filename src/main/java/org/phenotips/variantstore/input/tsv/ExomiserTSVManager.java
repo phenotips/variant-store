@@ -1,9 +1,10 @@
 package org.phenotips.variantstore.input.tsv;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.phenotips.variantstore.input.AbstractVariantIterator;
 import org.phenotips.variantstore.input.InputException;
@@ -11,6 +12,7 @@ import org.phenotips.variantstore.input.InputManager;
 import org.phenotips.variantstore.input.VariantHeader;
 import org.phenotips.variantstore.shared.VariantStoreException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 /**
@@ -19,6 +21,8 @@ import org.apache.log4j.Logger;
 public class ExomiserTSVManager implements InputManager {
     private Logger logger = Logger.getLogger(ExomiserTSVManager.class);
     private Path path;
+
+    private static String suffix = ".variants.tsv";
 
     @Override
     public void init(Path path) throws VariantStoreException {
@@ -51,7 +55,7 @@ public class ExomiserTSVManager implements InputManager {
 
     @Override
     public Path getIndividual(String id) {
-        return this.path.resolve(id + ".variants.tsv");
+        return this.path.resolve(id + suffix);
     }
 
     @Override
@@ -73,5 +77,29 @@ public class ExomiserTSVManager implements InputManager {
     @Override
     public AbstractVariantIterator getIteratorForIndividual(String id, boolean isPublic) {
         return new ExomiserTSVIterator(this.getIndividual(id), new VariantHeader(id, isPublic));
+    }
+
+    @Override
+    public List<String> getAllIndividuals() {
+        final List<String> list = new ArrayList<>();
+
+        try {
+            Files.walkFileTree(this.path, new SimpleFileVisitor<Path>() {
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    if (attrs.isDirectory()) {
+                        return FileVisitResult.CONTINUE;
+                    }
+                    String id = file.getFileName().toString();
+                    id = StringUtils.removeEnd(id, suffix);
+                    list.add(id);
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+        } catch (IOException e) {
+            logger.error("Error getting all individuals", e);
+        }
+
+        return list;
     }
 }

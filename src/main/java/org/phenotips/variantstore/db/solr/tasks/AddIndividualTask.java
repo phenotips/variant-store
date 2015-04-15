@@ -42,7 +42,7 @@ public class AddIndividualTask implements Callable<Object> {
             doc.setField("chrom", variant.getReferenceName());
             doc.setField("pos", variant.getStart());
             doc.setField("ref", variant.getReferenceBases());
-            doc.setField("alt", StringUtils.join(variant.getAlternateBases(), ","));
+            doc.setField("alts", variant.getAlternateBases());
 
             if (iterator.getHeader().isPublic()) {
                 doc.setField("is_public", true);
@@ -58,7 +58,9 @@ public class AddIndividualTask implements Callable<Object> {
             doc.setField("gene", info.get("GENE").get(0));
             doc.setField("gene_effect", info.get("GENE_EFFECT").get(0));
 
-            doc.setField("exac_af", info.get("EXAC_AF").get(0));
+            if (info.containsKey("EXAC_AF")) {
+                doc.setField("exac_af", info.get("EXAC_AF").get(0));
+            }
 
 
             addDoc(doc);

@@ -133,7 +133,9 @@ public class ExomiserTSVIterator extends AbstractVariantIterator {
             }
         }
 
-        info.put("EXAC_AF", Collections.singletonList(String.valueOf(exacFreq)));
+        if (exacFreq != 0) {
+            info.put("EXAC_AF", Collections.singletonList(String.valueOf(exacFreq)));
+        }
 
         variant.setEnd(variant.getStart() + variant.getReferenceBases().length());
         variant.setInfo(info);

@@ -1,9 +1,12 @@
 package org.phenotips.variantstore.input.vcf;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.phenotips.variantstore.input.AbstractVariantIterator;
 import org.phenotips.variantstore.input.InputException;
@@ -19,6 +22,8 @@ import org.phenotips.variantstore.shared.VariantStoreException;
 public class VCFManager implements InputManager {
     Logger logger = Logger.getLogger(VCFManager.class);
     private Path path;
+
+    private static String suffix = ".vcf";
 
     public void init(Path path) throws InputException {
         this.path = path;
@@ -51,7 +56,7 @@ public class VCFManager implements InputManager {
     }
 
     public Path getIndividual(String id) {
-        return this.path.resolve(id + ".vcf");
+        return this.path.resolve(id + suffix);
     }
 
     public void removeIndividual(String id) throws InputException {
@@ -74,4 +79,27 @@ public class VCFManager implements InputManager {
         return new VCFIterator(this.getIndividual(id), new VariantHeader(id, true));
     }
 
+    @Override
+    public List<String> getAllIndividuals() {
+        final List<String> list = new ArrayList<>();
+
+        try {
+            Files.walkFileTree(this.path, new SimpleFileVisitor<Path>() {
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    if (attrs.isDirectory()) {
+                        return FileVisitResult.CONTINUE;
+                    }
+                    String id = file.getFileName().toString();
+                    id = StringUtils.removeEnd(id, suffix);
+                    list.add(id);
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+        } catch (IOException e) {
+            logger.error("Error getting all individuals");
+        }
+
+        return list;
+    }
 }
