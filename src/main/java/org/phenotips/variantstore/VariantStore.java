@@ -83,7 +83,10 @@ public class VariantStore implements VariantStoreInterface
         Map<String, List<GAVariant>> map = new HashMap<>();
 
         for (String id: this.getIndividuals()) {
-            map.put(id, this.db.getTopHarmfulWithGene(id, 5, geneSymbol, variantEffects, alleleFrequencies));
+            List<GAVariant> list = this.db.getTopHarmfulWithGene(id, 5, geneSymbol, variantEffects, alleleFrequencies);
+            if (list.size() > 0) {
+                map.put(id, list);
+            }
         }
 
         return map;
