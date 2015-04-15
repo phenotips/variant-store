@@ -263,17 +263,17 @@ public class SolrController extends AbstractDatabaseController {
 
         Map<String, List<String>> info = new HashMap<>();
         info.put("QUAL", Collections.singletonList(doc.get("qual").toString()));
-        info.put("filter", Collections.singletonList(doc.get("filter").toString()));
-        info.put("exomiser_variant_score", Collections.singletonList(doc.get("exomiser_variant_score").toString()));
-        info.put("exomiser_gene_pheno_score", Collections.singletonList(doc.get("exomiser_gene_pheno_score").toString()));
-        info.put("exomiser_gene_variant_score", Collections.singletonList(doc.get("exomiser_gene_variant_score").toString()));
-        info.put("exomiser_gene_combined_score", Collections.singletonList(doc.get("exomiser_gene_combined_score").toString()));
+        info.put("FILTER", Collections.singletonList(doc.get("filter").toString()));
+        info.put("EXOMISER_VARIANT_SCORE", Collections.singletonList(doc.get("exomiser_variant_score").toString()));
+        info.put("EXOMISER_GENE_PHENO_SCORE", Collections.singletonList(doc.get("exomiser_gene_pheno_score").toString()));
+        info.put("EXOMISER_GENE_VARIANT_SCORE", Collections.singletonList(doc.get("exomiser_gene_variant_score").toString()));
+        info.put("EXOMISER_GENE_COMBINED_SCORE", Collections.singletonList(doc.get("exomiser_gene_combined_score").toString()));
 
-        info.put("gene", Collections.singletonList(doc.get("gene").toString()));
-        info.put("gene_effect", Collections.singletonList(doc.get("gene_effect").toString()));
+        info.put("GENE", Collections.singletonList(doc.get("gene").toString()));
+        info.put("GENE_EFFECT", Collections.singletonList(doc.get("gene_effect").toString()));
 
         if (doc.containsKey("exac_af")) {
-            info.put("exac_af", Collections.singletonList(doc.get("exac_af").toString()));
+            info.put("EXAC_AF", Collections.singletonList(doc.get("exac_af").toString()));
         }
 
         variant.setInfo(info);
