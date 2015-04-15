@@ -150,12 +150,12 @@ public class DefaultVariantStoreService implements Initializable, VariantStoreSe
             result.put(id, variants);
         }
         return result;
-    }
+        }
 
     private JSONObject variantToJSON(GAVariant rawV)
     {
         JSONObject v = new JSONObject();
-        v.put("pos", rawV.getStart());
+        v.put("position", rawV.getStart());
         v.put("ref", rawV.getReferenceBases());
         v.put("score", Double.parseDouble(rawV.getInfo().get("EXOMISER_VARIANT_SCORE").get(0)));
         v.put("chr", rawV.getReferenceName());
