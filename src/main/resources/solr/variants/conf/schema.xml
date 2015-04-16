@@ -67,8 +67,8 @@
 
     <field name="individual" type="string" indexed="true" stored="true" required="false" default="reference" />
 
-    <field name="qual" type="string" indexed="false" stored="true" required="false" />
-    <field name="filter" type="string" indexed="false" stored="true" required="false" />
+    <field name="qual" type="string" indexed="true" stored="true" required="false" />
+    <field name="filter" type="string" indexed="true" stored="true" required="false" />
 
     <field name="exomiser_variant_score" type="float" indexed="true" stored="true" required="false" />
     <field name="exomiser_gene_pheno_score" type="float" indexed="true" stored="true" required="false" />

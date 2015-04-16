@@ -70,6 +70,7 @@ public class VariantStore implements VariantStoreInterface
 
     @Override
     public Future removeIndividual(String id) throws VariantStoreException {
+        this.inputManager.removeIndividual(id);
         return this.db.removeIndividual(id);
     }
 
@@ -142,17 +143,22 @@ public class VariantStore implements VariantStoreInterface
 
         logger.debug(ids);
 
+        int i = 0;
         try {
             for (String id : ids) {
-                if (true) continue;
-                Path path = Paths.get("/data/vcf/c4r/tsvs/" + id + ".variants.tsv");
-                logger.debug("Adding " + path);
-                vs.addIndividual(id, true, path).get();
-                logger.debug("Added.");
+                if (true) break;
+
+//                Path path = Paths.get("/data/vcf/c4r/tsvs/" + id + ".variants.tsv");
+//                logger.debug("Adding " + path);
+//                vs.addIndividual(id, true, path).get();
+//                logger.debug("Added.");
+                if (i % 2 == 0) {
+                    vs.removeIndividual(id).get();
+                    logger.debug("Removed.");
+                }
+                i++;
             }
 
-//            vs.removeIndividual(id).get();
-//            logger.debug("Removed.");
         } catch (VariantStoreException | ExecutionException e) {
             logger.error("ERROR!!", e);
         } catch (InterruptedException e) {
@@ -162,15 +168,17 @@ public class VariantStore implements VariantStoreInterface
         Map<String, List<GAVariant>> map;
 
         logger.debug(vs.getIndividuals());
-        map = vs.getIndividualsWithVariant("chr1", 246859033, "AGTGT", "AGTGTGT");
+        map = vs.getIndividualsWithVariant("chr17", 42949808, "G", "A");
         logger.debug("MAP: " + map);
         Map<String, Double> af = new HashMap<>();
         af.put("EXAC", (double) 0.1);
-        map = vs.getIndividualsWithGene("CNST", Arrays.asList("MISSENSE", "INTERGENIC"), af);
+        map = vs.getIndividualsWithGene("EFTUD2", Arrays.asList("SPLICING"), af);
+        logger.debug("Individuals w Genes: " + map);
+        logger.debug("Total individuals: " + vs.getIndividuals().size());
 
 
 
-//        vs.stop();
+        vs.stop();
         logger.debug("Stopped");
     }
 
