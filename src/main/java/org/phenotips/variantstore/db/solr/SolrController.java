@@ -99,7 +99,7 @@ public class SolrController extends AbstractDatabaseController {
 
         logger.debug(String.format("Searching for id:%s n:%s", id, n));
 
-        String queryString = String.format("individual:%s", ClientUtils.escapeQueryChars(id));
+        String queryString = String.format("filter:PASS AND individual:%s", ClientUtils.escapeQueryChars(id));
 
         logger.debug("Query: " + queryString);
 
@@ -149,7 +149,7 @@ public class SolrController extends AbstractDatabaseController {
                 ClientUtils.escapeQueryChars(String.valueOf(alleleFrequencies.get("EXAC")))
         );
 
-        String queryString = String.format("individual:%s AND gene:%s AND (%s) AND (%s)",
+        String queryString = String.format("filter:PASS AND individual:%s AND gene:%s AND (%s) AND (%s)",
                 ClientUtils.escapeQueryChars(id),
                 ClientUtils.escapeQueryChars(gene),
                 effectQuery,
