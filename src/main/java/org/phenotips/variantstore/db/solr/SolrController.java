@@ -206,9 +206,9 @@ public class SolrController extends AbstractDatabaseController {
                 ClientUtils.escapeQueryChars(String.valueOf(alleleFrequencies.get("EXAC")))
         );
 
-        String queryString = String.format("filter:PASS AND gene:%s AND (%s)",// AND (%s)",
+        String queryString = String.format("filter:PASS AND gene:%s AND (%s) AND (%s)",
                 ClientUtils.escapeQueryChars(gene),
-//                effectQuery,
+                effectQuery,
                 exacQuery
         );
 
