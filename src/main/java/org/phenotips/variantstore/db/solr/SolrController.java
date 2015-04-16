@@ -13,6 +13,9 @@ import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
+import org.apache.solr.client.solrj.response.Group;
+import org.apache.solr.client.solrj.response.GroupCommand;
+import org.apache.solr.client.solrj.response.GroupResponse;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrDocument;
@@ -112,7 +115,7 @@ public class SolrController extends AbstractDatabaseController {
 
         try {
             resp = server.query(q);
-            list = appendDocsToList(resp.getResults(), list);
+            list = appendDocs(resp.getResults(), list);
         } catch (SolrServerException e) {
             logger.error("Error getting individuals ", e);
         }
@@ -122,7 +125,6 @@ public class SolrController extends AbstractDatabaseController {
 
     @Override
     public List<GAVariant> getTopHarmfulWithGene(String id, int n, String gene, List<String> variantEffects, Map<String, Double> alleleFrequencies) {
-        // TODO: expose it
         List<GAVariant> list = new ArrayList<>();
 
         if (id == null || "".equals(id)
@@ -167,12 +169,70 @@ public class SolrController extends AbstractDatabaseController {
 
         try {
             resp = server.query(q);
-            list = appendDocsToList(resp.getResults(), list);
+            list = appendDocs(resp.getResults(), list);
         } catch (SolrServerException e) {
             logger.error("Error getting individuals with variant", e);
         }
 
         return list;
+    }
+
+    @Override
+    public Map<String, List<GAVariant>> getIndividualsWithGene(String gene,
+                                                               List<String> variantEffects,
+                                                               Map<String, Double> alleleFrequencies,
+                                                               int n) {
+        Map<String, List<GAVariant>> map = new HashMap<>();
+
+        if (gene == null || "".equals(gene)
+                || variantEffects == null || variantEffects.size() == 0
+                || alleleFrequencies == null || alleleFrequencies.size() == 0) {
+            return map;
+        }
+
+        logger.debug(String.format("Searching for gene:%s effects:%s af:%s", gene, variantEffects, alleleFrequencies));
+
+        /** Build Query String **/
+
+        String effectQuery = "";
+        for (String effect: variantEffects) {
+            effectQuery += "gene_effect:" + ClientUtils.escapeQueryChars(effect) + " OR ";
+        }
+        // Strip final ' OR '
+        effectQuery = effectQuery.substring(0, effectQuery.length() - 4);
+
+        // Find ExAC AF under the specified frequency, or where ExAC is null.
+        String exacQuery = String.format("(-exac_af:[* TO *] AND *:*) OR exac_af:[0 TO %s]",
+                ClientUtils.escapeQueryChars(String.valueOf(alleleFrequencies.get("EXAC")))
+        );
+
+        String queryString = String.format("filter:PASS AND gene:%s AND (%s)",// AND (%s)",
+                ClientUtils.escapeQueryChars(gene),
+//                effectQuery,
+                exacQuery
+        );
+
+        logger.debug("Query: " + queryString);
+
+        SolrQuery q = new SolrQuery()
+                .setQuery(queryString)
+                .addSort("exomiser_variant_score", SolrQuery.ORDER.desc);
+
+        q.setRows(n);
+        q.set("group", true);
+        q.set("group.field", "individual");
+        q.set("group.limit", 5);
+
+        QueryResponse resp = null;
+
+        try {
+            resp = server.query(q);
+            map = appendDocs(resp.getGroupResponse(), map);
+        } catch (SolrServerException e) {
+            logger.error("Error getting individuals with variant", e);
+        }
+
+        return map;
     }
 
     @Override
@@ -186,11 +246,11 @@ public class SolrController extends AbstractDatabaseController {
 
         logger.debug(String.format("Searching for %s:%s %s->%s", chr, pos, ref, alt));
         String queryString = String.format("chrom:%s AND ref:%s AND pos:%s AND alts:%s",
-                        ClientUtils.escapeQueryChars(chr),
-                        ClientUtils.escapeQueryChars(ref),
-                        ClientUtils.escapeQueryChars(String.valueOf(pos)),
-                        ClientUtils.escapeQueryChars(alt)
-                );
+                ClientUtils.escapeQueryChars(chr),
+                ClientUtils.escapeQueryChars(ref),
+                ClientUtils.escapeQueryChars(String.valueOf(pos)),
+                ClientUtils.escapeQueryChars(alt)
+        );
 
         logger.debug("Query: " + queryString);
 
@@ -209,7 +269,7 @@ public class SolrController extends AbstractDatabaseController {
                 q.set(CursorMarkParams.CURSOR_MARK_PARAM, cursor);
 
                 resp = server.query(q);
-                map = appendDocsToMap(resp.getResults(), map);
+                map = appendDocs(resp.getResults(), map);
 
                 oldCursor = cursor;
                 cursor = resp.getNextCursorMark();
@@ -222,7 +282,23 @@ public class SolrController extends AbstractDatabaseController {
         return map;
     }
 
-    private Map<String, List<GAVariant>> appendDocsToMap(SolrDocumentList results, Map<String, List<GAVariant>> map) {
+    private Map<String, List<GAVariant>> appendDocs(GroupResponse groupResponse, Map<String, List<GAVariant>> map) {
+        GroupCommand groupCommand = groupResponse.getValues().get(0);
+
+        // no matches, don't do any work.
+        if (groupCommand.getMatches() <= 0) {
+            return map;
+        }
+
+        for (Group group : groupCommand.getValues()) {
+            map.put(group.getGroupValue(), appendDocs(group.getResult(), new ArrayList<GAVariant>()));
+        }
+
+        return map;
+    }
+
+
+    private Map<String, List<GAVariant>> appendDocs(SolrDocumentList results, Map<String, List<GAVariant>> map) {
 
         for (SolrDocument doc : results) {
             String individual = (String) doc.get("individual");
@@ -241,7 +317,7 @@ public class SolrController extends AbstractDatabaseController {
         return map;
     }
 
-    private List<GAVariant> appendDocsToList(SolrDocumentList results, List<GAVariant> list) {
+    private List<GAVariant> appendDocs(SolrDocumentList results, List<GAVariant> list) {
         for (SolrDocument doc : results) {
             GAVariant variant = variantFromDoc(doc);
 

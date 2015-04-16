@@ -81,16 +81,7 @@ public class VariantStore implements VariantStoreInterface
 
     @Override
     public Map<String, List<GAVariant>> getIndividualsWithGene(String geneSymbol, List<String> variantEffects, Map<String, Double> alleleFrequencies) {
-        Map<String, List<GAVariant>> map = new HashMap<>();
-
-        for (String id: this.getIndividuals()) {
-            List<GAVariant> list = this.db.getTopHarmfulWithGene(id, 5, geneSymbol, variantEffects, alleleFrequencies);
-            if (list.size() > 0) {
-                map.put(id, list);
-            }
-        }
-
-        return map;
+        return this.db.getIndividualsWithGene(geneSymbol, variantEffects, alleleFrequencies, 5);
     }
 
     @Override
@@ -121,58 +112,14 @@ public class VariantStore implements VariantStoreInterface
 
         logger.debug("Started");
 
-        final List<String> ids = new ArrayList<>();
-
-        try {
-            Files.walkFileTree(Paths.get("/data/vcf/c4r/tsvs/"), new SimpleFileVisitor<Path>()
-            {
-                @Override
-                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                    if (attrs.isDirectory()) {
-                        return FileVisitResult.CONTINUE;
-                    }
-                    String id = file.getFileName().toString();
-                    id = StringUtils.removeEnd(id, ".variants.tsv");
-                    ids.add(id);
-                    return FileVisitResult.CONTINUE;
-                }
-            });
-        } catch (IOException e) {
-            logger.error("Error getting all individuals", e);
-        }
-
-        logger.debug(ids);
-
-        int i = 0;
-        try {
-            for (String id : ids) {
-                if (true) break;
-
-//                Path path = Paths.get("/data/vcf/c4r/tsvs/" + id + ".variants.tsv");
-//                logger.debug("Adding " + path);
-//                vs.addIndividual(id, true, path).get();
-//                logger.debug("Added.");
-                if (i % 2 == 0) {
-                    vs.removeIndividual(id).get();
-                    logger.debug("Removed.");
-                }
-                i++;
-            }
-
-        } catch (VariantStoreException | ExecutionException e) {
-            logger.error("ERROR!!", e);
-        } catch (InterruptedException e) {
-            logger.error("Shouldn't happen", e);
-        }
-
         Map<String, List<GAVariant>> map;
 
-        logger.debug(vs.getIndividuals());
-        map = vs.getIndividualsWithVariant("chr17", 42949808, "G", "A");
-        logger.debug("MAP: " + map);
+//        logger.debug(vs.getIndividuals());
+//        map = vs.getIndividualsWithVariant("chr17", 42949808, "G", "A");
+//        logger.debug("MAP: " + map);
         Map<String, Double> af = new HashMap<>();
         af.put("EXAC", (double) 0.1);
-        map = vs.getIndividualsWithGene("EFTUD2", Arrays.asList("SPLICING"), af);
+        map = vs.getIndividualsWithGene("MED12", Arrays.asList("SPLICING"), af);
         logger.debug("Individuals w Genes: " + map);
         logger.debug("Total individuals: " + vs.getIndividuals().size());
 

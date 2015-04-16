@@ -26,6 +26,11 @@ public abstract class AbstractDatabaseController {
 
     public abstract Future removeIndividual(String id) throws DatabaseException;
 
+    public abstract Map<String, List<GAVariant>> getIndividualsWithGene(String gene,
+                                                                        List<String> variantEffects,
+                                                                        Map<String, Double> alleleFrequencies,
+                                                                        int n);
+
     public abstract Map<String,List<GAVariant>> getIndividualsWithVariant(String chr, int pos, String ref, String alt);
 
     public abstract List<GAVariant> getTopHarmfulWithGene(String id, int n, String gene, List<String> variantEffects, Map<String, Double> alleleFrequencies);
