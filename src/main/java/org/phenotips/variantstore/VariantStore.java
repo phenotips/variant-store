@@ -94,6 +94,23 @@ public class VariantStore implements VariantStoreInterface
         return this.inputManager.getAllIndividuals();
     }
 
+    /**
+     * The implementation method for the GA4GH
+     * @param chr
+     * @param pos
+     * @param allele
+     * @return
+     */
+    public double beacon(String chr, int pos, String allele) {
+        Map<String, List<GAVariant>> map = this.getIndividualsWithVariant(chr, pos, null, allele);
+
+        if (map.size() == 0) {
+            map = this.getIndividualsWithVariant(chr, pos, allele, null);
+        }
+
+        return (double) map.size() / (double) this.getIndividuals().size();
+    }
+
     public static void main(String[] args) {
         logger.debug("Starting");
         VariantStore vs = null;
