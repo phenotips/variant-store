@@ -13,14 +13,10 @@ import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
-import org.apache.solr.client.solrj.response.Group;
-import org.apache.solr.client.solrj.response.GroupCommand;
-import org.apache.solr.client.solrj.response.GroupResponse;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.util.ClientUtils;
-import org.apache.solr.common.SolrDocument;
-import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.params.CursorMarkParams;
+import org.apache.solr.common.params.GroupParams;
 import org.apache.solr.core.CoreContainer;
 import org.ga4gh.GAVariant;
 
@@ -115,7 +111,7 @@ public class SolrController extends AbstractDatabaseController {
 
         try {
             resp = server.query(q);
-            list = appendDocs(resp.getResults(), list);
+            list = VariantUtils.appendDocumentListToList(resp.getResults(), list);
         } catch (SolrServerException e) {
             logger.error("Error getting individuals ", e);
         }
@@ -169,7 +165,7 @@ public class SolrController extends AbstractDatabaseController {
 
         try {
             resp = server.query(q);
-            list = appendDocs(resp.getResults(), list);
+            list = VariantUtils.appendDocumentListToList(resp.getResults(), list);
         } catch (SolrServerException e) {
             logger.error("Error getting individuals with variant", e);
         }
@@ -218,16 +214,16 @@ public class SolrController extends AbstractDatabaseController {
                 .setQuery(queryString)
                 .addSort("exomiser_variant_score", SolrQuery.ORDER.desc);
 
-        q.setRows(n);
-        q.set("group", true);
-        q.set("group.field", "individual");
-        q.set("group.limit", 5);
+        q.setRows(10);
+        q.set(GroupParams.GROUP, true);
+        q.set(GroupParams.GROUP_FIELD, "individual");
+        q.set(GroupParams.GROUP_LIMIT, n);
 
         QueryResponse resp = null;
 
         try {
             resp = server.query(q);
-            map = appendDocs(resp.getGroupResponse(), map);
+            map = VariantUtils.appendGroupResponseToMap(resp.getGroupResponse(), map);
         } catch (SolrServerException e) {
             logger.error("Error getting individuals with variant", e);
         }
@@ -259,7 +255,13 @@ public class SolrController extends AbstractDatabaseController {
                 .setQuery(queryString)
                 .addSort("id", SolrQuery.ORDER.desc);
 
+
         QueryResponse resp = null;
+
+        q.setRows(10);
+        q.set(GroupParams.GROUP, true);
+        q.set(GroupParams.GROUP_FIELD, "individual");
+        q.set(GroupParams.GROUP_LIMIT, 1);
 
         String cursor = CursorMarkParams.CURSOR_MARK_START;
         String oldCursor = null;
@@ -269,7 +271,7 @@ public class SolrController extends AbstractDatabaseController {
                 q.set(CursorMarkParams.CURSOR_MARK_PARAM, cursor);
 
                 resp = server.query(q);
-                map = appendDocs(resp.getResults(), map);
+                map = VariantUtils.appendGroupResponseToMap(resp.getGroupResponse(), map);
 
                 oldCursor = cursor;
                 cursor = resp.getNextCursorMark();
@@ -282,82 +284,6 @@ public class SolrController extends AbstractDatabaseController {
         return map;
     }
 
-    private Map<String, List<GAVariant>> appendDocs(GroupResponse groupResponse, Map<String, List<GAVariant>> map) {
-        GroupCommand groupCommand = groupResponse.getValues().get(0);
 
-        // no matches, don't do any work.
-        if (groupCommand.getMatches() <= 0) {
-            return map;
-        }
-
-        for (Group group : groupCommand.getValues()) {
-            map.put(group.getGroupValue(), appendDocs(group.getResult(), new ArrayList<GAVariant>()));
-        }
-
-        return map;
-    }
-
-
-    private Map<String, List<GAVariant>> appendDocs(SolrDocumentList results, Map<String, List<GAVariant>> map) {
-
-        for (SolrDocument doc : results) {
-            String individual = (String) doc.get("individual");
-
-            GAVariant variant = variantFromDoc(doc);
-
-            if (!map.containsKey(individual)) {
-                List<GAVariant> list = new ArrayList<>();
-                list.add(variant);
-                map.put(individual, list);
-            } else {
-                map.get(individual).add(variant);
-            }
-        }
-
-        return map;
-    }
-
-    private List<GAVariant> appendDocs(SolrDocumentList results, List<GAVariant> list) {
-        for (SolrDocument doc : results) {
-            GAVariant variant = variantFromDoc(doc);
-
-            list.add(variant);
-        }
-
-        return list;
-    }
-
-
-    private GAVariant variantFromDoc(SolrDocument doc) {
-        GAVariant variant = new GAVariant();
-
-        variant.setReferenceName(doc.get("chrom").toString());
-        variant.setReferenceBases(doc.get("ref").toString());
-        variant.setStart(Long.valueOf(doc.get("pos").toString()));
-        variant.setEnd(variant.getStart() + variant.getReferenceBases().length());
-        variant.setAlternateBases((List<String>) doc.get("alts"));
-
-        Map<String, List<String>> info = new HashMap<>();
-        info.put("QUAL", Collections.singletonList(doc.get("qual").toString()));
-        info.put("FILTER", Collections.singletonList(doc.get("filter").toString()));
-        info.put("EXOMISER_VARIANT_SCORE", Collections.singletonList(doc.get("exomiser_variant_score").toString()));
-        info.put("EXOMISER_GENE_PHENO_SCORE", Collections.singletonList(doc.get("exomiser_gene_pheno_score").toString()));
-        info.put("EXOMISER_GENE_VARIANT_SCORE", Collections.singletonList(doc.get("exomiser_gene_variant_score").toString()));
-        info.put("EXOMISER_GENE_COMBINED_SCORE", Collections.singletonList(doc.get("exomiser_gene_combined_score").toString()));
-
-        info.put("GENE", Collections.singletonList(doc.get("gene").toString()));
-        info.put("GENE_EFFECT", Collections.singletonList(doc.get("gene_effect").toString()));
-
-        if (doc.containsKey("exac_af")) {
-            info.put("EXAC_AF", Collections.singletonList(doc.get("exac_af").toString()));
-        }
-
-        variant.setInfo(info);
-
-//        logger.debug(doc);
-        logger.debug(variant);
-
-        return variant;
-    }
 
 }
