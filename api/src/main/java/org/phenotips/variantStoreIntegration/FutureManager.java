@@ -19,7 +19,7 @@
  */
 package org.phenotips.variantStoreIntegration;
 
-import org.phenotips.variantStoreIntegration.Events.VCFEvent;
+import org.phenotips.variantStoreIntegration.events.VCFEvent;
 
 import org.xwiki.observation.EventListener;
 import org.xwiki.observation.event.Event;

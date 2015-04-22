@@ -21,7 +21,7 @@ package org.phenotips.variantStoreIntegration;
 
 import org.phenotips.Constants;
 import org.phenotips.data.Patient;
-import org.phenotips.variantStoreIntegration.Events.VCFUploadCompleteEvent;
+import org.phenotips.variantStoreIntegration.events.VCFUploadCompleteEvent;
 
 import org.xwiki.model.EntityType;
 import org.xwiki.model.reference.EntityReference;

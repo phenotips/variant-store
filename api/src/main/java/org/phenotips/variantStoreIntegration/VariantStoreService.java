@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 
-import net.sf.json.JSONArray;
+import org.ga4gh.GAVariant;
 
 /**
  * Service that exposes Phenotips' Variant Store.
@@ -74,7 +74,7 @@ public interface VariantStoreService
      * @param n the number of variants to return
      * @return a List of harmful variants for the specified individual
      */
-    JSONArray getTopHarmfullVariants(String id, int n);
+    List<GAVariant> getTopHarmfullVariants(String id, int n);
 
     /**
      * Get the individuals that have variants with the given gene symbol, exhibiting the given variant effects, and with
@@ -85,7 +85,7 @@ public interface VariantStoreService
      * @param alleleFrequencies
      * @return
      */
-    Map<String, JSONArray> getIndividualsWithGene(String geneSymbol,
+    Map<String, List<GAVariant>> getIndividualsWithGene(String geneSymbol,
         List<String> variantEffects,
         Map<String, Double> alleleFrequencies);
 
@@ -98,7 +98,7 @@ public interface VariantStoreService
      * @param alt
      * @return
      */
-    Map<String, JSONArray> getIndividualsWithVariant(String chr, int pos, String ref, String alt);
+    Map<String, List<GAVariant>> getIndividualsWithVariant(String chr, int pos, String ref, String alt);
 
     /**
      * Get a list of all the individual IDs stored in the variant store.

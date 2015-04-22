@@ -32,7 +32,6 @@ import org.xwiki.environment.Environment;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
@@ -40,9 +39,6 @@ import java.util.concurrent.Future;
 import javax.inject.Inject;
 
 import org.ga4gh.GAVariant;
-
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
 
 /**
  * @version $Id: 1f3bc36ff53b79ba95f90d7f1eaa24fa48d6bf4a $
@@ -59,9 +55,9 @@ public class DefaultVariantStoreService implements Initializable, VariantStoreSe
     public void initialize() throws InitializationException
     {
         this.variantStore = new VariantStore(
-                new ExomiserTSVManager(),
-                new SolrController()
-        );
+            new ExomiserTSVManager(),
+            new SolrController()
+            );
 
         try {
             this.variantStore.init(Paths.get(this.env.getPermanentDirectory().getPath()).resolve("variant-store"));
@@ -113,15 +109,11 @@ public class DefaultVariantStoreService implements Initializable, VariantStoreSe
      * @return a List of harmful variants for the specified individual
      */
     @Override
-    public JSONArray getTopHarmfullVariants(String id, int n)
+    public List<GAVariant> getTopHarmfullVariants(String id, int n)
     {
         List<GAVariant> rawVs = this.variantStore.getTopHarmfullVariants(id, n);
-        JSONArray variants = new JSONArray();
-        for (GAVariant rawV : rawVs) {
-            JSONObject v = this.variantToJSON(rawV);
-            variants.add(v);
-        }
-        return variants;
+
+        return rawVs;
     }
 
     /**
@@ -134,36 +126,13 @@ public class DefaultVariantStoreService implements Initializable, VariantStoreSe
      * @return
      */
     @Override
-    public Map<String, JSONArray> getIndividualsWithGene(String geneSymbol, List<String> variantEffects,
+    public Map<String, List<GAVariant>> getIndividualsWithGene(String geneSymbol, List<String> variantEffects,
         Map<String, Double> alleleFrequencies)
     {
         Map<String, List<GAVariant>> raw =
             this.variantStore.getIndividualsWithGene(geneSymbol, variantEffects, alleleFrequencies);
 
-        Map<String, JSONArray> result = new HashMap<String, JSONArray>();
-        for (String id : raw.keySet()) {
-            JSONArray variants = new JSONArray();
-            for (GAVariant rawV : raw.get(id)) {
-                JSONObject v = this.variantToJSON(rawV);
-                variants.add(v);
-            }
-            result.put(id, variants);
-        }
-        return result;
-        }
-
-    private JSONObject variantToJSON(GAVariant rawV)
-    {
-        JSONObject v = new JSONObject();
-        v.put("position", rawV.getStart());
-        v.put("ref", rawV.getReferenceBases());
-        v.put("score", Double.parseDouble(rawV.getInfo().get("EXOMISER_VARIANT_SCORE").get(0)));
-        v.put("chr", rawV.getReferenceName());
-        v.put("effect", rawV.getInfo().get("GENE_EFFECT").get(0));
-        // TODO:fix this
-        v.put("alt", rawV.getAlternateBases().get(0));
-        v.put("geneSymbol", rawV.getInfo().get("GENE").get(0));
-        return v;
+        return raw;
     }
 
     /**
@@ -176,19 +145,11 @@ public class DefaultVariantStoreService implements Initializable, VariantStoreSe
      * @return
      */
     @Override
-    public Map<String, JSONArray> getIndividualsWithVariant(String chr, int pos, String ref, String alt)
+    public Map<String, List<GAVariant>> getIndividualsWithVariant(String chr, int pos, String ref, String alt)
     {
         Map<String, List<GAVariant>> raw = this.variantStore.getIndividualsWithVariant(chr, pos, ref, alt);
-        Map<String, JSONArray> result = new HashMap<String, JSONArray>();
-        for (String id : raw.keySet()) {
-            JSONArray variants = new JSONArray();
-            for (GAVariant rawV : raw.get(id)) {
-                JSONObject v = this.variantToJSON(rawV);
-                variants.add(v);
-            }
-            result.put(id, variants);
-        }
-        return result;
+
+        return raw;
     }
 
     /**

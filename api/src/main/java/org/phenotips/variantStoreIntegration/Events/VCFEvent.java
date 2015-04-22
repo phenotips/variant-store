@@ -17,21 +17,28 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.phenotips.variantStoreIntegration.Events;
+package org.phenotips.variantStoreIntegration.events;
 
 import org.phenotips.data.Patient;
+import org.phenotips.data.events.PatientEvent;
 
-import org.xwiki.observation.event.Event;
+import org.xwiki.users.User;
 
 /**
  * The event fired upon completion of a VCF processing job in the variant store.
  *
  * @version $Id$
  */
-public interface VCFEvent extends Event
+public interface VCFEvent extends PatientEvent
 {
-    /**
-     * @return The patient to whom the VCF relates to
-     */
+
+    @Override
     Patient getPatient();
+
+    @Override
+    String getEventType();
+
+    @Override
+    User getAuthor();
+
 }

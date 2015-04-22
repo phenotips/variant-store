@@ -17,9 +17,11 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.phenotips.variantStoreIntegration.Events;
+package org.phenotips.variantStoreIntegration.events;
 
 import org.phenotips.data.Patient;
+
+import org.xwiki.users.User;
 
 /**
  * VCF event fired upon successful completion of the removal of a patients VCF from the variant store.
@@ -54,5 +56,19 @@ public class VCFRemovalCompleteEvent implements VCFEvent
     public Patient getPatient()
     {
         return this.patient;
+    }
+
+    @Override
+    public String getEventType()
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public User getAuthor()
+    {
+        // TODO Auto-generated method stub
+        return null;
     }
 }
