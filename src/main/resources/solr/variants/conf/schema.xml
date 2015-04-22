@@ -43,6 +43,7 @@
     <fieldType name="string" class="solr.StrField" sortMissingLast="true" />
     <fieldType name="bool" class="solr.BoolField" />
     <fieldType name="int" class="solr.TrieIntField" />
+    <fieldType name="long" class="solr.TrieLongField" />
     <fieldType name="float" class="solr.TrieFloatField" />
 
     <!-- Since fields of this type are by default not stored or indexed,
@@ -51,7 +52,7 @@
   </types>
 
   <fields>
-    <field name="_version_" type="int" indexed="true" stored="true" multiValued="false"/>
+    <field name="_version_" type="long" indexed="true" stored="true" multiValued="false"/>
 
     <!-- a hash of chrom, pos, ref, alt, individual -->
     <field name="id" type="string" indexed="true" stored="true" required="false" />

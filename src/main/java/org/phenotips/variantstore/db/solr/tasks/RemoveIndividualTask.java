@@ -22,7 +22,8 @@ public class RemoveIndividualTask implements Callable<Object> {
     @Override
     public Object call() throws Exception {
         try {
-            server.deleteByQuery(String.format("patient:%s", id));
+            server.deleteByQuery(String.format("individual:%s", id));
+            server.commit();
         } catch (SolrServerException | IOException e) {
             throw new DatabaseException(String.format("Error removing individual from solr"), e);
         }
