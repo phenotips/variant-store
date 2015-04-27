@@ -111,7 +111,7 @@ public class SolrController extends AbstractDatabaseController {
 
         try {
             resp = server.query(q);
-            list = VariantUtils.appendDocumentListToList(resp.getResults(), list);
+            list = SolrVariantUtils.appendDocumentListToList(resp.getResults(), list);
         } catch (SolrServerException e) {
             logger.error("Error getting individuals ", e);
         }
@@ -165,7 +165,7 @@ public class SolrController extends AbstractDatabaseController {
 
         try {
             resp = server.query(q);
-            list = VariantUtils.appendDocumentListToList(resp.getResults(), list);
+            list = SolrVariantUtils.appendDocumentListToList(resp.getResults(), list);
         } catch (SolrServerException e) {
             logger.error("Error getting individuals with variant", e);
         }
@@ -223,7 +223,7 @@ public class SolrController extends AbstractDatabaseController {
 
         try {
             resp = server.query(q);
-            map = VariantUtils.appendGroupResponseToMap(resp.getGroupResponse(), map);
+            map = SolrVariantUtils.appendGroupResponseToMap(resp.getGroupResponse(), map);
         } catch (SolrServerException e) {
             logger.error("Error getting individuals with variant", e);
         }
@@ -271,7 +271,7 @@ public class SolrController extends AbstractDatabaseController {
                 q.set(CursorMarkParams.CURSOR_MARK_PARAM, cursor);
 
                 resp = server.query(q);
-                map = VariantUtils.appendGroupResponseToMap(resp.getGroupResponse(), map);
+                map = SolrVariantUtils.appendGroupResponseToMap(resp.getGroupResponse(), map);
 
                 oldCursor = cursor;
                 cursor = resp.getNextCursorMark();

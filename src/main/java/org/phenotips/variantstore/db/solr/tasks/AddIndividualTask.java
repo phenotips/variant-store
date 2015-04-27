@@ -4,16 +4,14 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.solr.client.solrj.SolrQuery;
+
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.util.ClientUtils;
-import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import org.ga4gh.GAVariant;
 
-import org.phenotips.variantstore.db.solr.VariantUtils;
+import org.phenotips.variantstore.db.solr.SolrVariantUtils;
 import org.phenotips.variantstore.input.AbstractVariantIterator;
 import org.phenotips.variantstore.db.DatabaseException;
 
@@ -38,7 +36,7 @@ public class AddIndividualTask implements Callable<Object> {
         while (iterator.hasNext()) {
             variant = iterator.next();
 
-            SolrInputDocument doc = ClientUtils.toSolrInputDocument(VariantUtils.variantToDoc(variant));
+            SolrInputDocument doc = ClientUtils.toSolrInputDocument(SolrVariantUtils.variantToDoc(variant));
             // we will be reusing the document to speed up inserts as per SolrJ docs.
 
             doc.setField("individual", iterator.getHeader().getIndividualId());
