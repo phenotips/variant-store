@@ -4,7 +4,6 @@ import org.phenotips.variantstore.shared.GAVariantInfoFields;
 import org.phenotips.variantstore.shared.VariantUtils;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,11 +24,11 @@ public class SolrVariantUtils
      * Add a GroupResponse to a map where the keys are the values of the grouped-by field,
      * and the values are the list of variants in each group.
      * @param groupResponse the returned group response
-     * @param map the map to add the result to
      * @return the passed map
      */
-    public static Map<String, List<GAVariant>> appendGroupResponseToMap(GroupResponse groupResponse, Map<String, List<GAVariant>> map) {
+    public static Map<String, List<GAVariant>> groupResponseToMap(GroupResponse groupResponse) {
         GroupCommand groupCommand = groupResponse.getValues().get(0);
+        Map<String, List<GAVariant>> map = new HashMap<>();
 
         // no matches, don't do any work.
         if (groupCommand.getMatches() <= 0) {
@@ -37,7 +36,7 @@ public class SolrVariantUtils
         }
 
         for (Group group : groupCommand.getValues()) {
-            map.put(group.getGroupValue(), appendDocumentListToList(group.getResult(), new ArrayList<GAVariant>()));
+            map.put(group.getGroupValue(), documentListToList(group.getResult()));
         }
 
         return map;
@@ -46,10 +45,11 @@ public class SolrVariantUtils
     /**
      * Add the documents in a SolrDocumentList to a list of GAVariants.
      * @param documentList the SolrDocumentList
-     * @param list the list of GAVariants
      * @return the list of GAVariants
      */
-    public static List<GAVariant> appendDocumentListToList(SolrDocumentList documentList, List<GAVariant> list) {
+    public static List<GAVariant> documentListToList(SolrDocumentList documentList) {
+        List<GAVariant> list = new ArrayList<>();
+
         for (SolrDocument doc : documentList) {
             GAVariant variant = docToVariant(doc);
 

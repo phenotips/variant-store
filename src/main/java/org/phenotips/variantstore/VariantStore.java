@@ -129,11 +129,20 @@ public class VariantStore implements VariantStoreInterface
 
         logger.debug("Started");
 
+
+
+        try {
+            String id = "F0000009";
+            logger.debug("Adding " + id);
+            vs.addIndividual(id, true, Paths.get("/data/vcf/c4r/tsvs/" + id + ".variants.tsv")).get();
+            logger.debug("Removing");
+            vs.removeIndividual(id).get();
+        } catch (InterruptedException | ExecutionException | VariantStoreException e) {
+            logger.error("Error", e);
+        }
+
         Map<String, List<GAVariant>> map;
 
-//        logger.debug(vs.getIndividuals());
-//        map = vs.getIndividualsWithVariant("chr17", 42949808, "G", "A");
-//        logger.debug("MAP: " + map);
         Map<String, Double> af = new HashMap<>();
         af.put("EXAC", (double) 0.1);
         map = vs.getIndividualsWithGene("MED12", Arrays.asList("SPLICING"), af);

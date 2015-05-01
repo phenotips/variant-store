@@ -1,24 +1,24 @@
-package org.phenotips.variantstore;
+package org.phenotips.variantstore.db.solr;
 
-import org.phenotips.variantstore.db.solr.SolrSchema;
-import org.phenotips.variantstore.db.solr.SolrVariantUtils;
+import org.phenotips.variantstore.TestUtils;
 import org.phenotips.variantstore.shared.GAVariantInfoFields;
 import org.phenotips.variantstore.shared.VariantUtils;
 
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.solr.client.solrj.response.Group;
+import org.apache.solr.client.solrj.response.GroupCommand;
+import org.apache.solr.client.solrj.response.GroupResponse;
 import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrDocumentList;
 import org.ga4gh.GAVariant;
 import org.hamcrest.CoreMatchers;
-import org.junit.After;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -175,5 +175,62 @@ public class SolrVariantUtilsTest
                 VariantUtils.getInfoFromVariant(variant2, GAVariantInfoFields.EXOMISER_GENE_COMBINED_SCORE));
         assertEquals(VariantUtils.getInfoFromVariant(variant, GAVariantInfoFields.EXAC_AF),
                 VariantUtils.getInfoFromVariant(variant2, GAVariantInfoFields.EXAC_AF));
+    }
+
+    @Test
+    public void testGroupResponseToMap() throws Exception {
+        GAVariant var1 = TestUtils.randomGAVariant();
+        GAVariant var2 = TestUtils.randomGAVariant();
+        GAVariant var3 = TestUtils.randomGAVariant();
+
+        String p1 = "patient1";
+        SolrDocument doc1 = SolrVariantUtils.variantToDoc(var1);
+        SolrDocument doc2 = SolrVariantUtils.variantToDoc(var2);
+        SolrDocumentList list1 = new SolrDocumentList();
+        list1.add(doc1);
+        list1.add(doc2);
+
+        String p2 = "patient2";
+        SolrDocument doc3 = SolrVariantUtils.variantToDoc(var3);
+        SolrDocumentList list2 = new SolrDocumentList();
+        list2.add(doc3);
+
+        GroupCommand command = new GroupCommand("testCommand", 2);
+        command.add(new Group(p1, list1));
+        command.add(new Group(p2, list2));
+
+        GroupResponse response = new GroupResponse();
+        response.add(command);
+
+        Map<String, List<GAVariant>> map = SolrVariantUtils.groupResponseToMap(response);
+        assertThat(map.size(), is(2));
+        assertThat(map.get(p1).size(), is(2));
+        assertThat(map.get(p2).size(), is(1));
+
+        assertThat(map.get(p1).get(0).getReferenceBases(), is(var1.getReferenceBases()));
+        assertThat(map.get(p1).get(1).getReferenceBases(), is(var2.getReferenceBases()));
+        assertThat(map.get(p2).get(0).getReferenceBases(), is(var3.getReferenceBases()));
+    }
+
+    @Test
+    public void testDocumentListToList() throws Exception {
+        GAVariant var1 = TestUtils.randomGAVariant();
+        GAVariant var2 = TestUtils.randomGAVariant();
+
+        SolrDocumentList doclist = new SolrDocumentList();
+        SolrDocument doc1 = SolrVariantUtils.variantToDoc(var1);
+        SolrDocument doc2 = SolrVariantUtils.variantToDoc(var2);
+
+        doclist.add(doc1);
+        doclist.add(doc2);
+
+        List<GAVariant> list = SolrVariantUtils.documentListToList(doclist);
+
+        assertThat(list.size(), is(2));
+        assertThat(list.get(0), is(notNullValue()));
+        assertThat(list.get(1), is(notNullValue()));
+        /** TODO: stop relying on Math.random to generate pseudo-unique keys **/
+        assertThat(list.get(0).getReferenceBases(), is(var1.getReferenceBases()));
+        assertThat(list.get(1).getReferenceBases(), is(var2.getReferenceBases()));
     }
 }

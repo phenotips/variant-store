@@ -11,6 +11,8 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <buildtools.version>1.0</buildtools.version>
+    <checkstyle.skip>false</checkstyle.skip>
   </properties>
 
   <dependencies>
@@ -121,8 +123,8 @@
               <goal>idl-protocol</goal>
             </goals>
             <configuration>
-              <sourceDirectory>${project.basedir}/src/main/avro/</sourceDirectory>
-              <outputDirectory>${project.basedir}/src/main/java/</outputDirectory>
+              <sourceDirectory>src/main/avro/</sourceDirectory>
+              <outputDirectory>src/main/java/</outputDirectory>
               <stringType>String</stringType>
               <excludes>
                 <exclude>wip</exclude>

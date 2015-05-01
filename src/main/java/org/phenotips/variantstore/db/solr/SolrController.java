@@ -111,7 +111,7 @@ public class SolrController extends AbstractDatabaseController {
 
         try {
             resp = server.query(q);
-            list = SolrVariantUtils.appendDocumentListToList(resp.getResults(), list);
+            list = SolrVariantUtils.documentListToList(resp.getResults());
         } catch (SolrServerException e) {
             logger.error("Error getting individuals ", e);
         }
@@ -165,7 +165,7 @@ public class SolrController extends AbstractDatabaseController {
 
         try {
             resp = server.query(q);
-            list = SolrVariantUtils.appendDocumentListToList(resp.getResults(), list);
+            list = SolrVariantUtils.documentListToList(resp.getResults());
         } catch (SolrServerException e) {
             logger.error("Error getting individuals with variant", e);
         }
@@ -214,7 +214,7 @@ public class SolrController extends AbstractDatabaseController {
                 .setQuery(queryString)
                 .addSort("exomiser_variant_score", SolrQuery.ORDER.desc);
 
-        q.setRows(10);
+        q.setRows(300);
         q.set(GroupParams.GROUP, true);
         q.set(GroupParams.GROUP_FIELD, "individual");
         q.set(GroupParams.GROUP_LIMIT, n);
@@ -223,7 +223,7 @@ public class SolrController extends AbstractDatabaseController {
 
         try {
             resp = server.query(q);
-            map = SolrVariantUtils.appendGroupResponseToMap(resp.getGroupResponse(), map);
+            map = SolrVariantUtils.groupResponseToMap(resp.getGroupResponse());
         } catch (SolrServerException e) {
             logger.error("Error getting individuals with variant", e);
         }
@@ -271,7 +271,7 @@ public class SolrController extends AbstractDatabaseController {
                 q.set(CursorMarkParams.CURSOR_MARK_PARAM, cursor);
 
                 resp = server.query(q);
-                map = SolrVariantUtils.appendGroupResponseToMap(resp.getGroupResponse(), map);
+                map.putAll(SolrVariantUtils.groupResponseToMap(resp.getGroupResponse()));
 
                 oldCursor = cursor;
                 cursor = resp.getNextCursorMark();
