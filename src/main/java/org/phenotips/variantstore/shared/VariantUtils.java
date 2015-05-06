@@ -8,10 +8,16 @@ import java.util.Map;
 import org.ga4gh.GAVariant;
 
 /**
- * Utility functions for working with GAVariants
+ * Utility functions for working with GAVariants.
+ *
+ * @version $Id$
  */
-public class VariantUtils
+public final class VariantUtils
 {
+    private VariantUtils() {
+        throw new AssertionError();
+    }
+
     /**
      * Add a value to the the variant's info map. Creates a new map if it doesn't exist.
      *

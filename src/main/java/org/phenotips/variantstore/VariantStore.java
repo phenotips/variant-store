@@ -1,36 +1,39 @@
 package org.phenotips.variantstore;
 
-import org.phenotips.variantstore.db.AbstractDatabaseController;
+import org.phenotips.variantstore.db.DatabaseController;
 import org.phenotips.variantstore.db.solr.SolrController;
 import org.phenotips.variantstore.input.InputManager;
 import org.phenotips.variantstore.input.tsv.ExomiserTSVManager;
 import org.phenotips.variantstore.input.vcf.VCFManager;
 import org.phenotips.variantstore.shared.VariantStoreException;
 
-import java.io.IOException;
-import java.nio.file.*;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.util.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.ga4gh.GAVariant;
 
 /**
  * The Variant Store is capable of storing a large number of individuals genomic variants for further
- * querying and sorting
+ * querying and sorting.
+ *
+ * @version $Id$
  */
 public class VariantStore implements VariantStoreInterface
 {
     private static Logger logger = Logger.getLogger(VariantStore.class);
     private Path path;
     private InputManager inputManager;
-    private AbstractDatabaseController db;
+    private DatabaseController db;
 
     /**
-     * Use VCF and Solr by default
+     * Use VCF and Solr by default.
      */
     public VariantStore() {
         this.inputManager = new VCFManager();
@@ -38,12 +41,12 @@ public class VariantStore implements VariantStoreInterface
     }
 
     /**
-     * Specify your own DB and Input format
+     * Specify your own DB and Input format.
      *
-     * @param inputManager
-     * @param db
+     * @param inputManager an input format manager
+     * @param db the db implementation
      */
-    public VariantStore(InputManager inputManager, AbstractDatabaseController db) {
+    public VariantStore(InputManager inputManager, DatabaseController db) {
         this.path = path;
         this.inputManager = inputManager;
         this.db = db;
@@ -56,6 +59,7 @@ public class VariantStore implements VariantStoreInterface
         inputManager.init(this.path.resolve("tsv"));
     }
 
+    @Override
     public void stop() {
         db.stop();
     }
@@ -80,7 +84,10 @@ public class VariantStore implements VariantStoreInterface
     }
 
     @Override
-    public Map<String, List<GAVariant>> getIndividualsWithGene(String geneSymbol, List<String> variantEffects, Map<String, Double> alleleFrequencies) {
+    public Map<String, List<GAVariant>> getIndividualsWithGene(
+            String geneSymbol,
+            List<String> variantEffects,
+            Map<String, Double> alleleFrequencies) {
         return this.db.getIndividualsWithGene(geneSymbol, variantEffects, alleleFrequencies, 5);
     }
 
@@ -95,11 +102,12 @@ public class VariantStore implements VariantStoreInterface
     }
 
     /**
-     * The implementation method for the GA4GH
-     * @param chr
-     * @param pos
-     * @param allele
-     * @return
+     * The implementation method for the GA4GH.
+     *
+     * @param chr chromosome
+     * @param pos position
+     * @param allele allele
+     * @return the allele frequency of this variant in the db.
      */
     public double beacon(String chr, int pos, String allele) {
         Map<String, List<GAVariant>> map = this.getIndividualsWithVariant(chr, pos, null, allele);
@@ -108,9 +116,14 @@ public class VariantStore implements VariantStoreInterface
             map = this.getIndividualsWithVariant(chr, pos, allele, null);
         }
 
+        //TODO: THIS MATH IS SO WRONG
         return (double) map.size() / (double) this.getIndividuals().size();
     }
 
+    /**
+     * Main method for testing purposes. TODO:REMOVE
+     * @param args commandline args
+     */
     public static void main(String[] args) {
         logger.debug("Starting");
         VariantStore vs = null;
@@ -130,7 +143,6 @@ public class VariantStore implements VariantStoreInterface
         logger.debug("Started");
 
 
-
         try {
             String id = "F0000009";
             logger.debug("Adding " + id);
@@ -148,7 +160,6 @@ public class VariantStore implements VariantStoreInterface
         map = vs.getIndividualsWithGene("MED12", Arrays.asList("SPLICING"), af);
         logger.debug("Individuals w Genes: " + map);
         logger.debug("Total individuals: " + vs.getIndividuals().size());
-
 
 
         vs.stop();

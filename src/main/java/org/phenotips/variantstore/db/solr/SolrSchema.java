@@ -1,9 +1,9 @@
 package org.phenotips.variantstore.db.solr;
 
 /**
- * Created by meatcar on 4/24/15.
+ * @version $Id$
  */
-public class SolrSchema
+public final class SolrSchema
 {
     public static final String CHROM = "chrom";
     public static final String POS = "pos";
@@ -18,4 +18,10 @@ public class SolrSchema
     public static final String GENE = "gene";
     public static final String GENE_EFFECT = "gene_effect";
     public static final String EXAC_AF = "exac_af";
+    public static final String INDIVIDUAL = "individual";
+    public static final String ID = "id";
+
+    private SolrSchema() {
+        throw new AssertionError();
+    }
 }

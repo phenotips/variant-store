@@ -1,19 +1,27 @@
 package org.phenotips.variantstore.db.solr.tasks;
 
-import java.io.IOException;
-import java.util.concurrent.Callable;
-import org.apache.solr.client.solrj.SolrServer;
-import org.apache.solr.client.solrj.SolrServerException;
 import org.phenotips.variantstore.db.DatabaseException;
 
+import java.io.IOException;
+import java.util.concurrent.Callable;
+
+import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrServerException;
+
 /**
- * Created by meatcar on 2/24/15.
+ * @version $Id$
  */
-public class RemoveIndividualTask implements Callable<Object> {
+public class RemoveIndividualTask implements Callable<Object>
+{
 
     private SolrServer server;
     private String id;
 
+    /**
+     * Remove an individual from solr.
+     * @param server the solr server to run the task on
+     * @param id the id of the individual
+     */
     public RemoveIndividualTask(SolrServer server, String id) {
         this.server = server;
         this.id = id;
@@ -25,7 +33,7 @@ public class RemoveIndividualTask implements Callable<Object> {
             server.deleteByQuery(String.format("individual:%s", id));
             server.commit();
         } catch (SolrServerException | IOException e) {
-            throw new DatabaseException(String.format("Error removing individual from solr"), e);
+            throw new DatabaseException("Error removing individual from solr", e);
         }
         return null;
     }

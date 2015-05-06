@@ -1,30 +1,35 @@
 package org.phenotips.variantstore.input.vcf;
 
+import org.phenotips.variantstore.input.InputException;
+import org.phenotips.variantstore.input.InputManager;
+import org.phenotips.variantstore.input.VariantHeader;
+import org.phenotips.variantstore.input.VariantIterator;
+
 import java.io.IOException;
-import java.nio.file.*;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.phenotips.variantstore.input.AbstractVariantIterator;
-import org.phenotips.variantstore.input.InputException;
-import org.phenotips.variantstore.input.InputManager;
-import org.phenotips.variantstore.input.VariantHeader;
-import org.phenotips.variantstore.shared.Service;
-import org.phenotips.variantstore.db.DatabaseException;
-import org.phenotips.variantstore.shared.VariantStoreException;
 
 /**
  * Manage the raw VCF files that we store.
+ *
+ * @version $Id$
  */
-public class VCFManager implements InputManager {
-    Logger logger = Logger.getLogger(VCFManager.class);
+public class VCFManager implements InputManager
+{
+    private static String suffix = ".vcf";
+    private static Logger logger = Logger.getLogger(VCFManager.class);
     private Path path;
 
-    private static String suffix = ".vcf";
-
+    @Override
     public void init(Path path) throws InputException {
         this.path = path;
 
@@ -38,15 +43,12 @@ public class VCFManager implements InputManager {
         }
     }
 
+    @Override
     public void stop() {
 
     }
 
-    /**
-     * Store the individual's VCF.
-     * @param id the id of the individual
-     * @param path the path to the existing VCF file
-     */
+    @Override
     public void addIndividual(String id, Path path) throws InputException {
         try {
             Files.copy(path, this.getIndividual(id), StandardCopyOption.REPLACE_EXISTING);
@@ -55,10 +57,12 @@ public class VCFManager implements InputManager {
         }
     }
 
+    @Override
     public Path getIndividual(String id) {
         return this.path.resolve(id + suffix);
     }
 
+    @Override
     public void removeIndividual(String id) throws InputException {
         try {
             Files.delete(this.getIndividual(id));
@@ -67,15 +71,8 @@ public class VCFManager implements InputManager {
         }
     }
 
-    /**
-     * Given an individual, get the VariantIterator
-     *
-     * @param id
-     * @param isPublic
-     * @return
-     */
     @Override
-    public AbstractVariantIterator getIteratorForIndividual(String id, boolean isPublic) {
+    public VariantIterator getIteratorForIndividual(String id, boolean isPublic) {
         return new VCFIterator(this.getIndividual(id), new VariantHeader(id, true));
     }
 
@@ -84,7 +81,8 @@ public class VCFManager implements InputManager {
         final List<String> list = new ArrayList<>();
 
         try {
-            Files.walkFileTree(this.path, new SimpleFileVisitor<Path>() {
+            Files.walkFileTree(this.path, new SimpleFileVisitor<Path>()
+            {
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                     if (attrs.isDirectory()) {

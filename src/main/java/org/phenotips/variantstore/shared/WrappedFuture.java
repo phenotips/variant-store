@@ -10,11 +10,23 @@ import java.util.concurrent.TimeoutException;
 
 /**
  * A Future that wraps around multiple futures, and completes only when they all complete.
+ * @version $Id$
  */
-public class WrappedFuture implements Future<List> {
+public class WrappedFuture implements Future<List>
+{
+    /** a list of futures we're wrapping. */
     private List<Future> futures;
-    private boolean canceled = false;
 
+    /**
+     * whether this future has been canceled yet.
+     */
+    private boolean canceled;
+
+    /**
+     * Wrap all the given futures in a future that returns when all the given futures complete,
+     * and fails when any one fails.
+     * @param futures the futures to wrap.
+     */
     public WrappedFuture(Future... futures) {
         this.futures = Arrays.asList(futures);
     }

@@ -1,7 +1,9 @@
 package org.phenotips.variantstore.input.tsv;
 
 /**
- * The columns in the supported CSV file, in the order that they come.
+ * The columns in the supported TSV file, in the order that they come.
+ *
+ * @version $Id$
  */
 public enum ExomiserTSVColumn {
     CHROM,

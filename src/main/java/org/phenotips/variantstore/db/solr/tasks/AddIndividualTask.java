@@ -1,5 +1,9 @@
 package org.phenotips.variantstore.db.solr.tasks;
 
+import org.phenotips.variantstore.db.DatabaseException;
+import org.phenotips.variantstore.db.solr.SolrVariantUtils;
+import org.phenotips.variantstore.input.VariantIterator;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -11,19 +15,21 @@ import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrInputDocument;
 import org.ga4gh.GAVariant;
 
-import org.phenotips.variantstore.db.solr.SolrVariantUtils;
-import org.phenotips.variantstore.input.AbstractVariantIterator;
-import org.phenotips.variantstore.db.DatabaseException;
-
 /**
- * Created by meatcar on 2/24/15.
+ * @version $Id$
  */
-public class AddIndividualTask implements Callable<Object> {
+public class AddIndividualTask implements Callable<Object>
+{
 
     private final SolrServer server;
-    private final AbstractVariantIterator iterator;
+    private final VariantIterator iterator;
 
-    public AddIndividualTask(SolrServer server, AbstractVariantIterator iterator) {
+    /**
+     * Initialize the task.
+     * @param server the SolrServer to run the task on
+     * @param iterator the variants to add
+     */
+    public AddIndividualTask(SolrServer server, VariantIterator iterator) {
         this.server = server;
         this.iterator = iterator;
     }

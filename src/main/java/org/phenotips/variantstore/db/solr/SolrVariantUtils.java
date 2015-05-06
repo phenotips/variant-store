@@ -1,7 +1,8 @@
 package org.phenotips.variantstore.db.solr;
 
 import org.phenotips.variantstore.shared.GAVariantInfoFields;
-import org.phenotips.variantstore.shared.VariantUtils;
+import static org.phenotips.variantstore.shared.VariantUtils.addInfoToVariant;
+import static org.phenotips.variantstore.shared.VariantUtils.getInfoFromVariant;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,13 +17,18 @@ import org.apache.solr.common.SolrDocumentList;
 import org.ga4gh.GAVariant;
 
 /**
- * Created by meatcar on 4/20/15.
+ * @version $Id$
  */
-public class SolrVariantUtils
+public final class SolrVariantUtils
 {
+    private SolrVariantUtils() {
+        throw new AssertionError();
+    }
+
     /**
      * Add a GroupResponse to a map where the keys are the values of the grouped-by field,
      * and the values are the list of variants in each group.
+     *
      * @param groupResponse the returned group response
      * @return the passed map
      */
@@ -44,6 +50,7 @@ public class SolrVariantUtils
 
     /**
      * Add the documents in a SolrDocumentList to a list of GAVariants.
+     *
      * @param documentList the SolrDocumentList
      * @return the list of GAVariants
      */
@@ -59,9 +66,9 @@ public class SolrVariantUtils
         return list;
     }
 
-
     /**
-     * Turn a SolrDocument to a GAVariant
+     * Turn a SolrDocument to a GAVariant.
+     *
      * @param doc the SolrDocument
      * @return a new GAVariant
      */
@@ -74,24 +81,33 @@ public class SolrVariantUtils
         variant.setEnd(variant.getStart() + variant.getReferenceBases().length());
         variant.setAlternateBases((List<String>) doc.get(SolrSchema.ALTS));
 
-        VariantUtils.addInfoToVariant(variant, GAVariantInfoFields.QUALITY, doc.get(SolrSchema.QUAL));
-        VariantUtils.addInfoToVariant(variant, GAVariantInfoFields.FILTER, doc.get(SolrSchema.FILTER));
-        VariantUtils.addInfoToVariant(variant, GAVariantInfoFields.EXOMISER_VARIANT_SCORE, doc.get(SolrSchema.EXOMISER_VARIANT_SCORE));
-        VariantUtils.addInfoToVariant(variant, GAVariantInfoFields.EXOMISER_GENE_PHENO_SCORE, doc.get(SolrSchema.EXOMISER_GENE_PHENO_SCORE));
-        VariantUtils.addInfoToVariant(variant, GAVariantInfoFields.EXOMISER_GENE_VARIANT_SCORE, doc.get(SolrSchema.EXOMISER_GENE_VARIANT_SCORE));
-        VariantUtils.addInfoToVariant(variant, GAVariantInfoFields.EXOMISER_GENE_COMBINED_SCORE, doc.get(SolrSchema.EXOMISER_GENE_COMBINED_SCORE));
-        VariantUtils.addInfoToVariant(variant, GAVariantInfoFields.GENE, doc.get(SolrSchema.GENE));
-        VariantUtils.addInfoToVariant(variant, GAVariantInfoFields.GENE_EFFECT, doc.get(SolrSchema.GENE_EFFECT));
+        addInfoToVariant(variant,
+                GAVariantInfoFields.QUALITY, doc.get(SolrSchema.QUAL));
+        addInfoToVariant(variant,
+                GAVariantInfoFields.FILTER, doc.get(SolrSchema.FILTER));
+        addInfoToVariant(variant,
+                GAVariantInfoFields.EXOMISER_VARIANT_SCORE, doc.get(SolrSchema.EXOMISER_VARIANT_SCORE));
+        addInfoToVariant(variant,
+                GAVariantInfoFields.EXOMISER_GENE_PHENO_SCORE, doc.get(SolrSchema.EXOMISER_GENE_PHENO_SCORE));
+        addInfoToVariant(variant,
+                GAVariantInfoFields.EXOMISER_GENE_VARIANT_SCORE, doc.get(SolrSchema.EXOMISER_GENE_VARIANT_SCORE));
+        addInfoToVariant(variant,
+                GAVariantInfoFields.EXOMISER_GENE_COMBINED_SCORE, doc.get(SolrSchema.EXOMISER_GENE_COMBINED_SCORE));
+        addInfoToVariant(variant,
+                GAVariantInfoFields.GENE, doc.get(SolrSchema.GENE));
+        addInfoToVariant(variant,
+                GAVariantInfoFields.GENE_EFFECT, doc.get(SolrSchema.GENE_EFFECT));
 
         if (doc.containsKey(SolrSchema.EXAC_AF)) {
-            VariantUtils.addInfoToVariant(variant, GAVariantInfoFields.EXAC_AF, doc.get(SolrSchema.EXAC_AF));
+            addInfoToVariant(variant, GAVariantInfoFields.EXAC_AF, doc.get(SolrSchema.EXAC_AF));
         }
 
         return variant;
     }
 
     /**
-     * Turn a GAVariant into a SolrDocument
+     * Turn a GAVariant into a SolrDocument.
+     *
      * @param variant the GAVariant
      * @return the SolrDocument
      */
@@ -103,17 +119,21 @@ public class SolrVariantUtils
         doc.setField(SolrSchema.REF, variant.getReferenceBases());
         doc.setField(SolrSchema.ALTS, variant.getAlternateBases());
 
-        doc.setField(SolrSchema.QUAL, VariantUtils.getInfoFromVariant(variant, GAVariantInfoFields.QUALITY));
-        doc.setField(SolrSchema.FILTER, VariantUtils.getInfoFromVariant(variant, GAVariantInfoFields.FILTER));
+        doc.setField(SolrSchema.QUAL, getInfoFromVariant(variant, GAVariantInfoFields.QUALITY));
+        doc.setField(SolrSchema.FILTER, getInfoFromVariant(variant, GAVariantInfoFields.FILTER));
 
-        doc.setField(SolrSchema.EXOMISER_VARIANT_SCORE, Double.valueOf(VariantUtils.getInfoFromVariant(variant, GAVariantInfoFields.EXOMISER_VARIANT_SCORE)));
-        doc.setField(SolrSchema.EXOMISER_GENE_PHENO_SCORE, Double.valueOf(VariantUtils.getInfoFromVariant(variant, GAVariantInfoFields.EXOMISER_GENE_PHENO_SCORE)));
-        doc.setField(SolrSchema.EXOMISER_GENE_VARIANT_SCORE, Double.valueOf(VariantUtils.getInfoFromVariant(variant, GAVariantInfoFields.EXOMISER_GENE_VARIANT_SCORE)));
-        doc.setField(SolrSchema.EXOMISER_GENE_COMBINED_SCORE, Double.valueOf(VariantUtils.getInfoFromVariant(variant, GAVariantInfoFields.EXOMISER_GENE_COMBINED_SCORE)));
-        doc.setField(SolrSchema.GENE, VariantUtils.getInfoFromVariant(variant, GAVariantInfoFields.GENE));
-        doc.setField(SolrSchema.GENE_EFFECT, VariantUtils.getInfoFromVariant(variant, GAVariantInfoFields.GENE_EFFECT));
+        doc.setField(SolrSchema.EXOMISER_VARIANT_SCORE,
+                Double.valueOf(getInfoFromVariant(variant, GAVariantInfoFields.EXOMISER_VARIANT_SCORE)));
+        doc.setField(SolrSchema.EXOMISER_GENE_PHENO_SCORE,
+                Double.valueOf(getInfoFromVariant(variant, GAVariantInfoFields.EXOMISER_GENE_PHENO_SCORE)));
+        doc.setField(SolrSchema.EXOMISER_GENE_VARIANT_SCORE,
+                Double.valueOf(getInfoFromVariant(variant, GAVariantInfoFields.EXOMISER_GENE_VARIANT_SCORE)));
+        doc.setField(SolrSchema.EXOMISER_GENE_COMBINED_SCORE,
+                Double.valueOf(getInfoFromVariant(variant, GAVariantInfoFields.EXOMISER_GENE_COMBINED_SCORE)));
+        doc.setField(SolrSchema.GENE, getInfoFromVariant(variant, GAVariantInfoFields.GENE));
+        doc.setField(SolrSchema.GENE_EFFECT, getInfoFromVariant(variant, GAVariantInfoFields.GENE_EFFECT));
 
-        String value = VariantUtils.getInfoFromVariant(variant, GAVariantInfoFields.EXAC_AF);
+        String value = getInfoFromVariant(variant, GAVariantInfoFields.EXAC_AF);
         if (value != null) {
             doc.setField(SolrSchema.EXAC_AF, Double.valueOf(value));
         }

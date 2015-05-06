@@ -1,8 +1,18 @@
 package org.phenotips.variantstore.db.solr;
 
+import org.phenotips.variantstore.db.AbstractDatabaseController;
+import org.phenotips.variantstore.db.DatabaseException;
+import org.phenotips.variantstore.db.solr.tasks.AddIndividualTask;
+import org.phenotips.variantstore.db.solr.tasks.RemoveIndividualTask;
+import org.phenotips.variantstore.input.VariantIterator;
+import org.phenotips.variantstore.shared.ResourceManager;
+
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -20,17 +30,19 @@ import org.apache.solr.common.params.GroupParams;
 import org.apache.solr.core.CoreContainer;
 import org.ga4gh.GAVariant;
 
-import org.phenotips.variantstore.db.solr.tasks.AddIndividualTask;
-import org.phenotips.variantstore.input.AbstractVariantIterator;
-import org.phenotips.variantstore.db.AbstractDatabaseController;
-import org.phenotips.variantstore.db.DatabaseException;
-import org.phenotips.variantstore.shared.ResourceManager;
-import org.phenotips.variantstore.db.solr.tasks.RemoveIndividualTask;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Manages an embedded instance of solr.
+ *
+ * @version $Id$
  */
-public class SolrController extends AbstractDatabaseController {
+public class SolrController extends AbstractDatabaseController
+{
+    /** the field name of the EXAC allele frequency value in the allele frequency query map. **/
+    public static final String EXAC_FREQUENCY_FIELD = "EXAC";
+
     private Logger logger = Logger.getLogger(getClass());
 
     private ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
@@ -71,7 +83,7 @@ public class SolrController extends AbstractDatabaseController {
     }
 
     @Override
-    public Future addIndividual(final AbstractVariantIterator iterator) {
+    public Future addIndividual(final VariantIterator iterator) {
         FutureTask task = new FutureTask<Object>(new AddIndividualTask(server, iterator));
 
         executor.submit(task);
@@ -98,14 +110,16 @@ public class SolrController extends AbstractDatabaseController {
 
         logger.debug(String.format("Searching for id:%s n:%s", id, n));
 
-        String queryString = String.format("filter:PASS AND individual:%s", ClientUtils.escapeQueryChars(id));
+        String queryString = String.format("%s:PASS AND %s:%s",
+                SolrSchema.FILTER,
+                SolrSchema.INDIVIDUAL, ClientUtils.escapeQueryChars(id));
 
-        logger.debug("Query: " + queryString);
+        logger.debug("Query string: " + queryString);
 
         SolrQuery q = new SolrQuery()
                 .setQuery(queryString)
                 .setRows(n)
-                .setSort("exomiser_variant_score", SolrQuery.ORDER.desc);
+                .setSort(SolrSchema.EXOMISER_VARIANT_SCORE, SolrQuery.ORDER.desc);
 
         QueryResponse resp = null;
 
@@ -120,46 +134,59 @@ public class SolrController extends AbstractDatabaseController {
     }
 
     @Override
-    public List<GAVariant> getTopHarmfulWithGene(String id, int n, String gene, List<String> variantEffects, Map<String, Double> alleleFrequencies) {
+    public List<GAVariant> getTopHarmfulWithGene(String id,
+                                                 int n,
+                                                 String gene,
+                                                 List<String> variantEffects,
+                                                 Map<String, Double> alleleFrequencies) {
+
         List<GAVariant> list = new ArrayList<>();
 
-        if (id == null || "".equals(id)
-                || n == 0
-                || gene == null || "".equals(gene)
-                || variantEffects == null || variantEffects.size() == 0
-                || alleleFrequencies == null || alleleFrequencies.size() == 0) {
-            return list;
-        }
+        checkNotNull(id);
+        checkArgument("".equals(id));
 
-        logger.debug(String.format("Searching for gene:%s effects:%s af:%s", gene, variantEffects, alleleFrequencies));
+        checkArgument(n == 0);
+
+        checkNotNull(gene);
+        checkArgument("".equals(gene));
+
+        checkNotNull(variantEffects);
+        checkArgument(variantEffects.size() == 0);
+
+        checkNotNull(alleleFrequencies);
+        checkArgument(alleleFrequencies.size() == 0);
+
+        logger.debug(String.format("Searchig for gene:%s effects:%s af:%s", gene, variantEffects, alleleFrequencies));
 
         /** Build Query String **/
 
         String effectQuery = "";
-        for (String effect: variantEffects) {
-            effectQuery += "gene_effect:" + ClientUtils.escapeQueryChars(effect) + " OR ";
+        for (String effect : variantEffects) {
+            effectQuery += String.format("%s:%s OR ", SolrSchema.GENE_EFFECT, ClientUtils.escapeQueryChars(effect));
         }
         // Strip final ' OR '
         effectQuery = effectQuery.substring(0, effectQuery.length() - 4);
 
         // Find ExAC AF under the specified frequency, or where ExAC is null.
-        String exacQuery = String.format("(-exac_af:[* TO *] AND *:*) OR exac_af:[0 TO %s]",
-                ClientUtils.escapeQueryChars(String.valueOf(alleleFrequencies.get("EXAC")))
+        String exacQuery = String.format("(-%s:[* TO *] AND *:*) OR %s:[0 TO %s] ",
+                SolrSchema.EXAC_AF, SolrSchema.EXAC_AF,
+                ClientUtils.escapeQueryChars(String.valueOf(alleleFrequencies.get(EXAC_FREQUENCY_FIELD)))
         );
 
-        String queryString = String.format("filter:PASS AND individual:%s AND gene:%s AND (%s) AND (%s)",
-                ClientUtils.escapeQueryChars(id),
-                ClientUtils.escapeQueryChars(gene),
+        String queryString = String.format("%s:PASS AND %s:%s AND %s:%s AND (%s) AND (%s)",
+                SolrSchema.FILTER,
+                SolrSchema.INDIVIDUAL, ClientUtils.escapeQueryChars(id),
+                SolrSchema.GENE, ClientUtils.escapeQueryChars(gene),
                 effectQuery,
                 exacQuery
         );
 
-        logger.debug("Query: " + queryString);
+        logger.debug("Query : " + queryString);
 
         SolrQuery q = new SolrQuery()
                 .setRows(n)
                 .setQuery(queryString)
-                .addSort("exomiser_variant_score", SolrQuery.ORDER.desc);
+                .addSort(SolrSchema.EXOMISER_VARIANT_SCORE, SolrQuery.ORDER.desc);
 
         QueryResponse resp = null;
 
@@ -167,7 +194,7 @@ public class SolrController extends AbstractDatabaseController {
             resp = server.query(q);
             list = SolrVariantUtils.documentListToList(resp.getResults());
         } catch (SolrServerException e) {
-            logger.error("Error getting individuals with variant", e);
+            logger.error("Error getting individuals with variants", e);
         }
 
         return list;
@@ -180,43 +207,55 @@ public class SolrController extends AbstractDatabaseController {
                                                                int n) {
         Map<String, List<GAVariant>> map = new HashMap<>();
 
-        if (gene == null || "".equals(gene)
-                || variantEffects == null || variantEffects.size() == 0
-                || alleleFrequencies == null || alleleFrequencies.size() == 0) {
-            return map;
-        }
+        checkArgument(n == 0, "n cannot be zero");
+
+        checkNotNull(gene, "gene cannot be null");
+        checkArgument("".equals(gene), "gene cannot be empty");
+
+        checkNotNull(variantEffects, "effects cannot be null");
+        checkArgument(variantEffects.size() == 0, "effects cannot be empty");
+
+        checkNotNull(alleleFrequencies, "allele frequencies cannot be null");
+        checkArgument(alleleFrequencies.size() == 0, "allele frequencies cannot be empty");
 
         logger.debug(String.format("Searching for gene:%s effects:%s af:%s", gene, variantEffects, alleleFrequencies));
 
         /** Build Query String **/
 
-        String effectQuery = "";
-        for (String effect: variantEffects) {
-            effectQuery += "gene_effect:" + ClientUtils.escapeQueryChars(effect) + " OR ";
+        StringBuilder builder = new StringBuilder();
+        for (String effect : variantEffects) {
+            builder.append(SolrSchema.GENE_EFFECT)
+                   .append(":")
+                   .append(ClientUtils.escapeQueryChars(effect))
+                   .append(" OR ");
         }
         // Strip final ' OR '
+        String effectQuery = builder.toString();
         effectQuery = effectQuery.substring(0, effectQuery.length() - 4);
 
         // Find ExAC AF under the specified frequency, or where ExAC is null.
-        String exacQuery = String.format("(-exac_af:[* TO *] AND *:*) OR exac_af:[0 TO %s]",
-                ClientUtils.escapeQueryChars(String.valueOf(alleleFrequencies.get("EXAC")))
+        String exacQuery = String.format("(-%s:[* TO *] AND *:*) OR %s:[0 TO %s]",
+                SolrSchema.EXAC_AF, SolrSchema.EXAC_AF,
+                ClientUtils.escapeQueryChars(String.valueOf(alleleFrequencies.get(EXAC_FREQUENCY_FIELD)))
         );
 
-        String queryString = String.format("filter:PASS AND gene:%s AND (%s) AND (%s)",
+        String queryString = String.format("%s:PASS AND %s:%s AND (%s) AND (%s)",
+                SolrSchema.FILTER,
+                SolrSchema.GENE,
                 ClientUtils.escapeQueryChars(gene),
                 effectQuery,
                 exacQuery
         );
 
-        logger.debug("Query: " + queryString);
+        logger.debug("Qeury: " + queryString);
 
         SolrQuery q = new SolrQuery()
                 .setQuery(queryString)
-                .addSort("exomiser_variant_score", SolrQuery.ORDER.desc);
+                .addSort(SolrSchema.EXOMISER_VARIANT_SCORE, SolrQuery.ORDER.desc);
 
         q.setRows(300);
         q.set(GroupParams.GROUP, true);
-        q.set(GroupParams.GROUP_FIELD, "individual");
+        q.set(GroupParams.GROUP_FIELD, SolrSchema.INDIVIDUAL);
         q.set(GroupParams.GROUP_LIMIT, n);
 
         QueryResponse resp = null;
@@ -225,7 +264,7 @@ public class SolrController extends AbstractDatabaseController {
             resp = server.query(q);
             map = SolrVariantUtils.groupResponseToMap(resp.getGroupResponse());
         } catch (SolrServerException e) {
-            logger.error("Error getting individuals with variant", e);
+            logger.error("Error getting individals with variant", e);
         }
 
         return map;
@@ -241,26 +280,27 @@ public class SolrController extends AbstractDatabaseController {
 
 
         logger.debug(String.format("Searching for %s:%s %s->%s", chr, pos, ref, alt));
-        String queryString = String.format("chrom:%s AND ref:%s AND pos:%s AND alts:%s",
-                ClientUtils.escapeQueryChars(chr),
-                ClientUtils.escapeQueryChars(ref),
-                ClientUtils.escapeQueryChars(String.valueOf(pos)),
-                ClientUtils.escapeQueryChars(alt)
+        String queryString = String.format("%s:%s AND %s:%s AND %s:%s AND %s:%s",
+                SolrSchema.CHROM, ClientUtils.escapeQueryChars(chr),
+                SolrSchema.REF, ClientUtils.escapeQueryChars(ref),
+                SolrSchema.POS, ClientUtils.escapeQueryChars(String.valueOf(pos)),
+                SolrSchema.ALTS, ClientUtils.escapeQueryChars(alt)
         );
 
         logger.debug("Query: " + queryString);
 
         SolrQuery q = new SolrQuery()
-                .setTimeAllowed(0) // for cursor
                 .setQuery(queryString)
-                .addSort("id", SolrQuery.ORDER.desc);
+                .addSort(SolrSchema.ID, SolrQuery.ORDER.desc)
+                // required for cursor
+                .setTimeAllowed(0);
 
 
         QueryResponse resp = null;
 
         q.setRows(10);
         q.set(GroupParams.GROUP, true);
-        q.set(GroupParams.GROUP_FIELD, "individual");
+        q.set(GroupParams.GROUP_FIELD, SolrSchema.INDIVIDUAL);
         q.set(GroupParams.GROUP_LIMIT, 1);
 
         String cursor = CursorMarkParams.CURSOR_MARK_START;
@@ -283,7 +323,6 @@ public class SolrController extends AbstractDatabaseController {
 
         return map;
     }
-
 
 
 }

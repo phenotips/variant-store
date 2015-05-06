@@ -1,28 +1,32 @@
 package org.phenotips.variantstore.input.tsv;
 
-import java.io.IOException;
-import java.nio.file.*;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.phenotips.variantstore.input.AbstractVariantIterator;
 import org.phenotips.variantstore.input.InputException;
 import org.phenotips.variantstore.input.InputManager;
 import org.phenotips.variantstore.input.VariantHeader;
+import org.phenotips.variantstore.input.VariantIterator;
 import org.phenotips.variantstore.shared.VariantStoreException;
+
+import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 /**
- * Th
+ * @version $Id$
  */
-public class ExomiserTSVManager implements InputManager {
+public class ExomiserTSVManager implements InputManager
+{
+    private static String suffix = ".variants.tsv";
     private Logger logger = Logger.getLogger(ExomiserTSVManager.class);
     private Path path;
-
-    private static String suffix = ".variants.tsv";
 
     @Override
     public void init(Path path) throws VariantStoreException {
@@ -68,14 +72,14 @@ public class ExomiserTSVManager implements InputManager {
     }
 
     /**
-     * Given an individual, get the VariantIterator
+     * Given an individual, get the {@link VariantIterator}.
      *
-     * @param id
-     * @param isPublic
-     * @return
+     * @param id       individual id
+     * @param isPublic permission to use variants in aggregate results
+     * @return a variant iterator
      */
     @Override
-    public AbstractVariantIterator getIteratorForIndividual(String id, boolean isPublic) {
+    public VariantIterator getIteratorForIndividual(String id, boolean isPublic) {
         return new ExomiserTSVIterator(this.getIndividual(id), new VariantHeader(id, isPublic));
     }
 
@@ -84,7 +88,8 @@ public class ExomiserTSVManager implements InputManager {
         final List<String> list = new ArrayList<>();
 
         try {
-            Files.walkFileTree(this.path, new SimpleFileVisitor<Path>() {
+            Files.walkFileTree(this.path, new SimpleFileVisitor<Path>()
+            {
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                     if (attrs.isDirectory()) {
