@@ -1,3 +1,20 @@
+<!--
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
@@ -14,6 +31,7 @@
     <buildtools.version>1.1</buildtools.version>
     <checkstyle.skip>false</checkstyle.skip>
     <checkstyle.suppressions.location>${basedir}/src/checkstyle/checkstyle-suppressions.xml</checkstyle.suppressions.location>
+    <license.skip>false</license.skip>
   </properties>
 
   <dependencies>
@@ -176,6 +194,11 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
       </plugin>
+      <plugin>
+        <!-- Check license headers -->
+        <groupId>com.mycila</groupId>
+        <artifactId>license-maven-plugin</artifactId>
+      </plugin>
     </plugins>
     <pluginManagement>
       <plugins>
@@ -213,6 +236,60 @@
             </execution>
           </executions>
         </plugin>
+        <!-- Check license headers and fail the build if they're missing or not matching the defined format -->
+        <plugin>
+          <groupId>com.mycila</groupId>
+          <artifactId>license-maven-plugin</artifactId>
+          <!-- Lock down plugin version for build reproducibility -->
+          <version>2.6</version>
+          <configuration>
+            <skip>${license.skip}</skip>
+            <header>license.txt</header>
+            <strictCheck>true</strictCheck>
+            <headerDefinitions>
+              <!-- Our style for XML headers isn't standard so we need to define it in a custom manner.
+                   See xwiki-commons-tool-validation-resources module -->
+              <headerDefinition>license-xml-definition.xml</headerDefinition>
+              <headerDefinition>license-script-definition.xml</headerDefinition>
+              <headerDefinition>license-batch-definition.xml</headerDefinition>
+            </headerDefinitions>
+            <!-- Our Java and XML styles aren't the default so we need to change the mapping -->
+            <mapping>
+              <java>SLASHSTAR_STYLE</java>
+              <aj>SLASHSTAR_STYLE</aj>
+            </mapping>
+            <!-- We're only interested in checking our sources and our POMs -->
+            <!-- At the moment, only check the license headers in Java, XML and shell script files -->
+            <includes>
+              <include>src/**/*.java</include>
+              <include>src/**/*.xml</include>
+              <include>src/**/*.bat</include>
+              <include>src/**/*.sh</include>
+              <include>pom.xml</include>
+            </includes>
+            <excludes>
+              <!-- Exclude generated sources -->
+              <exclude>**/org/ga4gh/**</exclude>
+            </excludes>
+            <useDefaultExcludes>false</useDefaultExcludes>
+          </configuration>
+          <!-- Add a dependency since this is where the maven-license-plugin plugin will find the license.txt file -->
+          <dependencies>
+            <dependency>
+              <groupId>org.phenotips</groupId>
+              <artifactId>phenotips-license-verification-resources</artifactId>
+              <version>${buildtools.version}</version>
+            </dependency>
+          </dependencies>
+          <executions>
+            <execution>
+              <goals>
+                <goal>check</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
     </pluginManagement>
 
   </build>
