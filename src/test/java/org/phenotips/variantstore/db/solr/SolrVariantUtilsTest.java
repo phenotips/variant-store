@@ -18,10 +18,12 @@
 package org.phenotips.variantstore.db.solr;
 
 import org.phenotips.variantstore.TestUtils;
+import org.phenotips.variantstore.shared.GACallInfoFields;
 import org.phenotips.variantstore.shared.GAVariantInfoFields;
 import org.phenotips.variantstore.shared.VariantUtils;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -30,13 +32,14 @@ import org.apache.solr.client.solrj.response.GroupCommand;
 import org.apache.solr.client.solrj.response.GroupResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
+import org.ga4gh.GACall;
 import org.ga4gh.GAVariant;
 import org.hamcrest.CoreMatchers;
+import org.junit.Test;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-import org.junit.Test;
 
 /**
  * Test the SolrVariantUtils Class
@@ -81,13 +84,19 @@ public class SolrVariantUtilsTest
         assertEquals((long) variant.getStart(), position);
         assertEquals(variant.getReferenceBases(), ref);
         assertThat(variant.getAlternateBases(), CoreMatchers.<Object>is(alt));
-        assertEquals(VariantUtils.getInfoFromVariant(variant, GAVariantInfoFields.QUALITY), qual);
-        assertEquals(VariantUtils.getInfoFromVariant(variant, GAVariantInfoFields.FILTER), filter);
-        assertEquals(VariantUtils.getInfoFromVariant(variant, GAVariantInfoFields.EXOMISER_VARIANT_SCORE), String.valueOf(exomiser_variant_score));
-        assertEquals(VariantUtils.getInfoFromVariant(variant, GAVariantInfoFields.EXOMISER_GENE_PHENO_SCORE), String.valueOf(exomiser_gene_pheno_score));
-        assertEquals(VariantUtils.getInfoFromVariant(variant, GAVariantInfoFields.EXOMISER_GENE_VARIANT_SCORE), String.valueOf(exomiser_gene_variant_score));
-        assertEquals(VariantUtils.getInfoFromVariant(variant, GAVariantInfoFields.EXOMISER_GENE_COMBINED_SCORE), String.valueOf(exomiser_gene_combined_score));
-        assertEquals(VariantUtils.getInfoFromVariant(variant, GAVariantInfoFields.EXAC_AF), String.valueOf(exac_af));
+        assertEquals(VariantUtils.getInfo(variant, GAVariantInfoFields.GENE), String.valueOf(gene));
+        assertEquals(VariantUtils.getInfo(variant, GAVariantInfoFields.GENE_EFFECT), String.valueOf(gene_effect));
+        assertEquals(VariantUtils.getInfo(variant, GAVariantInfoFields.EXAC_AF), String.valueOf(exac_af));
+
+        assertThat(variant.getCalls(), is(notNullValue()));
+        GACall call = variant.getCalls().get(0);
+        assertThat(call, is(notNullValue()));
+        assertEquals(VariantUtils.getInfo(call, GACallInfoFields.QUALITY), qual);
+        assertEquals(VariantUtils.getInfo(call, GACallInfoFields.FILTER), filter);
+        assertEquals(VariantUtils.getInfo(call, GACallInfoFields.EXOMISER_VARIANT_SCORE), String.valueOf(exomiser_variant_score));
+        assertEquals(VariantUtils.getInfo(call, GACallInfoFields.EXOMISER_GENE_PHENO_SCORE), String.valueOf(exomiser_gene_pheno_score));
+        assertEquals(VariantUtils.getInfo(call, GACallInfoFields.EXOMISER_GENE_VARIANT_SCORE), String.valueOf(exomiser_gene_variant_score));
+        assertEquals(VariantUtils.getInfo(call, GACallInfoFields.EXOMISER_GENE_COMBINED_SCORE), String.valueOf(exomiser_gene_combined_score));
 
     }
 
@@ -112,15 +121,17 @@ public class SolrVariantUtilsTest
         variant.setStart(position);
         variant.setReferenceBases(ref);
         variant.setAlternateBases(alt);
-        VariantUtils.addInfoToVariant(variant, GAVariantInfoFields.QUALITY, qual);
-        VariantUtils.addInfoToVariant(variant, GAVariantInfoFields.FILTER, filter);
-        VariantUtils.addInfoToVariant(variant, GAVariantInfoFields.EXOMISER_VARIANT_SCORE, exomiser_variant_score);
-        VariantUtils.addInfoToVariant(variant, GAVariantInfoFields.EXOMISER_GENE_PHENO_SCORE, exomiser_gene_pheno_score);
-        VariantUtils.addInfoToVariant(variant, GAVariantInfoFields.EXOMISER_GENE_VARIANT_SCORE, exomiser_gene_variant_score);
-        VariantUtils.addInfoToVariant(variant, GAVariantInfoFields.EXOMISER_GENE_COMBINED_SCORE, exomiser_gene_combined_score);
-        VariantUtils.addInfoToVariant(variant, GAVariantInfoFields.GENE, gene);
-        VariantUtils.addInfoToVariant(variant, GAVariantInfoFields.GENE_EFFECT, gene_effect);
-        VariantUtils.addInfoToVariant(variant, GAVariantInfoFields.EXAC_AF, exac_af);
+        VariantUtils.addInfo(variant, GAVariantInfoFields.GENE, gene);
+        VariantUtils.addInfo(variant, GAVariantInfoFields.GENE_EFFECT, gene_effect);
+        VariantUtils.addInfo(variant, GAVariantInfoFields.EXAC_AF, exac_af);
+        GACall call = new GACall();
+        VariantUtils.addInfo(call, GACallInfoFields.QUALITY, qual);
+        VariantUtils.addInfo(call, GACallInfoFields.FILTER, filter);
+        VariantUtils.addInfo(call, GACallInfoFields.EXOMISER_VARIANT_SCORE, exomiser_variant_score);
+        VariantUtils.addInfo(call, GACallInfoFields.EXOMISER_GENE_PHENO_SCORE, exomiser_gene_pheno_score);
+        VariantUtils.addInfo(call, GACallInfoFields.EXOMISER_GENE_VARIANT_SCORE, exomiser_gene_variant_score);
+        VariantUtils.addInfo(call, GACallInfoFields.EXOMISER_GENE_COMBINED_SCORE, exomiser_gene_combined_score);
+        variant.setCalls(Collections.singletonList(call));
 
         SolrDocument doc = SolrVariantUtils.variantToDoc(variant);
 
@@ -160,15 +171,18 @@ public class SolrVariantUtilsTest
         variant.setStart(position);
         variant.setReferenceBases(ref);
         variant.setAlternateBases(alt);
-        VariantUtils.addInfoToVariant(variant, GAVariantInfoFields.QUALITY, qual);
-        VariantUtils.addInfoToVariant(variant, GAVariantInfoFields.FILTER, filter);
-        VariantUtils.addInfoToVariant(variant, GAVariantInfoFields.EXOMISER_VARIANT_SCORE, exomiser_variant_score);
-        VariantUtils.addInfoToVariant(variant, GAVariantInfoFields.EXOMISER_GENE_PHENO_SCORE, exomiser_gene_pheno_score);
-        VariantUtils.addInfoToVariant(variant, GAVariantInfoFields.EXOMISER_GENE_VARIANT_SCORE, exomiser_gene_variant_score);
-        VariantUtils.addInfoToVariant(variant, GAVariantInfoFields.EXOMISER_GENE_COMBINED_SCORE, exomiser_gene_combined_score);
-        VariantUtils.addInfoToVariant(variant, GAVariantInfoFields.GENE, gene);
-        VariantUtils.addInfoToVariant(variant, GAVariantInfoFields.GENE_EFFECT, gene_effect);
-        VariantUtils.addInfoToVariant(variant, GAVariantInfoFields.EXAC_AF, exac_af);
+        VariantUtils.addInfo(variant, GAVariantInfoFields.GENE, gene);
+        VariantUtils.addInfo(variant, GAVariantInfoFields.GENE_EFFECT, gene_effect);
+        VariantUtils.addInfo(variant, GAVariantInfoFields.EXAC_AF, exac_af);
+
+        GACall call = new GACall();
+        VariantUtils.addInfo(call, GACallInfoFields.QUALITY, qual);
+        VariantUtils.addInfo(call, GACallInfoFields.FILTER, filter);
+        VariantUtils.addInfo(call, GACallInfoFields.EXOMISER_VARIANT_SCORE, exomiser_variant_score);
+        VariantUtils.addInfo(call, GACallInfoFields.EXOMISER_GENE_PHENO_SCORE, exomiser_gene_pheno_score);
+        VariantUtils.addInfo(call, GACallInfoFields.EXOMISER_GENE_VARIANT_SCORE, exomiser_gene_variant_score);
+        VariantUtils.addInfo(call, GACallInfoFields.EXOMISER_GENE_COMBINED_SCORE, exomiser_gene_combined_score);
+        variant.setCalls(Collections.singletonList(call));
 
         SolrDocument doc = SolrVariantUtils.variantToDoc(variant);
         GAVariant variant2 = SolrVariantUtils.docToVariant(doc);
@@ -177,21 +191,26 @@ public class SolrVariantUtilsTest
         assertEquals((long) variant.getStart(), (long) variant2.getStart());
         assertEquals(variant.getReferenceBases(), variant2.getReferenceBases());
         assertThat(variant.getAlternateBases(), CoreMatchers.<Object>is(variant2.getAlternateBases()));
+        assertEquals(VariantUtils.getInfo(variant, GAVariantInfoFields.EXAC_AF),
+                VariantUtils.getInfo(variant2, GAVariantInfoFields.EXAC_AF));
+        assertEquals(VariantUtils.getInfo(variant, GAVariantInfoFields.GENE),
+                VariantUtils.getInfo(variant2, GAVariantInfoFields.GENE));
+        assertEquals(VariantUtils.getInfo(variant, GAVariantInfoFields.GENE_EFFECT),
+                VariantUtils.getInfo(variant2, GAVariantInfoFields.GENE_EFFECT));
 
-        assertEquals(VariantUtils.getInfoFromVariant(variant, GAVariantInfoFields.QUALITY),
-                VariantUtils.getInfoFromVariant(variant2, GAVariantInfoFields.QUALITY));
-        assertEquals(VariantUtils.getInfoFromVariant(variant, GAVariantInfoFields.FILTER),
-                VariantUtils.getInfoFromVariant(variant2, GAVariantInfoFields.FILTER));
-        assertEquals(VariantUtils.getInfoFromVariant(variant, GAVariantInfoFields.EXOMISER_VARIANT_SCORE),
-                VariantUtils.getInfoFromVariant(variant2, GAVariantInfoFields.EXOMISER_VARIANT_SCORE));
-        assertEquals(VariantUtils.getInfoFromVariant(variant, GAVariantInfoFields.EXOMISER_GENE_PHENO_SCORE),
-                VariantUtils.getInfoFromVariant(variant2, GAVariantInfoFields.EXOMISER_GENE_PHENO_SCORE));
-        assertEquals(VariantUtils.getInfoFromVariant(variant, GAVariantInfoFields.EXOMISER_GENE_VARIANT_SCORE),
-                VariantUtils.getInfoFromVariant(variant2, GAVariantInfoFields.EXOMISER_GENE_VARIANT_SCORE));
-        assertEquals(VariantUtils.getInfoFromVariant(variant, GAVariantInfoFields.EXOMISER_GENE_COMBINED_SCORE),
-                VariantUtils.getInfoFromVariant(variant2, GAVariantInfoFields.EXOMISER_GENE_COMBINED_SCORE));
-        assertEquals(VariantUtils.getInfoFromVariant(variant, GAVariantInfoFields.EXAC_AF),
-                VariantUtils.getInfoFromVariant(variant2, GAVariantInfoFields.EXAC_AF));
+        GACall call2 = variant2.getCalls().get(0);
+        assertEquals(VariantUtils.getInfo(call, GACallInfoFields.QUALITY),
+                VariantUtils.getInfo(call2, GACallInfoFields.QUALITY));
+        assertEquals(VariantUtils.getInfo(call, GACallInfoFields.FILTER),
+                VariantUtils.getInfo(call2, GACallInfoFields.FILTER));
+        assertEquals(VariantUtils.getInfo(call, GACallInfoFields.EXOMISER_VARIANT_SCORE),
+                VariantUtils.getInfo(call2, GACallInfoFields.EXOMISER_VARIANT_SCORE));
+        assertEquals(VariantUtils.getInfo(call, GACallInfoFields.EXOMISER_GENE_PHENO_SCORE),
+                VariantUtils.getInfo(call2, GACallInfoFields.EXOMISER_GENE_PHENO_SCORE));
+        assertEquals(VariantUtils.getInfo(call, GACallInfoFields.EXOMISER_GENE_VARIANT_SCORE),
+                VariantUtils.getInfo(call2, GACallInfoFields.EXOMISER_GENE_VARIANT_SCORE));
+        assertEquals(VariantUtils.getInfo(call, GACallInfoFields.EXOMISER_GENE_COMBINED_SCORE),
+                VariantUtils.getInfo(call2, GACallInfoFields.EXOMISER_GENE_COMBINED_SCORE));
     }
 
     @Test

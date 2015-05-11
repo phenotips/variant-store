@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.ga4gh.GACall;
 import org.ga4gh.GAVariant;
 
 /**
@@ -42,12 +43,26 @@ public final class VariantUtils
      * @param infoField the info field's name
      * @param value     the field's value
      */
-    public static void addInfoToVariant(GAVariant variant, String infoField, Object value) {
+    public static void addInfo(GAVariant variant, String infoField, Object value) {
         if (variant.getInfo() == null) {
             variant.setInfo(new HashMap<String, List<String>>());
         }
 
         variant.getInfo().put(infoField, Collections.<String>singletonList(String.valueOf(value)));
+    }
+
+    /**
+     * Add a value to the call's info map. Creates a new map if it doesn't exist.
+     * @param call the call
+     * @param infoField the info field name
+     * @param value the info field value
+     */
+    public static void addInfo(GACall call, String infoField, Object value) {
+        if (call.getInfo() == null) {
+            call.setInfo(new HashMap<String, List<String>>());
+        }
+
+        call.getInfo().put(infoField, Collections.<String>singletonList(String.valueOf(value)));
     }
 
     /**
@@ -57,13 +72,32 @@ public final class VariantUtils
      * @param field   the field to fetch.
      * @return null if field is not found, the String value otherwise.
      */
-    public static String getInfoFromVariant(GAVariant variant, String field) {
-        Map<String, List<String>> info = variant.getInfo();
+    public static String getInfo(GAVariant variant, String field) {
+        return getFirstElementValue(variant.getInfo(), field);
+    }
 
-        if (info == null || info.get(field) == null) {
+    /**
+     * Get a value from the info field. Assumes that each info field stores a single value
+     * @param call the GACall
+     * @param field the field to fetch
+     * @return null if field is not found, the String value otherwise
+     */
+    public static String getInfo(GACall call, String field) {
+        return getFirstElementValue(call.getInfo(), field);
+    }
+
+    /**
+     * Given a map, retrieve the array value for the given key, and return the first element of the array, or null.
+     * @param map the map
+     * @param key the key
+     * @return null if map is null or the key is not in the map. The first element of the value otherwise.
+     */
+    private static String getFirstElementValue(Map<String, List<String>> map, String key) {
+        if (map == null || map.get(key) == null) {
             return null;
         }
 
-        return info.get(field).get(0);
+        return map.get(key).get(0);
     }
+
 }

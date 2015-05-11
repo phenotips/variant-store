@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
+/*
  * See the NOTICE file distributed with this work for additional
  * information regarding copyright ownership.
  *
@@ -15,15 +14,24 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
--->
-<!DOCTYPE suppressions PUBLIC
-    "-//Puppy Crawl//DTD Suppressions 1.0//EN"
-    "http://www.puppycrawl.com/dtds/suppressions_1_0.dtd">
+ */
+package org.phenotips.variantstore.shared;
 
-<suppressions>
-  <suppress checks="JavadocVariable" files="ExomiserTSVColumn.java" />
-  <suppress checks="JavadocVariable" files="SolrSchema.java" />
-  <suppress checks="JavadocVariable" files="GAVariantInfoFields.java" />
-  <suppress checks="JavadocVariable" files="GACallInfoFields.java" />
-  <suppress checks="UncommentedMain" files="VariantStore.java" /><!--TODO: This is temporary until we have better tests-->
-</suppressions>
+/**
+ * The keys in the {{@link org.ga4gh.GACall}} Info field.
+ *
+ * @version $Id$
+ */
+public final class GACallInfoFields
+{
+    public static final String EXOMISER_GENE_COMBINED_SCORE = "EXOMISER_GENE_COMBINED_SCORE";
+    public static final String EXOMISER_GENE_PHENO_SCORE = "EXOMISER_GENE_PHENO_SCORE";
+    public static final String EXOMISER_GENE_VARIANT_SCORE = "EXOMISER_GENE_VARIANT_SCORE";
+    public static final String EXOMISER_VARIANT_SCORE = "EXOMISER_VARIANT_SCORE";
+    public static final String FILTER = "FILTER";
+    public static final String QUALITY = "QUAL";
+
+    private GACallInfoFields() {
+        throw new AssertionError();
+    }
+}

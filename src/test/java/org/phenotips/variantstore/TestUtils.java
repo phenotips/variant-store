@@ -17,13 +17,18 @@
  */
 package org.phenotips.variantstore;
 
+import org.phenotips.variantstore.shared.GACallInfoFields;
 import org.phenotips.variantstore.shared.GAVariantInfoFields;
 import org.phenotips.variantstore.shared.VariantUtils;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
+import org.ga4gh.GACall;
 import org.ga4gh.GAVariant;
+
+import com.google.common.collect.Lists;
 
 /**
  * Created by meatcar on 4/29/15.
@@ -64,15 +69,20 @@ public class TestUtils
         variant.setStart(position);
         variant.setReferenceBases(ref);
         variant.setAlternateBases(alt);
-        VariantUtils.addInfoToVariant(variant, GAVariantInfoFields.QUALITY, qual);
-        VariantUtils.addInfoToVariant(variant, GAVariantInfoFields.FILTER, filter);
-        VariantUtils.addInfoToVariant(variant, GAVariantInfoFields.EXOMISER_VARIANT_SCORE, exomiser_variant_score);
-        VariantUtils.addInfoToVariant(variant, GAVariantInfoFields.EXOMISER_GENE_PHENO_SCORE, exomiser_gene_pheno_score);
-        VariantUtils.addInfoToVariant(variant, GAVariantInfoFields.EXOMISER_GENE_VARIANT_SCORE, exomiser_gene_variant_score);
-        VariantUtils.addInfoToVariant(variant, GAVariantInfoFields.EXOMISER_GENE_COMBINED_SCORE, exomiser_gene_combined_score);
-        VariantUtils.addInfoToVariant(variant, GAVariantInfoFields.GENE, gene);
-        VariantUtils.addInfoToVariant(variant, GAVariantInfoFields.GENE_EFFECT, gene_effect);
-        VariantUtils.addInfoToVariant(variant, GAVariantInfoFields.EXAC_AF, exac_af);
+        VariantUtils.addInfo(variant, GAVariantInfoFields.GENE, gene);
+        VariantUtils.addInfo(variant, GAVariantInfoFields.GENE_EFFECT, gene_effect);
+        VariantUtils.addInfo(variant, GAVariantInfoFields.EXAC_AF, exac_af);
+
+        GACall call = new GACall();
+
+        call.setGenotype(Arrays.asList((int) (Math.random() * 100 % 2), (int) (Math.random() * 100 % 2)));
+        VariantUtils.addInfo(call, GACallInfoFields.QUALITY, qual);
+        VariantUtils.addInfo(call, GACallInfoFields.FILTER, filter);
+        VariantUtils.addInfo(call, GACallInfoFields.EXOMISER_VARIANT_SCORE, exomiser_variant_score);
+        VariantUtils.addInfo(call, GACallInfoFields.EXOMISER_GENE_PHENO_SCORE, exomiser_gene_pheno_score);
+        VariantUtils.addInfo(call, GACallInfoFields.EXOMISER_GENE_VARIANT_SCORE, exomiser_gene_variant_score);
+        VariantUtils.addInfo(call, GACallInfoFields.EXOMISER_GENE_COMBINED_SCORE, exomiser_gene_combined_score);
+        variant.setCalls(Collections.singletonList(call));
 
         return variant;
     }

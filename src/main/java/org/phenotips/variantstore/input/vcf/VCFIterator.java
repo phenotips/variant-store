@@ -19,22 +19,25 @@ package org.phenotips.variantstore.input.vcf;
 
 import org.phenotips.variantstore.input.AbstractVariantIterator;
 import org.phenotips.variantstore.input.VariantHeader;
+import org.phenotips.variantstore.shared.GACallInfoFields;
 import org.phenotips.variantstore.shared.GAVariantInfoFields;
+import org.phenotips.variantstore.shared.VariantUtils;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
 import org.apache.log4j.Logger;
+import org.ga4gh.GACall;
 import org.ga4gh.GAVariant;
 
 import htsjdk.samtools.util.CloseableIterator;
 import htsjdk.variant.variantcontext.Allele;
 import htsjdk.variant.variantcontext.CommonInfo;
+import htsjdk.variant.variantcontext.Genotype;
 import htsjdk.variant.variantcontext.VariantContext;
 import htsjdk.variant.vcf.VCFFileReader;
 
@@ -141,21 +144,38 @@ public class VCFIterator extends AbstractVariantIterator
         variant.setEnd((long) context.getEnd());
         variant.setReferenceBases(context.getReference().getBaseString());
 
+
         // ALT
         List<String> alts = stringifyAlleles(context.getAlternateAlleles());
         variant.setAlternateBases(alts);
 
         // INFO
-        info.put(GAVariantInfoFields.QUALITY, Collections.singletonList(String.valueOf(context.getPhredScaledQual())));
-        info.put(GAVariantInfoFields.FILTER, new ArrayList<String>(context.getFilters()));
-
         String alleleFrequency = (String) context.getAttribute("AF");
         if (alleleFrequency != null) {
             // handling ExAC VCF file
-            info.put(GAVariantInfoFields.EXAC_AF, Collections.singletonList(alleleFrequency));
+            VariantUtils.addInfo(variant, GAVariantInfoFields.EXAC_AF, alleleFrequency);
         }
 
         variant.setInfo(info);
+
+        // Calls
+        List<GACall> calls = new ArrayList<>();
+        for (Genotype genotype : context.getGenotypes()) {
+            GACall call = new GACall();
+
+            // genotype
+            call.setGenotype(new ArrayList<Integer>());
+            for (Allele a : genotype.getAlleles()) {
+                call.getGenotype().add(context.getAlleleIndex(a));
+            }
+
+            VariantUtils.addInfo(call, GACallInfoFields.QUALITY, String.valueOf(context.getPhredScaledQual()));
+            VariantUtils.addInfo(call, GACallInfoFields.FILTER, context.getFilters());
+
+
+            calls.add(call);
+        }
+        variant.setCalls(calls);
 
         this.nextRow = this.nextFiltered();
         if (!hasNext()) {
