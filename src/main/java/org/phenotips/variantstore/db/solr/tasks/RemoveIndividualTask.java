@@ -22,8 +22,9 @@ import org.phenotips.variantstore.db.DatabaseException;
 import java.io.IOException;
 import java.util.concurrent.Callable;
 
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 
 /**
  * @version $Id$
@@ -31,15 +32,15 @@ import org.apache.solr.client.solrj.SolrServerException;
 public class RemoveIndividualTask implements Callable<Object>
 {
 
-    private SolrServer server;
+    private SolrClient server;
     private String id;
 
     /**
      * Remove an individual from solr.
-     * @param server the solr server to run the task on
-     * @param id the id of the individual
+     *  @param server the solr server to run the task on
+     * @param id     the id of the individual
      */
-    public RemoveIndividualTask(SolrServer server, String id) {
+    public RemoveIndividualTask(SolrClient server, String id) {
         this.server = server;
         this.id = id;
     }

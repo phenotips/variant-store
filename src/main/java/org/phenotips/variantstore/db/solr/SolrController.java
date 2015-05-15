@@ -24,6 +24,7 @@ import org.phenotips.variantstore.db.solr.tasks.RemoveIndividualTask;
 import org.phenotips.variantstore.input.VariantIterator;
 import org.phenotips.variantstore.shared.ResourceManager;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -36,8 +37,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 
 import org.apache.log4j.Logger;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.client.solrj.response.QueryResponse;
@@ -57,7 +58,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class SolrController extends AbstractDatabaseController
 {
-    /** the field name of the EXAC allele frequency value in the allele frequency query map. **/
+    /**
+     * the field name of the EXAC allele frequency value in the allele frequency query map.
+     **/
     public static final String EXAC_FREQUENCY_FIELD = "EXAC";
 
     private Logger logger = Logger.getLogger(getClass());
@@ -65,7 +68,7 @@ public class SolrController extends AbstractDatabaseController
     private ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
     private CoreContainer cores;
-    private SolrServer server;
+    private SolrClient server;
 
     /**
      * Create a SolrController, that will store it's files and configuration in a directory inside of rootPath.
@@ -95,7 +98,6 @@ public class SolrController extends AbstractDatabaseController
     @Override
     public void stop() {
         executor.shutdownNow();
-        server.shutdown();
         cores.shutdown();
     }
 
@@ -143,7 +145,7 @@ public class SolrController extends AbstractDatabaseController
         try {
             resp = server.query(q);
             list = SolrVariantUtils.documentListToList(resp.getResults());
-        } catch (SolrServerException e) {
+        } catch (SolrServerException | IOException e) {
             logger.error("Error getting individuals ", e);
         }
 
@@ -210,7 +212,7 @@ public class SolrController extends AbstractDatabaseController
         try {
             resp = server.query(q);
             list = SolrVariantUtils.documentListToList(resp.getResults());
-        } catch (SolrServerException e) {
+        } catch (SolrServerException | IOException e) {
             logger.error("Error getting individuals with variants", e);
         }
 
@@ -242,9 +244,9 @@ public class SolrController extends AbstractDatabaseController
         StringBuilder builder = new StringBuilder();
         for (String effect : variantEffects) {
             builder.append(SolrSchema.GENE_EFFECT)
-                   .append(":")
-                   .append(ClientUtils.escapeQueryChars(effect))
-                   .append(" OR ");
+                    .append(":")
+                    .append(ClientUtils.escapeQueryChars(effect))
+                    .append(" OR ");
         }
         // Strip final ' OR '
         String effectQuery = builder.toString();
@@ -280,7 +282,7 @@ public class SolrController extends AbstractDatabaseController
         try {
             resp = server.query(q);
             map = SolrVariantUtils.groupResponseToMap(resp.getGroupResponse());
-        } catch (SolrServerException e) {
+        } catch (SolrServerException | IOException e) {
             logger.error("Error getting individals with variant", e);
         }
 
@@ -309,7 +311,7 @@ public class SolrController extends AbstractDatabaseController
         SolrQuery q = new SolrQuery()
                 .setQuery(queryString)
                 .addSort(SolrSchema.ID, SolrQuery.ORDER.desc)
-                // required for cursor
+                        // required for cursor
                 .setTimeAllowed(0);
 
 
@@ -332,7 +334,7 @@ public class SolrController extends AbstractDatabaseController
 
                 oldCursor = cursor;
                 cursor = resp.getNextCursorMark();
-            } catch (SolrServerException e) {
+            } catch (SolrServerException | IOException e) {
                 logger.error("Error getting individuals with variant", e);
                 break;
             }
