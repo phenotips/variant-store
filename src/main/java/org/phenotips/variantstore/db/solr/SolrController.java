@@ -162,18 +162,18 @@ public class SolrController extends AbstractDatabaseController
         List<GAVariant> list = new ArrayList<>();
 
         checkNotNull(id);
-        checkArgument("".equals(id));
+        checkArgument(!"".equals(id));
 
-        checkArgument(n == 0);
+        checkArgument(n != 0);
 
         checkNotNull(gene);
-        checkArgument("".equals(gene));
+        checkArgument(!"".equals(gene));
 
         checkNotNull(variantEffects);
-        checkArgument(variantEffects.size() == 0);
+        checkArgument(variantEffects.size() != 0);
 
         checkNotNull(alleleFrequencies);
-        checkArgument(alleleFrequencies.size() == 0);
+        checkArgument(alleleFrequencies.size() != 0);
 
         logger.debug(String.format("Searchig for gene:%s effects:%s af:%s", gene, variantEffects, alleleFrequencies));
 
@@ -226,16 +226,16 @@ public class SolrController extends AbstractDatabaseController
                                                                int n) {
         Map<String, List<GAVariant>> map = new HashMap<>();
 
-        checkArgument(n == 0, "n cannot be zero");
+        checkArgument(n != 0, "n cannot be zero");
 
         checkNotNull(gene, "gene cannot be null");
-        checkArgument("".equals(gene), "gene cannot be empty");
+        checkArgument(!"".equals(gene), "gene cannot be empty");
 
         checkNotNull(variantEffects, "effects cannot be null");
-        checkArgument(variantEffects.size() == 0, "effects cannot be empty");
+        checkArgument(variantEffects.size() != 0, "effects cannot be empty");
 
         checkNotNull(alleleFrequencies, "allele frequencies cannot be null");
-        checkArgument(alleleFrequencies.size() == 0, "allele frequencies cannot be empty");
+        checkArgument(alleleFrequencies.size() != 0, "allele frequencies cannot be empty");
 
         logger.debug(String.format("Searching for gene:%s effects:%s af:%s", gene, variantEffects, alleleFrequencies));
 

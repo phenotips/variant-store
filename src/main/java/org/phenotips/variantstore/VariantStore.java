@@ -61,12 +61,59 @@ public class VariantStore implements VariantStoreInterface
      * Specify your own DB and Input format.
      *
      * @param inputManager an input format manager
-     * @param db the db implementation
+     * @param db           the db implementation
      */
     public VariantStore(InputManager inputManager, DatabaseController db) {
         this.path = path;
         this.inputManager = inputManager;
         this.db = db;
+    }
+
+    /**
+     * Main method for testing purposes. TODO:REMOVE
+     *
+     * @param args commandline args
+     */
+    public static void main(String[] args) {
+        logger.debug("Starting");
+        VariantStore vs = null;
+
+        vs = new VariantStore(
+                new ExomiserTSVManager(),
+                new SolrController()
+        );
+
+        try {
+            vs.init(Paths.get("/data/dev-variant-store"));
+        } catch (VariantStoreException e) {
+            logger.error("Error initializing VariantStore", e);
+            return;
+        }
+
+        logger.debug("Started");
+
+
+        try {
+            String id = "F0000009";
+            logger.debug("Adding " + id);
+            vs.addIndividual(id, true, Paths.get("/data/vcf/c4r/tsvs/" + id + ".variants.tsv")).get();
+            logger.debug("Removing");
+            vs.removeIndividual(id).get();
+        } catch (InterruptedException | ExecutionException | VariantStoreException e) {
+            logger.error("Error", e);
+        }
+
+        Map<String, List<GAVariant>> map;
+
+        Map<String, Double> af = new HashMap<>();
+        af.put("EXAC", (double) 0.1);
+        map = vs.getIndividualsWithGene("MED12", Arrays.asList("SPLICING"), af);
+        logger.debug("Individuals w Genes: " + map);
+        logger.debug("Total individuals: " + vs.getIndividuals().size());
+
+
+        vs.stop();
+        logger.debug("Stopped");
     }
 
     @Override
@@ -121,8 +168,8 @@ public class VariantStore implements VariantStoreInterface
     /**
      * The implementation method for the GA4GH.
      *
-     * @param chr chromosome
-     * @param pos position
+     * @param chr    chromosome
+     * @param pos    position
      * @param allele allele
      * @return the allele frequency of this variant in the db.
      */
@@ -135,52 +182,6 @@ public class VariantStore implements VariantStoreInterface
 
         //TODO: THIS MATH IS SO WRONG
         return (double) map.size() / (double) this.getIndividuals().size();
-    }
-
-    /**
-     * Main method for testing purposes. TODO:REMOVE
-     * @param args commandline args
-     */
-    public static void main(String[] args) {
-        logger.debug("Starting");
-        VariantStore vs = null;
-
-        vs = new VariantStore(
-                new ExomiserTSVManager(),
-                new SolrController()
-        );
-
-        try {
-            vs.init(Paths.get("/data/dev-variant-store"));
-        } catch (VariantStoreException e) {
-            logger.error("Error initializing VariantStore", e);
-            return;
-        }
-
-        logger.debug("Started");
-
-
-        try {
-            String id = "F0000009";
-            logger.debug("Adding " + id);
-            vs.addIndividual(id, true, Paths.get("/data/vcf/c4r/tsvs/" + id + ".variants.tsv")).get();
-            logger.debug("Removing");
-            vs.removeIndividual(id).get();
-        } catch (InterruptedException | ExecutionException | VariantStoreException e) {
-            logger.error("Error", e);
-        }
-
-        Map<String, List<GAVariant>> map;
-
-        Map<String, Double> af = new HashMap<>();
-        af.put("EXAC", (double) 0.1);
-        map = vs.getIndividualsWithGene("MED12", Arrays.asList("SPLICING"), af);
-        logger.debug("Individuals w Genes: " + map);
-        logger.debug("Total individuals: " + vs.getIndividuals().size());
-
-
-        vs.stop();
-        logger.debug("Stopped");
     }
 
 }
