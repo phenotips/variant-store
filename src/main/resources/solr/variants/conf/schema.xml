@@ -79,7 +79,9 @@
     <field name="chrom" type="string" indexed="true" stored="true" required="true" />
     <field name="pos" type="int" indexed="true" stored="true" required="true" />
     <field name="ref" type="string" indexed="true" stored="true" required="true" />
-    <field multiValued="true" name="alts" type="string" indexed="true" stored="true" required="true" />
+    <field name="alt" type="string" indexed="true" stored="true" required="true" />
+    <!--the number of copies of this variant that this individual has, as per GT field in VCF-->
+    <field name="copies" type="int" indexed="true" stored="true" required="true" />
 
     <field name="is_public" type="bool" indexed="true" stored="true" required="false" default="false"/>
 

@@ -36,8 +36,10 @@ import org.ga4gh.GACall;
 import org.ga4gh.GAVariant;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
@@ -67,7 +69,7 @@ public class SolrVariantUtilsTest
         doc.setField(SolrSchema.CHROM, chrom);
         doc.setField(SolrSchema.POS, position);
         doc.setField(SolrSchema.REF, ref);
-        doc.setField(SolrSchema.ALTS, alt);
+        doc.setField(SolrSchema.ALT, alt);
         doc.setField(SolrSchema.QUAL, qual);
         doc.setField(SolrSchema.FILTER, filter);
         doc.setField(SolrSchema.EXOMISER_VARIANT_SCORE, exomiser_variant_score);
@@ -138,7 +140,7 @@ public class SolrVariantUtilsTest
         assertEquals(doc.get(SolrSchema.CHROM), chrom);
         assertEquals(doc.get(SolrSchema.POS), position);
         assertEquals(doc.get(SolrSchema.REF), ref);
-        assertThat(doc.get(SolrSchema.ALTS), CoreMatchers.<Object>is(alt));
+        assertThat(doc.get(SolrSchema.ALT), is(nullValue()));
         assertEquals(doc.get(SolrSchema.QUAL), qual);
         assertEquals(doc.get(SolrSchema.FILTER), filter);
         assertEquals(doc.get(SolrSchema.EXOMISER_VARIANT_SCORE), exomiser_variant_score);
@@ -155,7 +157,6 @@ public class SolrVariantUtilsTest
         String chrom = "chrX";
         long position = (long) 2000;
         String ref = "CTAG";
-        List<String> alt = Arrays.asList("A", "T");
         String qual = "10";
         String filter = "PASS";
         double exomiser_variant_score = 0.1;
@@ -170,7 +171,6 @@ public class SolrVariantUtilsTest
         variant.setReferenceName(chrom);
         variant.setStart(position);
         variant.setReferenceBases(ref);
-        variant.setAlternateBases(alt);
         VariantUtils.addInfo(variant, GAVariantInfoFields.GENE, gene);
         VariantUtils.addInfo(variant, GAVariantInfoFields.GENE_EFFECT, gene_effect);
         VariantUtils.addInfo(variant, GAVariantInfoFields.EXAC_AF, exac_af);
@@ -190,7 +190,7 @@ public class SolrVariantUtilsTest
         assertEquals(variant.getReferenceName(), variant2.getReferenceName());
         assertEquals((long) variant.getStart(), (long) variant2.getStart());
         assertEquals(variant.getReferenceBases(), variant2.getReferenceBases());
-        assertThat(variant.getAlternateBases(), CoreMatchers.<Object>is(variant2.getAlternateBases()));
+
         assertEquals(VariantUtils.getInfo(variant, GAVariantInfoFields.EXAC_AF),
                 VariantUtils.getInfo(variant2, GAVariantInfoFields.EXAC_AF));
         assertEquals(VariantUtils.getInfo(variant, GAVariantInfoFields.GENE),
@@ -268,5 +268,35 @@ public class SolrVariantUtilsTest
         /** TODO: stop relying on Math.random to generate pseudo-unique keys **/
         assertThat(list.get(0).getReferenceBases(), is(var1.getReferenceBases()));
         assertThat(list.get(1).getReferenceBases(), is(var2.getReferenceBases()));
+    }
+
+    @Test
+    public void testVariantToDocs() throws Exception {
+        GAVariant variant = new GAVariant();
+        GACall call = new GACall();
+
+        /** Test multiple alts */
+        variant.setAlternateBases(Arrays.asList("A", "T"));
+        call.setGenotype(Arrays.asList(1, 2));
+        variant.setCalls(Collections.singletonList(call));
+
+        List<SolrDocument> solrDocuments = SolrVariantUtils.variantToDocs(variant);
+
+        assertThat(solrDocuments.size(), is(2));
+        assertThat((String) solrDocuments.get(0).getFieldValue(SolrSchema.ALT), is(equalTo("A")));
+        assertThat((int) solrDocuments.get(0).getFieldValue(SolrSchema.COPIES), is(equalTo(1)));
+        assertThat((String) solrDocuments.get(1).getFieldValue(SolrSchema.ALT), is(equalTo("T")));
+        assertThat((int) solrDocuments.get(1).getFieldValue(SolrSchema.COPIES), is(equalTo(1)));
+
+        /** Test single alt */
+        variant.setAlternateBases(Arrays.asList("A"));
+        call.setGenotype(Arrays.asList(1, 1));
+        variant.setCalls(Collections.singletonList(call));
+
+        solrDocuments = SolrVariantUtils.variantToDocs(variant);
+
+        assertThat(solrDocuments.size(), is(1));
+        assertThat((String) solrDocuments.get(0).getFieldValue(SolrSchema.ALT), is(equalTo("A")));
+        assertThat((int) solrDocuments.get(0).getFieldValue(SolrSchema.COPIES), is(equalTo(2)));
     }
 }

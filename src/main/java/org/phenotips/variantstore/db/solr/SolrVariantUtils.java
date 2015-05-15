@@ -23,6 +23,7 @@ import static org.phenotips.variantstore.shared.VariantUtils.addInfo;
 import static org.phenotips.variantstore.shared.VariantUtils.getInfo;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -99,7 +100,6 @@ public final class SolrVariantUtils
         variant.setReferenceBases(doc.get(SolrSchema.REF).toString());
         variant.setStart(Long.valueOf(doc.get(SolrSchema.POS).toString()));
         variant.setEnd(variant.getStart() + variant.getReferenceBases().length());
-        variant.setAlternateBases((List<String>) doc.get(SolrSchema.ALTS));
 
         addInfo(variant, GAVariantInfoFields.GENE, doc.get(SolrSchema.GENE));
         addInfo(variant, GAVariantInfoFields.GENE_EFFECT, doc.get(SolrSchema.GENE_EFFECT));
@@ -117,6 +117,16 @@ public final class SolrVariantUtils
         addInfo(call, GACallInfoFields.EXOMISER_GENE_COMBINED_SCORE, doc.get(SolrSchema.EXOMISER_GENE_COMBINED_SCORE));
         variant.setCalls(Collections.singletonList(call));
 
+        List<String> alts;
+        if (doc.get(SolrSchema.COPIES) == 2) {
+            alts = Arrays.asList(doc.get(SolrSchema.ALT).toString(), doc.get(SolrSchema.ALT).toString());
+            call.setGenotype(Arrays.asList(1, 1));
+        } else {
+            alts = Collections.singletonList(doc.get(SolrSchema.ALT).toString());
+            call.setGenotype(Arrays.asList(0, 1));
+        }
+        variant.setAlternateBases(alts);
+
         return variant;
     }
 
@@ -132,7 +142,6 @@ public final class SolrVariantUtils
         doc.setField(SolrSchema.CHROM, variant.getReferenceName());
         doc.setField(SolrSchema.POS, variant.getStart());
         doc.setField(SolrSchema.REF, variant.getReferenceBases());
-        doc.setField(SolrSchema.ALTS, variant.getAlternateBases());
 
         doc.setField(SolrSchema.GENE, getInfo(variant, GAVariantInfoFields.GENE));
         doc.setField(SolrSchema.GENE_EFFECT, getInfo(variant, GAVariantInfoFields.GENE_EFFECT));
@@ -147,14 +156,55 @@ public final class SolrVariantUtils
         doc.setField(SolrSchema.FILTER, getInfo(call, GACallInfoFields.FILTER));
 
         doc.setField(SolrSchema.EXOMISER_VARIANT_SCORE,
-                Double.valueOf(getInfo(call, GACallInfoFields.EXOMISER_VARIANT_SCORE)));
+                safeValueOf(getInfo(call, GACallInfoFields.EXOMISER_VARIANT_SCORE)));
         doc.setField(SolrSchema.EXOMISER_GENE_PHENO_SCORE,
-                Double.valueOf(getInfo(call, GACallInfoFields.EXOMISER_GENE_PHENO_SCORE)));
+                safeValueOf(getInfo(call, GACallInfoFields.EXOMISER_GENE_PHENO_SCORE)));
         doc.setField(SolrSchema.EXOMISER_GENE_VARIANT_SCORE,
-                Double.valueOf(getInfo(call, GACallInfoFields.EXOMISER_GENE_VARIANT_SCORE)));
+                safeValueOf(getInfo(call, GACallInfoFields.EXOMISER_GENE_VARIANT_SCORE)));
         doc.setField(SolrSchema.EXOMISER_GENE_COMBINED_SCORE,
-                Double.valueOf(getInfo(call, GACallInfoFields.EXOMISER_GENE_COMBINED_SCORE)));
+                safeValueOf(getInfo(call, GACallInfoFields.EXOMISER_GENE_COMBINED_SCORE)));
 
         return doc;
+    }
+
+    /**
+     * Given a single variant, create at least one doc, where each doc has a single alt from the variant, as well
+     * as the number of copies that of that alt that the variant exhibits.
+     * @param variant the GAVariant
+     * @return a list of solr documents
+     */
+    public static List<SolrDocument> variantToDocs(GAVariant variant) {
+        Map<String, SolrDocument> map = new HashMap<>();
+        for (int i : variant.getCalls().get(0).getGenotype()) {
+            // genotype field has 1-based indeces. Convert them to 0-based
+            i -= 1;
+            String alt = variant.getAlternateBases().get(i);
+            SolrDocument doc;
+
+            if (map.containsKey(alt)) {
+                doc = map.get(alt);
+                doc.setField(SolrSchema.COPIES, (int) doc.getFieldValue(SolrSchema.COPIES) + 1);
+            } else {
+                doc = variantToDoc(variant);
+                doc.setField(SolrSchema.ALT, alt);
+                doc.setField(SolrSchema.COPIES, 1);
+                map.put(alt, doc);
+            }
+        }
+
+        return new ArrayList<>(map.values());
+    }
+
+    /**
+     * Avoid NullPointerExceptions when parsing doubles
+     * @param s the string
+     * @return a double or null
+     */
+    private static Double safeValueOf(String s) {
+        if (s == null) {
+            return null;
+        }
+
+        return Double.valueOf(s);
     }
 }

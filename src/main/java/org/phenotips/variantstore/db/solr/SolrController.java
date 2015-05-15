@@ -303,7 +303,7 @@ public class SolrController extends AbstractDatabaseController
                 SolrSchema.CHROM, ClientUtils.escapeQueryChars(chr),
                 SolrSchema.REF, ClientUtils.escapeQueryChars(ref),
                 SolrSchema.POS, ClientUtils.escapeQueryChars(String.valueOf(pos)),
-                SolrSchema.ALTS, ClientUtils.escapeQueryChars(alt)
+                SolrSchema.ALT, ClientUtils.escapeQueryChars(alt)
         );
 
         logger.debug("Query: " + queryString);
