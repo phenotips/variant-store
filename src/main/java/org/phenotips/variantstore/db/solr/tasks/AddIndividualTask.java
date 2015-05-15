@@ -28,7 +28,6 @@ import java.util.concurrent.Callable;
 
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrInputDocument;
 import org.ga4gh.GAVariant;
@@ -44,7 +43,8 @@ public class AddIndividualTask implements Callable<Object>
 
     /**
      * Initialize the task.
-     *  @param server   the SolrServer to run the task on
+     *
+     * @param server   the SolrServer to run the task on
      * @param iterator the variants to add
      */
     public AddIndividualTask(SolrClient server, VariantIterator iterator) {

@@ -24,7 +24,6 @@ import java.util.concurrent.Callable;
 
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 
 /**
  * @version $Id$
@@ -37,7 +36,8 @@ public class RemoveIndividualTask implements Callable<Object>
 
     /**
      * Remove an individual from solr.
-     *  @param server the solr server to run the task on
+     *
+     * @param server the solr server to run the task on
      * @param id     the id of the individual
      */
     public RemoveIndividualTask(SolrClient server, String id) {
