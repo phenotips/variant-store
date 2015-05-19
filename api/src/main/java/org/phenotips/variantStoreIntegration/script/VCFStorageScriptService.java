@@ -35,6 +35,7 @@ import javax.inject.Singleton;
  * API for providing access to the variant store.
  *
  * @version $Id$
+ * @Since 1.0
  */
 @Component
 @Named("VCFStorage")
@@ -45,12 +46,12 @@ public class VCFStorageScriptService implements ScriptService
     private VCFUploadManager uploadManager;
 
     /**
-     * @param patient A PhenoTips patient.
+     * @param patientID A PhenoTips patient ID.
      * @param filePath The path to where the patients VCF is stored
      */
-    public void upload(Patient patient, Path filePath)
+    public void upload(String patientID, String filePath)
     {
-        this.uploadManager.uploadVCF(patient, filePath);
+        this.uploadManager.uploadVCF(patientID, filePath);
     }
 
     /**

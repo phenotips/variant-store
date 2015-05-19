@@ -29,6 +29,8 @@ import org.xwiki.observation.ObservationManager;
 
 import java.util.concurrent.Future;
 
+import javax.inject.Provider;
+
 import com.xpn.xwiki.XWiki;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.XWikiException;
@@ -57,20 +59,22 @@ public class VCFUploadJob implements Runnable
 
     private XWikiContext context;
 
+    private Provider<XWikiContext> contextProvider;
+
     private ObservationManager observationManager;
 
     /**
      * @param patient A PhenoTips Patient ID
      * @param variantStoreFuture The future returned by the variant store.
-     * @param context The xwiki context
+     * @param provider The xwiki context provider
      * @param observationManager The observation manager for event pubs
      */
-    public VCFUploadJob(Patient patient, Future variantStoreFuture, XWikiContext context,
+    public VCFUploadJob(Patient patient, Future variantStoreFuture, Provider<XWikiContext> provider,
         ObservationManager observationManager)
     {
         this.future = variantStoreFuture;
         this.patient = patient;
-        this.context = context;
+        this.contextProvider = provider;
         this.observationManager = observationManager;
     }
 
@@ -79,6 +83,7 @@ public class VCFUploadJob implements Runnable
     {
         String propertyName = "status";
         try {
+            this.context = this.contextProvider.get();
             // set patient VCF upload status to 'Inititialized' on disk
             XWiki xwiki = this.context.getWiki();
             XWikiDocument d = xwiki.getDocument(this.patient.getDocument(), this.context);
@@ -110,12 +115,15 @@ public class VCFUploadJob implements Runnable
                 this.future.cancel(true);
                 status.setValue(null);
             } catch (XWikiException e1) {
-                // TODO figure out what to do here. Ignore it?
+                this.future.cancel(true);
+                this.observationManager.notify(new VCFUploadCompleteEvent(this.patient), this);
             }
 
         } catch (Exception e) {
-            // TODO Auto-generated catch block
+
+            this.future.cancel(true);
             e.printStackTrace();
+            this.observationManager.notify(new VCFUploadCompleteEvent(this.patient), this);
         }
 
     }
