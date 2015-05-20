@@ -108,16 +108,20 @@ public class DefaultVCFUploadManager implements VCFUploadManager
      *
      */
     @Override
-    public void uploadVCF(String patientID, String filePath)
+    public void uploadVCF(String patientID, String filePath) throws Exception
     {
         Patient patient = this.pr.getPatientById(patientID);
 
         if (patient == null){
             this.logger.warn("No patient found with the id: {}", patientID);
-            return;
+            throw new Exception("Could not find the patient with ID: " + patientID);
         }
 
-        Path pathOfFile = new File(filePath).toPath();
+        File vcfFile = new File(filePath);
+        if (!vcfFile.exists() || !vcfFile.isFile()) {
+            this.logger.warn("Attempted to upload an invalid VCF file");
+            throw new Exception("No file was found at: " + filePath);
+        }
 
         if (this.currentUploads.get(patientID) != null) {
             this.logger.warn("Tried to upload VCF of {} while it was already uploading", patientID);
@@ -131,9 +135,10 @@ public class DefaultVCFUploadManager implements VCFUploadManager
 
         Future varStoreFuture = null;
         try {
-            varStoreFuture = this.varStore.addIndividual(patientID, isPublic, pathOfFile);
+            varStoreFuture = this.varStore.addIndividual(patientID, isPublic, vcfFile.toPath());
             VCFUploadJob newUploadJob = new VCFUploadJob(patient, varStoreFuture, contextProvider, this.observationManager);
-            this.currentUploads.add(patientID, this.executor.submit(newUploadJob));
+            ExecutionContextRunnable wrappedJob = new ExecutionContextRunnable(newUploadJob, componentManager);
+            this.currentUploads.add(patientID, this.executor.submit(wrappedJob));
         } catch (VariantStoreException e) {
             this.logger.warn("Variant store exception thrown when trying to upload a vcf for: {}", patientID);
             e.printStackTrace();

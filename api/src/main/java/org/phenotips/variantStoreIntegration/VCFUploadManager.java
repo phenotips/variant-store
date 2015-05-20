@@ -41,7 +41,7 @@ public interface VCFUploadManager extends Initializable
      * @param patientID A valid PhenoTips patient
      * @param filePath A VCF path to upload
      */
-    void uploadVCF(String patientID, String filePath);
+    void uploadVCF(String patientID, String filePath) throws Exception;
 
     /**
      * Attempts to cancel the given patients VCF upload.

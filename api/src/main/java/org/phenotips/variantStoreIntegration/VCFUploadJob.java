@@ -23,12 +23,14 @@ import org.phenotips.Constants;
 import org.phenotips.data.Patient;
 import org.phenotips.variantStoreIntegration.events.VCFUploadCompleteEvent;
 
+import org.xwiki.component.annotation.Component;
 import org.xwiki.model.EntityType;
 import org.xwiki.model.reference.EntityReference;
 import org.xwiki.observation.ObservationManager;
 
 import java.util.concurrent.Future;
 
+import javax.inject.Inject;
 import javax.inject.Provider;
 
 import com.xpn.xwiki.XWiki;
@@ -57,8 +59,6 @@ public class VCFUploadJob implements Runnable
 
     private Patient patient;
 
-    private XWikiContext context;
-
     private Provider<XWikiContext> contextProvider;
 
     private ObservationManager observationManager;
@@ -83,31 +83,28 @@ public class VCFUploadJob implements Runnable
     {
         String propertyName = "status";
         try {
-            this.context = this.contextProvider.get();
             // set patient VCF upload status to 'Inititialized' on disk
-            XWiki xwiki = this.context.getWiki();
-            XWikiDocument d = xwiki.getDocument(this.patient.getDocument(), this.context);
+            XWiki xwiki = this.contextProvider.get().getWiki();
+            XWikiDocument d = xwiki.getDocument(this.patient.getDocument(), this.contextProvider.get());
 
-            BaseObject uploadStatusObj = d.getXObject(CLASS_REFERENCE, true, this.context);
-
-            StringProperty status = (StringProperty) uploadStatusObj.get(propertyName);
-            status.setValue("Initialized");
-            xwiki.saveDocument(d, this.context);
+            BaseObject uploadStatusObj = d.getXObject(CLASS_REFERENCE, true, this.contextProvider.get());
+            uploadStatusObj.set(propertyName, "Initialized", this.contextProvider.get());
+            xwiki.saveDocument(d, this.contextProvider.get());
 
             this.future.get();
 
             // upon successful VCF upload set patient VCF upload status to 'Done' on disk
-            status.setValue("Done");
-            xwiki.saveDocument(d, this.context);
+            uploadStatusObj.set(propertyName, "Done", this.contextProvider.get());
+            xwiki.saveDocument(d, this.contextProvider.get());
 
             this.observationManager.notify(new VCFUploadCompleteEvent(this.patient), this);
         } catch (InterruptedException e) {
             // variant store job was interrupted (canceled?) set VCF upload status to null.
-            XWiki xwiki = this.context.getWiki();
+            XWiki xwiki = this.contextProvider.get().getWiki();
             XWikiDocument d;
             try {
-                d = xwiki.getDocument(this.patient.getDocument(), this.context);
-                BaseObject uploadStatusObj = d.getXObject(CLASS_REFERENCE, true, this.context);
+                d = xwiki.getDocument(this.patient.getDocument(), this.contextProvider.get());
+                BaseObject uploadStatusObj = d.getXObject(CLASS_REFERENCE, true, this.contextProvider.get());
 
                 StringProperty status = (StringProperty) uploadStatusObj.get(propertyName);
                 status.setValue("Cancelling");

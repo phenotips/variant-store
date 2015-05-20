@@ -70,6 +70,7 @@
 
   <modules>
     <module>api</module>
+    <module>ui</module>
   </modules>
 
   <build>
