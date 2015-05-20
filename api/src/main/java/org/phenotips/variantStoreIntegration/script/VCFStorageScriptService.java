@@ -31,10 +31,15 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
+import com.xpn.xwiki.web.XWikiResponse;
+
+import net.sf.json.JSONObject;
+
 /**
  * API for providing access to the variant store.
  *
  * @version $Id$
+ * @Since 1.0
  */
 @Component
 @Named("VCFStorage")
@@ -45,12 +50,22 @@ public class VCFStorageScriptService implements ScriptService
     private VCFUploadManager uploadManager;
 
     /**
-     * @param patient A PhenoTips patient.
+     * @param patientID A PhenoTips patient ID.
      * @param filePath The path to where the patients VCF is stored
      */
-    public void upload(Patient patient, Path filePath)
+    public JSONObject upload(String patientID, String filePath)
     {
-        this.uploadManager.uploadVCF(patient, filePath);
+        JSONObject response = new JSONObject();
+        try {
+            this.uploadManager.uploadVCF(patientID, filePath);
+            response.element("status", "201");
+        } catch (Exception e) {
+            response.element("status", "500");
+            response.element("message", e.getMessage());
+            response.element("trace", e.getStackTrace());
+        } finally {
+            return response;
+        }
     }
 
     /**

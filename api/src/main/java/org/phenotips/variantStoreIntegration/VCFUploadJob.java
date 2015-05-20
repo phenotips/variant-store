@@ -23,11 +23,15 @@ import org.phenotips.Constants;
 import org.phenotips.data.Patient;
 import org.phenotips.variantStoreIntegration.events.VCFUploadCompleteEvent;
 
+import org.xwiki.component.annotation.Component;
 import org.xwiki.model.EntityType;
 import org.xwiki.model.reference.EntityReference;
 import org.xwiki.observation.ObservationManager;
 
 import java.util.concurrent.Future;
+
+import javax.inject.Inject;
+import javax.inject.Provider;
 
 import com.xpn.xwiki.XWiki;
 import com.xpn.xwiki.XWikiContext;
@@ -55,22 +59,22 @@ public class VCFUploadJob implements Runnable
 
     private Patient patient;
 
-    private XWikiContext context;
+    private Provider<XWikiContext> contextProvider;
 
     private ObservationManager observationManager;
 
     /**
      * @param patient A PhenoTips Patient ID
      * @param variantStoreFuture The future returned by the variant store.
-     * @param context The xwiki context
+     * @param provider The xwiki context provider
      * @param observationManager The observation manager for event pubs
      */
-    public VCFUploadJob(Patient patient, Future variantStoreFuture, XWikiContext context,
+    public VCFUploadJob(Patient patient, Future variantStoreFuture, Provider<XWikiContext> provider,
         ObservationManager observationManager)
     {
         this.future = variantStoreFuture;
         this.patient = patient;
-        this.context = context;
+        this.contextProvider = provider;
         this.observationManager = observationManager;
     }
 
@@ -80,29 +84,27 @@ public class VCFUploadJob implements Runnable
         String propertyName = "status";
         try {
             // set patient VCF upload status to 'Inititialized' on disk
-            XWiki xwiki = this.context.getWiki();
-            XWikiDocument d = xwiki.getDocument(this.patient.getDocument(), this.context);
+            XWiki xwiki = this.contextProvider.get().getWiki();
+            XWikiDocument d = xwiki.getDocument(this.patient.getDocument(), this.contextProvider.get());
 
-            BaseObject uploadStatusObj = d.getXObject(CLASS_REFERENCE, true, this.context);
-
-            StringProperty status = (StringProperty) uploadStatusObj.get(propertyName);
-            status.setValue("Initialized");
-            xwiki.saveDocument(d, this.context);
+            BaseObject uploadStatusObj = d.getXObject(CLASS_REFERENCE, true, this.contextProvider.get());
+            uploadStatusObj.set(propertyName, "Initialized", this.contextProvider.get());
+            xwiki.saveDocument(d, this.contextProvider.get());
 
             this.future.get();
 
             // upon successful VCF upload set patient VCF upload status to 'Done' on disk
-            status.setValue("Done");
-            xwiki.saveDocument(d, this.context);
+            uploadStatusObj.set(propertyName, "Done", this.contextProvider.get());
+            xwiki.saveDocument(d, this.contextProvider.get());
 
             this.observationManager.notify(new VCFUploadCompleteEvent(this.patient), this);
         } catch (InterruptedException e) {
             // variant store job was interrupted (canceled?) set VCF upload status to null.
-            XWiki xwiki = this.context.getWiki();
+            XWiki xwiki = this.contextProvider.get().getWiki();
             XWikiDocument d;
             try {
-                d = xwiki.getDocument(this.patient.getDocument(), this.context);
-                BaseObject uploadStatusObj = d.getXObject(CLASS_REFERENCE, true, this.context);
+                d = xwiki.getDocument(this.patient.getDocument(), this.contextProvider.get());
+                BaseObject uploadStatusObj = d.getXObject(CLASS_REFERENCE, true, this.contextProvider.get());
 
                 StringProperty status = (StringProperty) uploadStatusObj.get(propertyName);
                 status.setValue("Cancelling");
@@ -110,12 +112,15 @@ public class VCFUploadJob implements Runnable
                 this.future.cancel(true);
                 status.setValue(null);
             } catch (XWikiException e1) {
-                // TODO figure out what to do here. Ignore it?
+                this.future.cancel(true);
+                this.observationManager.notify(new VCFUploadCompleteEvent(this.patient), this);
             }
 
         } catch (Exception e) {
-            // TODO Auto-generated catch block
+
+            this.future.cancel(true);
             e.printStackTrace();
+            this.observationManager.notify(new VCFUploadCompleteEvent(this.patient), this);
         }
 
     }

@@ -38,10 +38,10 @@ public interface VCFUploadManager extends Initializable
     /**
      * Attempt to add the patient and VCF file to the variant store.
      *
-     * @param patient A valid PhenoTips patient
+     * @param patientID A valid PhenoTips patient
      * @param filePath A VCF path to upload
      */
-    void uploadVCF(Patient patient, Path filePath);
+    void uploadVCF(String patientID, String filePath) throws Exception;
 
     /**
      * Attempts to cancel the given patients VCF upload.

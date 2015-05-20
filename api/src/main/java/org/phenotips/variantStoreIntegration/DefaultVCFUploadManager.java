@@ -20,17 +20,21 @@
 package org.phenotips.variantStoreIntegration;
 
 import org.phenotips.data.Patient;
+import org.phenotips.data.PatientRepository;
 import org.phenotips.data.permissions.PermissionsManager;
 import org.phenotips.data.permissions.Visibility;
-import org.phenotips.variantStoreIntegration.VCFUploadManager;
 import org.phenotips.variantStoreIntegration.events.VCFRemovalCompleteEvent;
 import org.phenotips.variantStoreIntegration.events.VCFUploadCompleteEvent;
+import org.phenotips.variantstore.shared.VariantStoreException;
 
 import org.xwiki.component.annotation.Component;
+import org.xwiki.component.manager.ComponentManager;
 import org.xwiki.component.phase.InitializationException;
 import org.xwiki.context.Execution;
+import org.xwiki.context.concurrent.ExecutionContextRunnable;
 import org.xwiki.observation.ObservationManager;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -38,6 +42,7 @@ import java.util.concurrent.Future;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.slf4j.Logger;
@@ -65,14 +70,20 @@ public class DefaultVCFUploadManager implements VCFUploadManager
     private Logger logger;
 
     @Inject
-    private MockVariantStore varStore;
+    private VariantStoreService varStore;
 
     /** Provides access to the current execution context. */
     @Inject
-    private Execution execution;
+    private Provider<XWikiContext> contextProvider;
 
     @Inject
     private ObservationManager observationManager;
+
+    @Inject
+    private PatientRepository pr;
+
+    @Inject
+    private ComponentManager componentManager;
 
     private ExecutorService executor;
 
@@ -83,7 +94,6 @@ public class DefaultVCFUploadManager implements VCFUploadManager
     @Override
     public void initialize() throws InitializationException
     {
-        this.varStore.init();
         this.executor = Executors.newCachedThreadPool();
 
         this.currentUploads = new FutureManager("currentUploads", new VCFUploadCompleteEvent(null));
@@ -96,29 +106,44 @@ public class DefaultVCFUploadManager implements VCFUploadManager
     /**
      * {@inheritDoc}
      *
-     * @see org.phenotips.variantStoreIntegration.VCFUploadManager#uploadVCF(org.phenotips.data.Patient, java.io.File)
      */
     @Override
-    public void uploadVCF(Patient patient, Path filePath)
+    public void uploadVCF(String patientID, String filePath) throws Exception
     {
-        String id = patient.getId();
+        Patient patient = this.pr.getPatientById(patientID);
 
-        if (this.currentUploads.get(id) != null) {
-            this.logger.warn("Tried to upload VCF of {} while it was already uploading", patient.toString());
+        if (patient == null){
+            this.logger.warn("No patient found with the id: {}", patientID);
+            throw new Exception("Could not find the patient with ID: " + patientID);
+        }
+
+        File vcfFile = new File(filePath);
+        if (!vcfFile.exists() || !vcfFile.isFile()) {
+            this.logger.warn("Attempted to upload an invalid VCF file");
+            throw new Exception("No file was found at: " + filePath);
+        }
+
+        if (this.currentUploads.get(patientID) != null) {
+            this.logger.warn("Tried to upload VCF of {} while it was already uploading", patientID);
             return;
-        } else if (this.currentRemovals.get(id) != null) {
-            this.logger.warn("Tried to upload VCF of {} while it was being removed", patient.toString());
+        } else if (this.currentRemovals.get(patientID) != null) {
+            this.logger.warn("Tried to upload VCF of {} while it was being removed", patientID);
             return;
         }
 
-        XWikiContext context = (XWikiContext) this.execution.getContext().getProperty("xwikicontext");
+        boolean isPublic = DefaultVCFUploadManager.resolvePatientPermission(patient);
 
-        boolean isPublic = DefaultVCFUploadManager.resolvePatientPermission(id);
+        Future varStoreFuture = null;
+        try {
+            varStoreFuture = this.varStore.addIndividual(patientID, isPublic, vcfFile.toPath());
+            VCFUploadJob newUploadJob = new VCFUploadJob(patient, varStoreFuture, contextProvider, this.observationManager);
+            ExecutionContextRunnable wrappedJob = new ExecutionContextRunnable(newUploadJob, componentManager);
+            this.currentUploads.add(patientID, this.executor.submit(wrappedJob));
+        } catch (VariantStoreException e) {
+            this.logger.warn("Variant store exception thrown when trying to upload a vcf for: {}", patientID);
+            e.printStackTrace();
+        }
 
-        Future varStoreFuture = this.varStore.addIndividual(id, isPublic, filePath);
-        VCFUploadJob newUploadJob = new VCFUploadJob(patient, varStoreFuture, context, this.observationManager);
-
-        this.currentUploads.add(id, this.executor.submit(newUploadJob));
     }
 
     /**
@@ -157,14 +182,22 @@ public class DefaultVCFUploadManager implements VCFUploadManager
             return;
         }
 
-        Future varStoreFuture = this.varStore.removeIndividual(id);
-        VCFRemovalJob newRemovalJob = new VCFRemovalJob(id, varStoreFuture);
-        this.currentRemovals.add(id, this.executor.submit(newRemovalJob));
+        Future varStoreFuture = null;
+        try {
+            varStoreFuture = this.varStore.removeIndividual(id);
+            VCFRemovalJob newRemovalJob = new VCFRemovalJob(id, varStoreFuture);
+            this.currentRemovals.add(id, this.executor.submit(newRemovalJob));
+        } catch (VariantStoreException e) {
+            this.logger.warn("Variant store exception thrown when trying to remove a vcf for: {}", patient.getId());
+            e.printStackTrace();
+        }
+
     }
 
-    private static boolean resolvePatientPermission(String id)
+    private static boolean resolvePatientPermission(Patient patient)
     {
-        Visibility patientVisibility = permissions.resolveVisibility(id);
+
+        Visibility patientVisibility = permissions.getPatientAccess(patient).getVisibility();
         return (patientVisibility.compareTo(hiddenVisibility) > 0);
     }
 
