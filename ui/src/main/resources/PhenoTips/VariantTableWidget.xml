@@ -283,7 +283,7 @@
     displayBasesCell : function(key, variant) {
       var fullBases = this.Utils.deepFind(variant, key);
       if (fullBases.length &gt; 9) {
-        var shortBases = fullBases.subString(0,9) + "...";
+        var shortBases = fullBases.substring(0,9) + "...";
       } else {
         var shortBases = fullBases;
       }
@@ -344,7 +344,7 @@
       return cell;
     },
 
-    displayAF :function(key, variant) {
+    displayAF : function(key, variant) {
       var af = this.Utils.deepFind(variant, key);
       var cell = new Element('td');
       if (af) {
@@ -479,6 +479,11 @@ table.variant-display-table td {
   border-left: none;
   border-right: none;
   padding: .4em .5em;
+  text-align: left;
+}
+table.variant-display-table th {
+  border: none;
+  border-bottom: solid black 1px;
 }
 .variant-position.button{
   width: 100%;
