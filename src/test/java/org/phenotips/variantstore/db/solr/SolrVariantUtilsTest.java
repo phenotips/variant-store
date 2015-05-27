@@ -54,7 +54,7 @@ public class SolrVariantUtilsTest
         String chrom = "chrX";
         long position = (long) 2000;
         String ref = "CTAG";
-        List<String> alt = Arrays.asList("A", "T");
+        String alt = "A";
         String qual = "10";
         String filter = "PASS";
         double exomiser_variant_score = 0.1;
@@ -70,6 +70,7 @@ public class SolrVariantUtilsTest
         doc.setField(SolrSchema.POS, position);
         doc.setField(SolrSchema.REF, ref);
         doc.setField(SolrSchema.ALT, alt);
+        doc.setField(SolrSchema.COPIES, 2);
         doc.setField(SolrSchema.QUAL, qual);
         doc.setField(SolrSchema.FILTER, filter);
         doc.setField(SolrSchema.EXOMISER_VARIANT_SCORE, exomiser_variant_score);
@@ -85,7 +86,7 @@ public class SolrVariantUtilsTest
         assertEquals(variant.getReferenceName(), chrom);
         assertEquals((long) variant.getStart(), position);
         assertEquals(variant.getReferenceBases(), ref);
-        assertThat(variant.getAlternateBases(), CoreMatchers.<Object>is(alt));
+        assertThat(variant.getAlternateBases().get(0), CoreMatchers.<Object>is(alt));
         assertEquals(VariantUtils.getInfo(variant, GAVariantInfoFields.GENE), String.valueOf(gene));
         assertEquals(VariantUtils.getInfo(variant, GAVariantInfoFields.GENE_EFFECT), String.valueOf(gene_effect));
         assertEquals(VariantUtils.getInfo(variant, GAVariantInfoFields.EXAC_AF), String.valueOf(exac_af));
@@ -93,6 +94,8 @@ public class SolrVariantUtilsTest
         assertThat(variant.getCalls(), is(notNullValue()));
         GACall call = variant.getCalls().get(0);
         assertThat(call, is(notNullValue()));
+        assertThat(call.getGenotype().get(0), is(1));
+        assertThat(call.getGenotype().get(1), is(1));
         assertEquals(VariantUtils.getInfo(call, GACallInfoFields.QUALITY), qual);
         assertEquals(VariantUtils.getInfo(call, GACallInfoFields.FILTER), filter);
         assertEquals(VariantUtils.getInfo(call, GACallInfoFields.EXOMISER_VARIANT_SCORE), String.valueOf(exomiser_variant_score));
@@ -127,6 +130,7 @@ public class SolrVariantUtilsTest
         VariantUtils.addInfo(variant, GAVariantInfoFields.GENE_EFFECT, gene_effect);
         VariantUtils.addInfo(variant, GAVariantInfoFields.EXAC_AF, exac_af);
         GACall call = new GACall();
+        call.setGenotype(Arrays.asList(0, 1));
         VariantUtils.addInfo(call, GACallInfoFields.QUALITY, qual);
         VariantUtils.addInfo(call, GACallInfoFields.FILTER, filter);
         VariantUtils.addInfo(call, GACallInfoFields.EXOMISER_VARIANT_SCORE, exomiser_variant_score);
@@ -140,7 +144,8 @@ public class SolrVariantUtilsTest
         assertEquals(doc.get(SolrSchema.CHROM), chrom);
         assertEquals(doc.get(SolrSchema.POS), position);
         assertEquals(doc.get(SolrSchema.REF), ref);
-        assertThat(doc.get(SolrSchema.ALT), is(nullValue()));
+        assertEquals(doc.get(SolrSchema.ALT), alt.get(0));
+        assertEquals(doc.get(SolrSchema.COPIES), 1);
         assertEquals(doc.get(SolrSchema.QUAL), qual);
         assertEquals(doc.get(SolrSchema.FILTER), filter);
         assertEquals(doc.get(SolrSchema.EXOMISER_VARIANT_SCORE), exomiser_variant_score);
@@ -157,6 +162,7 @@ public class SolrVariantUtilsTest
         String chrom = "chrX";
         long position = (long) 2000;
         String ref = "CTAG";
+        List<String> alts = Collections.singletonList(TestUtils.randomBases(10));
         String qual = "10";
         String filter = "PASS";
         double exomiser_variant_score = 0.1;
@@ -171,11 +177,13 @@ public class SolrVariantUtilsTest
         variant.setReferenceName(chrom);
         variant.setStart(position);
         variant.setReferenceBases(ref);
+        variant.setAlternateBases(alts);
         VariantUtils.addInfo(variant, GAVariantInfoFields.GENE, gene);
         VariantUtils.addInfo(variant, GAVariantInfoFields.GENE_EFFECT, gene_effect);
         VariantUtils.addInfo(variant, GAVariantInfoFields.EXAC_AF, exac_af);
 
         GACall call = new GACall();
+        call.setGenotype(Arrays.asList(0, 1));
         VariantUtils.addInfo(call, GACallInfoFields.QUALITY, qual);
         VariantUtils.addInfo(call, GACallInfoFields.FILTER, filter);
         VariantUtils.addInfo(call, GACallInfoFields.EXOMISER_VARIANT_SCORE, exomiser_variant_score);
@@ -190,6 +198,7 @@ public class SolrVariantUtilsTest
         assertEquals(variant.getReferenceName(), variant2.getReferenceName());
         assertEquals((long) variant.getStart(), (long) variant2.getStart());
         assertEquals(variant.getReferenceBases(), variant2.getReferenceBases());
+        assertEquals(variant.getAlternateBases(), variant2.getAlternateBases());
 
         assertEquals(VariantUtils.getInfo(variant, GAVariantInfoFields.EXAC_AF),
                 VariantUtils.getInfo(variant2, GAVariantInfoFields.EXAC_AF));
@@ -199,6 +208,8 @@ public class SolrVariantUtilsTest
                 VariantUtils.getInfo(variant2, GAVariantInfoFields.GENE_EFFECT));
 
         GACall call2 = variant2.getCalls().get(0);
+        assertThat(call2.getGenotype().get(0), is(0));
+        assertThat(call2.getGenotype().get(1), is(1));
         assertEquals(VariantUtils.getInfo(call, GACallInfoFields.QUALITY),
                 VariantUtils.getInfo(call2, GACallInfoFields.QUALITY));
         assertEquals(VariantUtils.getInfo(call, GACallInfoFields.FILTER),
@@ -268,35 +279,5 @@ public class SolrVariantUtilsTest
         /** TODO: stop relying on Math.random to generate pseudo-unique keys **/
         assertThat(list.get(0).getReferenceBases(), is(var1.getReferenceBases()));
         assertThat(list.get(1).getReferenceBases(), is(var2.getReferenceBases()));
-    }
-
-    @Test
-    public void testVariantToDocs() throws Exception {
-        GAVariant variant = new GAVariant();
-        GACall call = new GACall();
-
-        /** Test multiple alts */
-        variant.setAlternateBases(Arrays.asList("A", "T"));
-        call.setGenotype(Arrays.asList(1, 2));
-        variant.setCalls(Collections.singletonList(call));
-
-        List<SolrDocument> solrDocuments = SolrVariantUtils.variantToDocs(variant);
-
-        assertThat(solrDocuments.size(), is(2));
-        assertThat((String) solrDocuments.get(0).getFieldValue(SolrSchema.ALT), is(equalTo("A")));
-        assertThat((int) solrDocuments.get(0).getFieldValue(SolrSchema.COPIES), is(equalTo(1)));
-        assertThat((String) solrDocuments.get(1).getFieldValue(SolrSchema.ALT), is(equalTo("T")));
-        assertThat((int) solrDocuments.get(1).getFieldValue(SolrSchema.COPIES), is(equalTo(1)));
-
-        /** Test single alt */
-        variant.setAlternateBases(Arrays.asList("A"));
-        call.setGenotype(Arrays.asList(1, 1));
-        variant.setCalls(Collections.singletonList(call));
-
-        solrDocuments = SolrVariantUtils.variantToDocs(variant);
-
-        assertThat(solrDocuments.size(), is(1));
-        assertThat((String) solrDocuments.get(0).getFieldValue(SolrSchema.ALT), is(equalTo("A")));
-        assertThat((int) solrDocuments.get(0).getFieldValue(SolrSchema.COPIES), is(equalTo(2)));
     }
 }

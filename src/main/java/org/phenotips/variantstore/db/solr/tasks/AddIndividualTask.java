@@ -18,12 +18,10 @@
 package org.phenotips.variantstore.db.solr.tasks;
 
 import org.phenotips.variantstore.db.DatabaseException;
-import org.phenotips.variantstore.db.solr.SolrSchema;
 import org.phenotips.variantstore.db.solr.SolrVariantUtils;
 import org.phenotips.variantstore.input.VariantIterator;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -33,7 +31,6 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
-import org.ga4gh.GACall;
 import org.ga4gh.GAVariant;
 
 /**
@@ -63,23 +60,15 @@ public class AddIndividualTask implements Callable<Object>
 
         while (iterator.hasNext()) {
             variant = iterator.next();
-            SolrInputDocument doc;
+            SolrDocument doc = SolrVariantUtils.variantToDoc(variant);
 
-            for (SolrDocument plainDoc : SolrVariantUtils.variantToDocs(variant)) {
-                doc = ClientUtils.toSolrInputDocument(plainDoc);
+            doc.setField("individual", iterator.getHeader().getIndividualId());
 
-                doc.setField("individual", iterator.getHeader().getIndividualId());
-
-                if (iterator.getHeader().isPublic()) {
-                    doc.setField("is_public", true);
-                }
-
-                addDoc(doc);
-
+            if (iterator.getHeader().isPublic()) {
+                doc.setField("is_public", true);
             }
 
-
-
+            addDoc(ClientUtils.toSolrInputDocument(doc));
         }
 
         // Solr should commit the fields at it's own optimal pace.

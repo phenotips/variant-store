@@ -25,6 +25,8 @@ import org.phenotips.variantstore.shared.VariantUtils;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +37,6 @@ import org.ga4gh.GACall;
 import org.ga4gh.GAVariant;
 
 import htsjdk.samtools.util.CloseableIterator;
-import htsjdk.variant.variantcontext.Allele;
 import htsjdk.variant.variantcontext.CommonInfo;
 import htsjdk.variant.variantcontext.Genotype;
 import htsjdk.variant.variantcontext.VariantContext;
@@ -53,6 +54,7 @@ public class VCFIterator extends AbstractVariantIterator
     private Logger logger = Logger.getLogger(getClass());
     private Map<String, List<String>> filter;
     private VariantContext nextRow;
+    private int altIndex;
 
     /**
      * Create a new Variant Iterator for a VCF file.
@@ -108,20 +110,6 @@ public class VCFIterator extends AbstractVariantIterator
         this.nextRow = this.nextFiltered();
     }
 
-    /**
-     * Turn a list of htsjdk Alleles into a list of Strings/Strings.
-     *
-     * @param alleles a list of htsjdk Alleles
-     * @return a list of String representations of each allele
-     */
-    private static List<String> stringifyAlleles(List<Allele> alleles) {
-        List<String> alts = new ArrayList<>();
-        for (Allele a : alleles) {
-            alts.add(a.getDisplayString());
-        }
-        return alts;
-    }
-
     @Override
     public boolean hasNext() {
         return nextRow != null;
@@ -146,7 +134,7 @@ public class VCFIterator extends AbstractVariantIterator
 
 
         // ALT
-        List<String> alts = stringifyAlleles(context.getAlternateAlleles());
+        List<String> alts = Collections.singletonList(context.getAlleles().get(altIndex).getBaseString());
         variant.setAlternateBases(alts);
 
         // INFO
@@ -165,9 +153,9 @@ public class VCFIterator extends AbstractVariantIterator
 
             // genotype
             call.setGenotype(new ArrayList<Integer>());
-            for (Allele a : genotype.getAlleles()) {
-                call.getGenotype().add(context.getAlleleIndex(a));
-            }
+            int count = genotype.countAllele(context.getAlleles().get(altIndex));
+            // if 2: (1,1), if 1: (0, 1), if 0: (0, 0)
+            call.setGenotype(Arrays.asList(count / 2, count % 2));
 
             VariantUtils.addInfo(call, GACallInfoFields.QUALITY, String.valueOf(context.getPhredScaledQual()));
             VariantUtils.addInfo(call, GACallInfoFields.FILTER, context.getFilters());
@@ -177,7 +165,12 @@ public class VCFIterator extends AbstractVariantIterator
         }
         variant.setCalls(calls);
 
-        this.nextRow = this.nextFiltered();
+        if (this.nextRow.getAlternateAlleles().size() > altIndex) {
+            altIndex++;
+        } else {
+            this.nextRow = this.nextFiltered();
+            altIndex = 0;
+        }
         if (!hasNext()) {
             iterator.close();
             reader.close();

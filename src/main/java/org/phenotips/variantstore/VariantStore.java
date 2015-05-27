@@ -87,6 +87,7 @@ public class VariantStore implements VariantStoreInterface
             vs.init(Paths.get("/data/dev-variant-store"));
         } catch (VariantStoreException e) {
             logger.error("Error initializing VariantStore", e);
+            vs.stop();
             return;
         }
 
@@ -101,6 +102,8 @@ public class VariantStore implements VariantStoreInterface
             vs.removeIndividual(id).get();
         } catch (InterruptedException | ExecutionException | VariantStoreException e) {
             logger.error("Error", e);
+            vs.stop();
+            return;
         }
 
         Map<String, List<GAVariant>> map;
