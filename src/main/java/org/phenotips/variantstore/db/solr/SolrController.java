@@ -65,7 +65,7 @@ public class SolrController extends AbstractDatabaseController
     /**
      * the field name of the internal (db) allele frequency value in the allele frequency query map.
      */
-    public static final String INTERNAL_FREQUENCY_FIELD = "PHENOTIPS";
+    public static final String DB_FREQUENCY_FIELD = "PhenomeCentral";
 
     private Logger logger = Logger.getLogger(getClass());
 
@@ -246,7 +246,7 @@ public class SolrController extends AbstractDatabaseController
         /** Build Query String **/
 
         // alleleFreq = copiesSum / 2*totIndividuals
-        int copiesSum = (int) (alleleFrequencies.get(INTERNAL_FREQUENCY_FIELD) * totIndividuals * 2);
+        int copiesSum = (int) (alleleFrequencies.get(DB_FREQUENCY_FIELD) * totIndividuals * 2);
 
         StringBuilder builder = new StringBuilder();
         for (String effect : variantEffects) {
