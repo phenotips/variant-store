@@ -22,7 +22,7 @@
 
 <suppressions>
   <suppress checks="JavadocVariable" files="ExomiserTSVColumn.java" />
-  <suppress checks="JavadocVariable" files="SolrSchema.java" />
+  <suppress checks="JavadocVariable" files="VariantsSchema.java" />
   <suppress checks="JavadocVariable" files="GAVariantInfoFields.java" />
   <suppress checks="JavadocVariable" files="GACallInfoFields.java" />
   <suppress checks="UncommentedMain" files="VariantStore.java" /><!--TODO: This is temporary until we have better tests-->

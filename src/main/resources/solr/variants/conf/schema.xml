@@ -72,20 +72,23 @@
     <field name="_version_" type="long" indexed="true" stored="true" multiValued="false"/>
 
     <!-- a hash of chrom, pos, ref, alt, individual -->
-    <field name="id" type="string" indexed="true" stored="true" required="false" />
+    <field name="hash" type="string" indexed="true" stored="true" required="false" />
+
+    <!--CallSet id (individual identifier)-->
+    <field name="callset_id" type="string" indexed="true" stored="true" required="false" default="reference" />
+
     <!-- a hash of chrom, pos, ref, alt. Used to identify indentical variants -->
     <field name="variant_id" type="string" indexed="true" stored="true" required="false" />
 
-    <field name="chrom" type="string" indexed="true" stored="true" required="true" />
-    <field name="pos" type="int" indexed="true" stored="true" required="true" />
-    <field name="ref" type="string" indexed="true" stored="true" required="true" />
-    <field name="alt" type="string" indexed="true" stored="true" required="true" />
+    <field name="chrom" type="string" indexed="true" stored="true" required="false" />
+    <field name="pos" type="int" indexed="true" stored="true" required="false" />
+    <field name="ref" type="string" indexed="true" stored="true" required="false" />
+    <field name="alt" type="string" indexed="true" stored="true" required="false" />
+
     <!--the number of copies of this variant that this individual has, as per GT field in VCF-->
-    <field name="copies" type="int" indexed="true" stored="true" required="true" />
+    <field name="copies" type="int" indexed="true" stored="true" required="false" />
 
     <field name="is_public" type="bool" indexed="true" stored="true" required="false" default="false"/>
-
-    <field name="individual" type="string" indexed="true" stored="true" required="false" default="reference" />
 
     <field name="qual" type="string" indexed="true" stored="true" required="false" />
     <field name="filter" type="string" indexed="true" stored="true" required="false" />
@@ -100,7 +103,14 @@
 
     <field name="exac_af" type="string" indexed="true" stored="true" required="false" />
 
-    <!-- TODO: add DP, DP4, SB, QD -->
+    <!--##################################-->
+    <!-- Aggregate variant info below. This is inserted separate from the per-individual variant above.-->
+
+    <!--foreign key, maps 1-1 to variant_id -->
+    <field name="aggregate_variant_id" type="string" indexed="true" stored="true" required="false" />
+    <!--total number of copies in the DB for this variant-->
+    <field name="copies_sum" type="int" indexed="true" stored="true" required="false" />
+
     <!-- Ignore everyting else -->
     <dynamicField name="*" type="ignored" multiValued="true" />
   </fields>
@@ -108,5 +118,5 @@
   <!-- Field to use to determine and enforce document uniqueness.
        Unless this field is marked with required="false", it will be a required field
     -->
-  <uniqueKey>id</uniqueKey>
+  <uniqueKey>hash</uniqueKey>
 </schema>

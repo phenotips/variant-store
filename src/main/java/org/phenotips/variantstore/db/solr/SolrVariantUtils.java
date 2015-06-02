@@ -34,6 +34,8 @@ import org.apache.solr.client.solrj.response.GroupCommand;
 import org.apache.solr.client.solrj.response.GroupResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
+import org.apache.solr.common.util.StrUtils;
+import org.apache.solr.update.processor.Lookup3Signature;
 import org.ga4gh.GACall;
 import org.ga4gh.GAVariant;
 
@@ -96,30 +98,36 @@ public final class SolrVariantUtils
     public static GAVariant docToVariant(SolrDocument doc) {
         GAVariant variant = new GAVariant();
 
-        variant.setReferenceName(doc.get(SolrSchema.CHROM).toString());
-        variant.setReferenceBases(doc.get(SolrSchema.REF).toString());
-        variant.setStart(Long.valueOf(doc.get(SolrSchema.POS).toString()));
+        variant.setReferenceName(doc.get(VariantsSchema.CHROM).toString());
+        variant.setReferenceBases(doc.get(VariantsSchema.REF).toString());
+        variant.setStart(Long.valueOf(doc.get(VariantsSchema.POS).toString()));
         variant.setEnd(variant.getStart() + variant.getReferenceBases().length());
-        variant.setAlternateBases(Collections.singletonList(doc.get(SolrSchema.ALT).toString()));
+        variant.setAlternateBases(Collections.singletonList(doc.get(VariantsSchema.ALT).toString()));
 
-        addInfo(variant, GAVariantInfoFields.GENE, doc.get(SolrSchema.GENE));
-        addInfo(variant, GAVariantInfoFields.GENE_EFFECT, doc.get(SolrSchema.GENE_EFFECT));
+        addInfo(variant, GAVariantInfoFields.GENE, doc.get(VariantsSchema.GENE));
+        addInfo(variant, GAVariantInfoFields.GENE_EFFECT, doc.get(VariantsSchema.GENE_EFFECT));
 
-        if (doc.containsKey(SolrSchema.EXAC_AF)) {
-            addInfo(variant, GAVariantInfoFields.EXAC_AF, doc.get(SolrSchema.EXAC_AF));
+        if (doc.containsKey(VariantsSchema.EXAC_AF)) {
+            addInfo(variant, GAVariantInfoFields.EXAC_AF, doc.get(VariantsSchema.EXAC_AF));
         }
 
         GACall call = new GACall();
-        addInfo(call, GACallInfoFields.QUALITY, doc.get(SolrSchema.QUAL));
-        addInfo(call, GACallInfoFields.FILTER, doc.get(SolrSchema.FILTER));
-        addInfo(call, GACallInfoFields.EXOMISER_VARIANT_SCORE, doc.get(SolrSchema.EXOMISER_VARIANT_SCORE));
-        addInfo(call, GACallInfoFields.EXOMISER_GENE_PHENO_SCORE, doc.get(SolrSchema.EXOMISER_GENE_PHENO_SCORE));
-        addInfo(call, GACallInfoFields.EXOMISER_GENE_VARIANT_SCORE, doc.get(SolrSchema.EXOMISER_GENE_VARIANT_SCORE));
-        addInfo(call, GACallInfoFields.EXOMISER_GENE_COMBINED_SCORE, doc.get(SolrSchema.EXOMISER_GENE_COMBINED_SCORE));
+        addInfo(call, GACallInfoFields.QUALITY,
+                doc.get(VariantsSchema.QUAL));
+        addInfo(call, GACallInfoFields.FILTER,
+                doc.get(VariantsSchema.FILTER));
+        addInfo(call, GACallInfoFields.EXOMISER_VARIANT_SCORE,
+                doc.get(VariantsSchema.EXOMISER_VARIANT_SCORE));
+        addInfo(call, GACallInfoFields.EXOMISER_GENE_PHENO_SCORE,
+                doc.get(VariantsSchema.EXOMISER_GENE_PHENO_SCORE));
+        addInfo(call, GACallInfoFields.EXOMISER_GENE_VARIANT_SCORE,
+                doc.get(VariantsSchema.EXOMISER_GENE_VARIANT_SCORE));
+        addInfo(call, GACallInfoFields.EXOMISER_GENE_COMBINED_SCORE,
+                doc.get(VariantsSchema.EXOMISER_GENE_COMBINED_SCORE));
         variant.setCalls(Collections.singletonList(call));
 
-        variant.setAlternateBases(Collections.singletonList(doc.get(SolrSchema.ALT).toString()));
-        if ((int) doc.get(SolrSchema.COPIES) == 2) {
+        variant.setAlternateBases(Collections.singletonList(doc.get(VariantsSchema.ALT).toString()));
+        if ((int) doc.get(VariantsSchema.COPIES) == 2) {
             call.setGenotype(Arrays.asList(1, 1));
         } else {
             call.setGenotype(Arrays.asList(0, 1));
@@ -137,15 +145,15 @@ public final class SolrVariantUtils
     public static SolrDocument variantToDoc(GAVariant variant) {
         SolrDocument doc = new SolrDocument();
 
-        doc.setField(SolrSchema.CHROM, variant.getReferenceName());
-        doc.setField(SolrSchema.POS, variant.getStart());
-        doc.setField(SolrSchema.REF, variant.getReferenceBases());
-        doc.setField(SolrSchema.ALT, variant.getAlternateBases().get(0));
+        doc.setField(VariantsSchema.CHROM, variant.getReferenceName());
+        doc.setField(VariantsSchema.POS, variant.getStart());
+        doc.setField(VariantsSchema.REF, variant.getReferenceBases());
+        doc.setField(VariantsSchema.ALT, variant.getAlternateBases().get(0));
 
-        doc.setField(SolrSchema.GENE, getInfo(variant, GAVariantInfoFields.GENE));
-        doc.setField(SolrSchema.GENE_EFFECT, getInfo(variant, GAVariantInfoFields.GENE_EFFECT));
+        doc.setField(VariantsSchema.GENE, getInfo(variant, GAVariantInfoFields.GENE));
+        doc.setField(VariantsSchema.GENE_EFFECT, getInfo(variant, GAVariantInfoFields.GENE_EFFECT));
 
-        doc.setField(SolrSchema.EXAC_AF, safeValueOf(getInfo(variant, GAVariantInfoFields.EXAC_AF)));
+        doc.setField(VariantsSchema.EXAC_AF, safeValueOf(getInfo(variant, GAVariantInfoFields.EXAC_AF)));
 
         GACall call = variant.getCalls().get(0);
         int copies = 0;
@@ -154,17 +162,17 @@ public final class SolrVariantUtils
                 copies++;
             }
         }
-        doc.setField(SolrSchema.COPIES, copies);
-        doc.setField(SolrSchema.QUAL, getInfo(call, GACallInfoFields.QUALITY));
-        doc.setField(SolrSchema.FILTER, getInfo(call, GACallInfoFields.FILTER));
+        doc.setField(VariantsSchema.COPIES, copies);
+        doc.setField(VariantsSchema.QUAL, getInfo(call, GACallInfoFields.QUALITY));
+        doc.setField(VariantsSchema.FILTER, getInfo(call, GACallInfoFields.FILTER));
 
-        doc.setField(SolrSchema.EXOMISER_VARIANT_SCORE,
+        doc.setField(VariantsSchema.EXOMISER_VARIANT_SCORE,
                 safeValueOf(getInfo(call, GACallInfoFields.EXOMISER_VARIANT_SCORE)));
-        doc.setField(SolrSchema.EXOMISER_GENE_PHENO_SCORE,
+        doc.setField(VariantsSchema.EXOMISER_GENE_PHENO_SCORE,
                 safeValueOf(getInfo(call, GACallInfoFields.EXOMISER_GENE_PHENO_SCORE)));
-        doc.setField(SolrSchema.EXOMISER_GENE_VARIANT_SCORE,
+        doc.setField(VariantsSchema.EXOMISER_GENE_VARIANT_SCORE,
                 safeValueOf(getInfo(call, GACallInfoFields.EXOMISER_GENE_VARIANT_SCORE)));
-        doc.setField(SolrSchema.EXOMISER_GENE_COMBINED_SCORE,
+        doc.setField(VariantsSchema.EXOMISER_GENE_COMBINED_SCORE,
                 safeValueOf(getInfo(call, GACallInfoFields.EXOMISER_GENE_COMBINED_SCORE)));
 
         return doc;
@@ -182,5 +190,56 @@ public final class SolrVariantUtils
         }
 
         return Double.valueOf(s);
+    }
+
+    /**
+     * Make variant signature from chr + pos + ref + alt.
+     * @param variant the variant
+     * @param callsetID the callset identifier
+     * @return the signature
+     */
+    public static String getHash(GAVariant variant, String callsetID) {
+        Lookup3Signature signatureBuilder = new Lookup3Signature();
+        signatureBuilder.add(variant.getReferenceName());
+        signatureBuilder.add(variant.getStart().toString());
+        signatureBuilder.add(variant.getReferenceBases());
+        signatureBuilder.add(variant.getAlternateBases().get(0));
+        signatureBuilder.add(callsetID);
+
+        return byteArrayToString(signatureBuilder.getSignature());
+    }
+
+    /**
+     * Make variant signature from chr + pos + ref + alt.
+     * @param variant the variant
+     * @return the signature
+     */
+    public static String getVariantSignature(GAVariant variant) {
+        Lookup3Signature signatureBuilder = new Lookup3Signature();
+        signatureBuilder.add(variant.getReferenceName());
+        signatureBuilder.add(variant.getStart().toString());
+        signatureBuilder.add(variant.getReferenceBases());
+        signatureBuilder.add(variant.getAlternateBases().get(0));
+
+        return byteArrayToString(signatureBuilder.getSignature());
+    }
+
+    /**
+     * Turns bytes[] into a hex String.
+     * Copied from {@link org.apache.solr.update.processor.SignatureUpdateProcessorFactory}.
+     * @param bytes a byte array
+     * @return a String
+     */
+    private static String byteArrayToString(byte[] bytes) {
+        char[] arr = new char[bytes.length << 1];
+
+        for (int i = 0; i < bytes.length; i++) {
+            int b = bytes[i];
+            int idx = i << 1;
+            arr[idx] = StrUtils.HEX_DIGITS[(b >> 4) & 0xf];
+            arr[idx + 1] = StrUtils.HEX_DIGITS[b & 0xf];
+        }
+        return new String(arr);
+
     }
 }

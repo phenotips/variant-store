@@ -26,6 +26,7 @@ import org.phenotips.variantstore.shared.VariantStoreException;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -95,11 +96,10 @@ public class VariantStore implements VariantStoreInterface
 
 
         try {
-            String id = "F0000009";
-            logger.debug("Adding " + id);
-            vs.addIndividual(id, true, Paths.get("/data/vcf/c4r/tsvs/" + id + ".variants.tsv")).get();
-            logger.debug("Removing");
-            vs.removeIndividual(id).get();
+            for (String id : new ArrayList<String>()) {
+                //Arrays.asList("F0000010", "F0000011")) {
+                vs.addIndividual(id, true, Paths.get("/data/vcf/c4r/tsvs/" + id + ".variants.tsv")).get();
+            }
         } catch (InterruptedException | ExecutionException | VariantStoreException e) {
             logger.error("Error", e);
             vs.stop();
@@ -109,11 +109,19 @@ public class VariantStore implements VariantStoreInterface
         Map<String, List<GAVariant>> map;
 
         Map<String, Double> af = new HashMap<>();
-        af.put("EXAC", (double) 0.1);
-        map = vs.getIndividualsWithGene("MED12", Arrays.asList("SPLICING"), af);
+        af.put("EXAC", (double) 1.0);
+        af.put("PHENOTIPS", (double) 0.5);
+        map = vs.getIndividualsWithGene("SRCAP", Arrays.asList("STOPGAIN"), af);
         logger.debug("Individuals w Genes: " + map);
-        logger.debug("Total individuals: " + vs.getIndividuals().size());
 
+//        try {
+//            logger.debug("Removing");
+//            vs.removeIndividual(id).get();
+//        } catch (InterruptedException | ExecutionException | VariantStoreException e) {
+//            logger.error("Eror", e);
+//            vs.stop();
+//            return;
+//        }
 
         vs.stop();
         logger.debug("Stopped");
@@ -133,6 +141,7 @@ public class VariantStore implements VariantStoreInterface
 
     @Override
     public Future addIndividual(String id, boolean isPublic, Path file) throws VariantStoreException {
+        logger.debug("Adding " + id);
         // copy file to file cache
         inputManager.addIndividual(id, file);
 
@@ -155,7 +164,11 @@ public class VariantStore implements VariantStoreInterface
             String geneSymbol,
             List<String> variantEffects,
             Map<String, Double> alleleFrequencies) {
-        return this.db.getIndividualsWithGene(geneSymbol, variantEffects, alleleFrequencies, 5);
+        return this.db.getIndividualsWithGene(geneSymbol,
+                variantEffects,
+                alleleFrequencies,
+                5,
+                this.getIndividuals().size());
     }
 
     @Override

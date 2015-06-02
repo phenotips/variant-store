@@ -59,13 +59,14 @@ public interface DatabaseController extends Service
      * @param variantEffects    the effect that the variant has on the gene
      * @param alleleFrequencies the allele frequencies of the variant. Allowed keys are "EXAC"
      * @param n                 the number of variants to return per individual
+     * @param totIndividuals    the total number of individuals in the db.
      * @return a map, where the keys are individual ids, and the values are a list of variants
      * for each individual that match the filter, sorted by variant harmfulness.
      */
     Map<String, List<GAVariant>> getIndividualsWithGene(String gene,
                                                         List<String> variantEffects,
                                                         Map<String, Double> alleleFrequencies,
-                                                        int n);
+                                                        int n, int totIndividuals);
 
     /**
      * Fetch all individuals that have variants that match the pattern.

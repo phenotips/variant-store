@@ -18,6 +18,7 @@
 package org.phenotips.variantstore.db.solr.tasks;
 
 import org.phenotips.variantstore.db.DatabaseException;
+import org.phenotips.variantstore.db.solr.VariantsSchema;
 
 import java.io.IOException;
 import java.util.concurrent.Callable;
@@ -48,8 +49,8 @@ public class RemoveIndividualTask implements Callable<Object>
     @Override
     public Object call() throws Exception {
         try {
-            server.deleteByQuery(String.format("individual:%s", id));
-            server.commit();
+            server.deleteByQuery(String.format(VariantsSchema.CALLSET_ID + ":%s", id));
+            server.commit(true, true);
         } catch (SolrServerException | IOException e) {
             throw new DatabaseException("Error removing individual from solr", e);
         }

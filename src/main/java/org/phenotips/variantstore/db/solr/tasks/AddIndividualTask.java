@@ -19,9 +19,11 @@ package org.phenotips.variantstore.db.solr.tasks;
 
 import org.phenotips.variantstore.db.DatabaseException;
 import org.phenotips.variantstore.db.solr.SolrVariantUtils;
+import org.phenotips.variantstore.db.solr.VariantsSchema;
 import org.phenotips.variantstore.input.VariantIterator;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -57,23 +59,44 @@ public class AddIndividualTask implements Callable<Object>
     public Object call() throws Exception {
         GAVariant variant;
         Map<String, List<String>> info;
+        SolrDocument doc;
+        SolrInputDocument aggregateDoc = new SolrInputDocument();
 
         while (iterator.hasNext()) {
             variant = iterator.next();
-            SolrDocument doc = SolrVariantUtils.variantToDoc(variant);
+            doc = SolrVariantUtils.variantToDoc(variant);
 
-            doc.setField("individual", iterator.getHeader().getIndividualId());
+            doc.setField(VariantsSchema.HASH,
+                    SolrVariantUtils.getHash(variant, iterator.getHeader().getIndividualId()));
+            doc.setField(VariantsSchema.VARIANT_ID, SolrVariantUtils.getVariantSignature(variant));
+
+            doc.setField(VariantsSchema.CALLSET_ID, iterator.getHeader().getIndividualId());
 
             if (iterator.getHeader().isPublic()) {
-                doc.setField("is_public", true);
+                doc.setField(VariantsSchema.PUBLIC, true);
             }
 
             addDoc(ClientUtils.toSolrInputDocument(doc));
+
+            // Make aggregate info doc
+            aggregateDoc.setField(VariantsSchema.HASH,
+                    SolrVariantUtils.getHash(variant, VariantsSchema.AGGREGATE_TABLE));
+
+            // gotta use atomic update here because we're using increment below.
+            Map<String, String> aggregateVariantIdMap = new HashMap<>();
+            aggregateVariantIdMap.put("set", SolrVariantUtils.getVariantSignature(variant));
+            aggregateDoc.setField(VariantsSchema.AGGREGATE_VARIANT_ID, aggregateVariantIdMap);
+
+            Map<String, Integer> copiesSumMap = new HashMap<>();
+            copiesSumMap.put("inc", (Integer) doc.get(VariantsSchema.COPIES));
+            aggregateDoc.addField(VariantsSchema.COPIES_SUM, copiesSumMap);
+
+            addDoc(aggregateDoc);
         }
 
         // Solr should commit the fields at it's own optimal pace.
         // We want to commit once at the end to make sure any leftovers in solr buffers are available for querying.
-        server.commit();
+        server.commit(true, true);
         return null;
     }
 
@@ -85,4 +108,5 @@ public class AddIndividualTask implements Callable<Object>
             throw new DatabaseException(String.format("Error adding variants to Solr"), e);
         }
     }
+
 }

@@ -36,7 +36,6 @@ import org.ga4gh.GACall;
 import org.ga4gh.GAVariant;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -66,20 +65,20 @@ public class SolrVariantUtilsTest
         double exac_af = 0.5;
 
         SolrDocument doc = new SolrDocument();
-        doc.setField(SolrSchema.CHROM, chrom);
-        doc.setField(SolrSchema.POS, position);
-        doc.setField(SolrSchema.REF, ref);
-        doc.setField(SolrSchema.ALT, alt);
-        doc.setField(SolrSchema.COPIES, 2);
-        doc.setField(SolrSchema.QUAL, qual);
-        doc.setField(SolrSchema.FILTER, filter);
-        doc.setField(SolrSchema.EXOMISER_VARIANT_SCORE, exomiser_variant_score);
-        doc.setField(SolrSchema.EXOMISER_GENE_PHENO_SCORE, exomiser_gene_pheno_score);
-        doc.setField(SolrSchema.EXOMISER_GENE_VARIANT_SCORE, exomiser_gene_variant_score);
-        doc.setField(SolrSchema.EXOMISER_GENE_COMBINED_SCORE, exomiser_gene_combined_score);
-        doc.setField(SolrSchema.GENE, gene);
-        doc.setField(SolrSchema.GENE_EFFECT, gene_effect);
-        doc.setField(SolrSchema.EXAC_AF, exac_af);
+        doc.setField(VariantsSchema.CHROM, chrom);
+        doc.setField(VariantsSchema.POS, position);
+        doc.setField(VariantsSchema.REF, ref);
+        doc.setField(VariantsSchema.ALT, alt);
+        doc.setField(VariantsSchema.COPIES, 2);
+        doc.setField(VariantsSchema.QUAL, qual);
+        doc.setField(VariantsSchema.FILTER, filter);
+        doc.setField(VariantsSchema.EXOMISER_VARIANT_SCORE, exomiser_variant_score);
+        doc.setField(VariantsSchema.EXOMISER_GENE_PHENO_SCORE, exomiser_gene_pheno_score);
+        doc.setField(VariantsSchema.EXOMISER_GENE_VARIANT_SCORE, exomiser_gene_variant_score);
+        doc.setField(VariantsSchema.EXOMISER_GENE_COMBINED_SCORE, exomiser_gene_combined_score);
+        doc.setField(VariantsSchema.GENE, gene);
+        doc.setField(VariantsSchema.GENE_EFFECT, gene_effect);
+        doc.setField(VariantsSchema.EXAC_AF, exac_af);
 
         GAVariant variant = SolrVariantUtils.docToVariant(doc);
 
@@ -141,20 +140,20 @@ public class SolrVariantUtilsTest
 
         SolrDocument doc = SolrVariantUtils.variantToDoc(variant);
 
-        assertEquals(doc.get(SolrSchema.CHROM), chrom);
-        assertEquals(doc.get(SolrSchema.POS), position);
-        assertEquals(doc.get(SolrSchema.REF), ref);
-        assertEquals(doc.get(SolrSchema.ALT), alt.get(0));
-        assertEquals(doc.get(SolrSchema.COPIES), 1);
-        assertEquals(doc.get(SolrSchema.QUAL), qual);
-        assertEquals(doc.get(SolrSchema.FILTER), filter);
-        assertEquals(doc.get(SolrSchema.EXOMISER_VARIANT_SCORE), exomiser_variant_score);
-        assertEquals(doc.get(SolrSchema.EXOMISER_GENE_PHENO_SCORE), exomiser_gene_pheno_score);
-        assertEquals(doc.get(SolrSchema.EXOMISER_GENE_VARIANT_SCORE), exomiser_gene_variant_score);
-        assertEquals(doc.get(SolrSchema.EXOMISER_GENE_COMBINED_SCORE), exomiser_gene_combined_score);
-        assertEquals(doc.get(SolrSchema.GENE), gene);
-        assertEquals(doc.get(SolrSchema.GENE_EFFECT), gene_effect);
-        assertEquals(doc.get(SolrSchema.EXAC_AF), exac_af);
+        assertEquals(doc.get(VariantsSchema.CHROM), chrom);
+        assertEquals(doc.get(VariantsSchema.POS), position);
+        assertEquals(doc.get(VariantsSchema.REF), ref);
+        assertEquals(doc.get(VariantsSchema.ALT), alt.get(0));
+        assertEquals(doc.get(VariantsSchema.COPIES), 1);
+        assertEquals(doc.get(VariantsSchema.QUAL), qual);
+        assertEquals(doc.get(VariantsSchema.FILTER), filter);
+        assertEquals(doc.get(VariantsSchema.EXOMISER_VARIANT_SCORE), exomiser_variant_score);
+        assertEquals(doc.get(VariantsSchema.EXOMISER_GENE_PHENO_SCORE), exomiser_gene_pheno_score);
+        assertEquals(doc.get(VariantsSchema.EXOMISER_GENE_VARIANT_SCORE), exomiser_gene_variant_score);
+        assertEquals(doc.get(VariantsSchema.EXOMISER_GENE_COMBINED_SCORE), exomiser_gene_combined_score);
+        assertEquals(doc.get(VariantsSchema.GENE), gene);
+        assertEquals(doc.get(VariantsSchema.GENE_EFFECT), gene_effect);
+        assertEquals(doc.get(VariantsSchema.EXAC_AF), exac_af);
     }
 
     @Test
