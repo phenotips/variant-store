@@ -178,6 +178,15 @@
         </executions>
       </plugin>
       <plugin>
+        <groupId>org.shortbrain.maven</groupId>
+        <artifactId>maven-yourkit-plugin</artifactId>
+        <version>1.0-SNAPSHOT</version>
+        <configuration>
+          <yourkitPath>/opt/yourkit</yourkitPath>
+          <mainClass>org.phenotips.variantstore.VariantStore</mainClass>
+        </configuration>
+      </plugin>
+      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <!-- Lock down plugin version for build reproducibility -->
