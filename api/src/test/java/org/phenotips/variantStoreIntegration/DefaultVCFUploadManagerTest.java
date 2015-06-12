@@ -19,32 +19,21 @@
  */
 package org.phenotips.variantStoreIntegration;
 
-import org.phenotips.data.Patient;
 import org.phenotips.data.permissions.PermissionsManager;
 import org.phenotips.data.permissions.Visibility;
+import org.phenotips.variantStoreIntegration.internal.DefaultVCFUploadManager;
 import org.phenotips.variantStoreIntegration.mocks.MockVariantStore;
 import org.phenotips.variantstore.VariantStoreInterface;
-import org.phenotips.variantstore.shared.VariantStoreException;
 
 import org.xwiki.component.manager.ComponentLookupException;
-import org.xwiki.component.util.ReflectionUtils;
 import org.xwiki.context.Execution;
-import org.xwiki.context.ExecutionContext;
 import org.xwiki.test.mockito.MockitoComponentMockingRule;
-
-import java.nio.file.Path;
-import java.util.concurrent.Future;
 
 import org.junit.Before;
 import org.junit.Rule;
-import org.junit.Test;
-import org.mockito.Matchers;
 import org.mockito.MockitoAnnotations;
 
-import com.xpn.xwiki.XWikiContext;
-
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * Tests for the {@link DefaultVCFUploadManager} .

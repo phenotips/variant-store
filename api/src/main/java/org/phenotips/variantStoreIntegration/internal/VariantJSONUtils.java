@@ -32,19 +32,23 @@ import org.ga4gh.GAVariant;
 import net.sf.json.JSONObject;
 
 /**
- * A class of static methods for translating {@link org.ga4gh.GAVariant} to {@link net.sf.json.JSON}
+ * A class of static methods for translating {@link org.ga4gh.GAVariant} to {@link net.sf.json.JSON}.
  * @version $Id$
  */
-public class VariantJSONUtils
+public final class VariantJSONUtils
 {
-    /**
-     * Converts a {@link GAVariant} to a {@link JSONObject}
+    private VariantJSONUtils()
+    {
+        throw new AssertionError();
+    }
+
+    /**Converts a {@link GAVariant} to a {@link JSONObject}.
      *
      * @param gaVariant The representation of the variant
      * @return A JSON representation of the variant in the following form:
      *
      */
-    public static JSONObject convertGAVariantToJSON(GAVariant gaVariant){
+    public static JSONObject convertGAVariantToJSON(GAVariant gaVariant) {
         JSONObject resultJSON = new JSONObject();
         resultJSON.put("start", gaVariant.getStart());
         resultJSON.put("referenceBases", gaVariant.getReferenceBases());

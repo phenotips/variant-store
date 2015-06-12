@@ -118,7 +118,7 @@ public class DefaultVariantStoreService implements Initializable, VariantStoreSe
 
     /**
      * Get the individuals that have variants with the given gene symbol, exhibiting the given variant effects, and with
-     * the given allele frequencies. Sort the list of patients by descending variant harmfulness
+     * the given allele frequencies. Sort the list of patients by descending variant harmfulness.
      *
      * @param geneSymbol
      * @param variantEffects

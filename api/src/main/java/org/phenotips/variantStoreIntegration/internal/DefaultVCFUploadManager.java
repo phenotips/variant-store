@@ -17,25 +17,28 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.phenotips.variantStoreIntegration;
+package org.phenotips.variantStoreIntegration.internal;
 
 import org.phenotips.data.Patient;
 import org.phenotips.data.PatientRepository;
 import org.phenotips.data.permissions.PermissionsManager;
 import org.phenotips.data.permissions.Visibility;
+import org.phenotips.variantStoreIntegration.VCFUploadManager;
+import org.phenotips.variantStoreIntegration.VariantStoreService;
 import org.phenotips.variantStoreIntegration.events.VCFRemovalCompleteEvent;
 import org.phenotips.variantStoreIntegration.events.VCFUploadCompleteEvent;
+import org.phenotips.variantStoreIntegration.internal.jobs.FutureManager;
+import org.phenotips.variantStoreIntegration.internal.jobs.VCFRemovalJob;
+import org.phenotips.variantStoreIntegration.internal.jobs.VCFUploadJob;
 import org.phenotips.variantstore.shared.VariantStoreException;
 
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.manager.ComponentManager;
 import org.xwiki.component.phase.InitializationException;
-import org.xwiki.context.Execution;
 import org.xwiki.context.concurrent.ExecutionContextRunnable;
 import org.xwiki.observation.ObservationManager;
 
 import java.io.File;
-import java.nio.file.Path;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -112,7 +115,7 @@ public class DefaultVCFUploadManager implements VCFUploadManager
     {
         Patient patient = this.pr.getPatientById(patientID);
 
-        if (patient == null){
+        if (patient == null) {
             this.logger.warn("No patient found with the id: {}", patientID);
             throw new Exception("Could not find the patient with ID: " + patientID);
         }
@@ -136,7 +139,8 @@ public class DefaultVCFUploadManager implements VCFUploadManager
         Future varStoreFuture = null;
         try {
             varStoreFuture = this.varStore.addIndividual(patientID, isPublic, vcfFile.toPath());
-            VCFUploadJob newUploadJob = new VCFUploadJob(patient, varStoreFuture, contextProvider, this.observationManager);
+            VCFUploadJob newUploadJob = new VCFUploadJob(patient, varStoreFuture, contextProvider,
+                this.observationManager);
             ExecutionContextRunnable wrappedJob = new ExecutionContextRunnable(newUploadJob, componentManager);
             this.currentUploads.add(patientID, this.executor.submit(wrappedJob));
         } catch (VariantStoreException e) {

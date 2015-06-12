@@ -17,20 +17,18 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.phenotips.variantStoreIntegration;
+package org.phenotips.variantStoreIntegration.internal.jobs;
 
 import org.phenotips.Constants;
 import org.phenotips.data.Patient;
 import org.phenotips.variantStoreIntegration.events.VCFUploadCompleteEvent;
 
-import org.xwiki.component.annotation.Component;
 import org.xwiki.model.EntityType;
 import org.xwiki.model.reference.EntityReference;
 import org.xwiki.observation.ObservationManager;
 
 import java.util.concurrent.Future;
 
-import javax.inject.Inject;
 import javax.inject.Provider;
 
 import com.xpn.xwiki.XWiki;

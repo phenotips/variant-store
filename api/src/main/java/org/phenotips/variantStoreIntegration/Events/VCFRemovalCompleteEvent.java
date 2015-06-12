@@ -61,14 +61,12 @@ public class VCFRemovalCompleteEvent implements VCFEvent
     @Override
     public String getEventType()
     {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public User getAuthor()
     {
-        // TODO Auto-generated method stub
         return null;
     }
 }
