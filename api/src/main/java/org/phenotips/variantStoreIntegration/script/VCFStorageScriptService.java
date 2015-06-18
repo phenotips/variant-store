@@ -25,13 +25,11 @@ import org.phenotips.variantStoreIntegration.VCFUploadManager;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.script.service.ScriptService;
 
-import java.nio.file.Path;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-import com.xpn.xwiki.web.XWikiResponse;
 
 import net.sf.json.JSONObject;
 
@@ -39,33 +37,36 @@ import net.sf.json.JSONObject;
  * API for providing access to the variant store.
  *
  * @version $Id$
- * @Since 1.0
+ * @since 1.0
  */
 @Component
 @Named("VCFStorage")
 @Singleton
 public class VCFStorageScriptService implements ScriptService
 {
+    private static final String STATUS_STRING = "status";
     @Inject
     private VCFUploadManager uploadManager;
 
     /**
      * @param patientID A PhenoTips patient ID.
      * @param filePath The path to where the patients VCF is stored
+     * @return A json object with key status representing the status of the intial request. NOTE: The status is only
+     * relevant to the submission of the request. Failures during asynchronous vcf processing will not effect the status
+     * of the request.
      */
     public JSONObject upload(String patientID, String filePath)
     {
         JSONObject response = new JSONObject();
         try {
             this.uploadManager.uploadVCF(patientID, filePath);
-            response.element("status", "201");
+            response.element(STATUS_STRING, "201");
         } catch (Exception e) {
-            response.element("status", "500");
+            response.element(STATUS_STRING, "500");
             response.element("message", e.getMessage());
             response.element("trace", e.getStackTrace());
-        } finally {
-            return response;
         }
+        return response;
     }
 
     /**

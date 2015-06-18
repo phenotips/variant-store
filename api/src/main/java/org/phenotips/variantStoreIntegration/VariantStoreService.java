@@ -32,7 +32,7 @@ import java.util.concurrent.Future;
 import org.ga4gh.GAVariant;
 
 /**
- * Service that exposes Phenotips' Variant Store.
+ * Service that exposes Phenotip's Variant Store.
  *
  * @version $Id: 47fbeef7d4aac08639f2dc9016b2e6c6d3923293 $
  * @since 1.1M1
@@ -56,14 +56,16 @@ public interface VariantStoreService
      * @param file the path to the file on the local filesystem where the data is stored.
      * @return a Future that completes when the individual is fully inserted into the variant store, and is ready to be
      *         queried.
+     * @throws VariantStoreException If the variant store encountered a problem processing the file
      */
     Future addIndividual(String id, boolean isPublic, Path file) throws VariantStoreException;
 
     /**
-     * Remove any information associated with the specified individual from the variant store
+     * Remove any information associated with the specified individual from the variant store.
      *
      * @param id the individual's ID
      * @return a Future that completes when the individual is fully removed from the variant store.
+     * @throws VariantStoreException If the variant store encountered a problem processing the file
      */
     Future removeIndividual(String id) throws VariantStoreException;
 
@@ -80,25 +82,14 @@ public interface VariantStoreService
      * Get the individuals that have variants with the given gene symbol, exhibiting the given variant effects, and with
      * the given allele frequencies. Sort the list of patients by descending variant harmfulness
      *
-     * @param geneSymbol
-     * @param variantEffects
-     * @param alleleFrequencies
-     * @return
+     * @param geneSymbol The gene symbol to be included
+     * @param variantEffects A list of effects to be filtered by.
+     * @param alleleFrequencies Only variants with allele frequencies less than this will be considered.
+     * @return A Map of individual IDs to lists of GAVariants passing the filter params.
      */
     Map<String, List<GAVariant>> getIndividualsWithGene(String geneSymbol,
         List<String> variantEffects,
         Map<String, Double> alleleFrequencies);
-
-    /**
-     * Get all the individuals that exhibit the given variant, as well as the variant itself.
-     *
-     * @param chr
-     * @param pos
-     * @param ref
-     * @param alt
-     * @return
-     */
-    Map<String, List<GAVariant>> getIndividualsWithVariant(String chr, int pos, String ref, String alt);
 
     /**
      * Get a list of all the individual IDs stored in the variant store.

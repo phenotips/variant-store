@@ -23,6 +23,7 @@ import java.util.concurrent.Future;
 
 /**
  * The wrapper class for the future returned from a call to variant stores remove method.
+ * TODO: This class is a stub. Must implement something similar to {@link VCFUploadJob} once upload protocol stabilizes.
  *
  * @version $Id$
  */

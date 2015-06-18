@@ -57,7 +57,7 @@ public class DefaultVariantStoreService implements Initializable, VariantStoreSe
         this.variantStore = new VariantStore(
             new ExomiserTSVManager(),
             new SolrController()
-            );
+        );
 
         try {
             this.variantStore.init(Paths.get(this.env.getPermanentDirectory().getPath()).resolve("variant-store"));
@@ -82,6 +82,7 @@ public class DefaultVariantStoreService implements Initializable, VariantStoreSe
      * @param file the path to the file on the local filesystem where the data is stored.
      * @return a Future that completes when the individual is fully inserted into the variant store, and is ready to be
      *         queried.
+     * @throws VariantStoreException If the variant store encountered a problem processing the request.
      */
     @Override
     public Future addIndividual(String id, boolean isPublic, Path file) throws VariantStoreException
@@ -90,10 +91,11 @@ public class DefaultVariantStoreService implements Initializable, VariantStoreSe
     }
 
     /**
-     * Remove any information associated with the specified individual from the variant store
+     * Remove any information associated with the specified individual from the variant store.
      *
      * @param id the individual's ID
      * @return a Future that completes when the individual is fully removed from the variant store.
+     * @throws VariantStoreException If the variant store encountered a problem processing the request.
      */
     @Override
     public Future removeIndividual(String id) throws VariantStoreException
@@ -111,45 +113,22 @@ public class DefaultVariantStoreService implements Initializable, VariantStoreSe
     @Override
     public List<GAVariant> getTopHarmfullVariants(String id, int n)
     {
-        List<GAVariant> rawVs = this.variantStore.getTopHarmfullVariants(id, n);
-
-        return rawVs;
+        return this.variantStore.getTopHarmfullVariants(id, n);
     }
 
     /**
-     * Get the individuals that have variants with the given gene symbol, exhibiting the given variant effects, and with
-     * the given allele frequencies. Sort the list of patients by descending variant harmfulness.
-     *
-     * @param geneSymbol
-     * @param variantEffects
-     * @param alleleFrequencies
-     * @return
+     * Get the individuals that have variants with the given gene symbol, exhibiting the given variant effects,
+     * and with the given allele frequencies. Sort the list of patients by descending variant harmfulness
+     * @param geneSymbol the gene symbol
+     * @param variantEffects the variant effects
+     * @param alleleFrequencies the allele frequenceis
+     * @return a map of individuals and respective variants
      */
     @Override
     public Map<String, List<GAVariant>> getIndividualsWithGene(String geneSymbol, List<String> variantEffects,
         Map<String, Double> alleleFrequencies)
     {
-        Map<String, List<GAVariant>> raw =
-            this.variantStore.getIndividualsWithGene(geneSymbol, variantEffects, alleleFrequencies);
-
-        return raw;
-    }
-
-    /**
-     * Get all the individuals that exhibit the given variant, as well as the variant itself.
-     *
-     * @param chr
-     * @param pos
-     * @param ref
-     * @param alt
-     * @return
-     */
-    @Override
-    public Map<String, List<GAVariant>> getIndividualsWithVariant(String chr, int pos, String ref, String alt)
-    {
-        Map<String, List<GAVariant>> raw = this.variantStore.getIndividualsWithVariant(chr, pos, ref, alt);
-
-        return raw;
+        return this.variantStore.getIndividualsWithGene(geneSymbol, variantEffects, alleleFrequencies);
     }
 
     /**

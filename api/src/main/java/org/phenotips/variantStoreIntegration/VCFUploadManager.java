@@ -24,8 +24,6 @@ import org.phenotips.data.Patient;
 import org.xwiki.component.annotation.Role;
 import org.xwiki.component.phase.Initializable;
 
-import java.nio.file.Path;
-
 /**
  * The main component meant to interact with the variant store and coordinate PhenoTips events and data.
  *
@@ -36,10 +34,11 @@ public interface VCFUploadManager extends Initializable
 {
 
     /**
-     * Attempt to add the patient and VCF file to the variant store.
+     * Attempts to add the patient and VCF file to the variant store.
      *
-     * @param patientID A valid PhenoTips patient
+     * @param patientID A valid PhenoTips patient ID
      * @param filePath A VCF path to upload
+     * @throws Exception If there was an error while uploading the file.
      */
     void uploadVCF(String patientID, String filePath) throws Exception;
 
