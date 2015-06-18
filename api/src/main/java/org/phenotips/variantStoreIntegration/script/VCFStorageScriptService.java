@@ -60,9 +60,9 @@ public class VCFStorageScriptService implements ScriptService
         JSONObject response = new JSONObject();
         try {
             this.uploadManager.uploadVCF(patientID, filePath);
-            response.element(STATUS_STRING, "201");
+            response.element(STATUS_STRING, 201);
         } catch (Exception e) {
-            response.element(STATUS_STRING, "500");
+            response.element(STATUS_STRING, 500);
             response.element("message", e.getMessage());
             response.element("trace", e.getStackTrace());
         }

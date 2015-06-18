@@ -42,7 +42,9 @@
   <content>{{velocity wiki='false'}}
 #if ($request.getMethod() == 'POST')
   $response.setContentType('application/json')
-  $services.VCFStorage.upload($request.getParameter("individualId"), $request.getParameter("path"))
+  #set ($result = $services.VCFStorage.upload($request.getParameter("individualId"), $request.getParameter("path")))
+  $response.setStatus($result.get('status'))
+  $result
 #end
 {{/velocity}}</content>
 </xwikidoc>
