@@ -24,49 +24,44 @@ import org.phenotips.data.Patient;
 import org.xwiki.users.User;
 
 /**
- * VCF event fired upon successful completion of the removal of a patients VCF from the variant store.
+ * Event fired upon the successful completion of a patient's VCF file to the variant store.
  *
  * @version $Id$
  */
-public class VCFRemovalCompleteEvent implements VCFEvent
+public class VCFUploadCompleteEvent implements VCFEvent
 {
     private Patient patient;
 
     /**
      * @param patient A valid PhenoTips patient
      */
-    public VCFRemovalCompleteEvent(Patient patient)
-    {
+    public VCFUploadCompleteEvent(Patient patient) {
         this.patient = patient;
     }
 
     @Override
-    public boolean matches(Object otherEvent)
-    {
-        if (otherEvent instanceof VCFRemovalCompleteEvent) {
-            VCFRemovalCompleteEvent otherUploadEvent = (VCFRemovalCompleteEvent) otherEvent;
+    public boolean matches(Object otherEvent) {
+        if (otherEvent instanceof VCFUploadCompleteEvent) {
+            VCFUploadCompleteEvent otherUploadEvent = (VCFUploadCompleteEvent) otherEvent;
             return this.patient == null || (otherUploadEvent.getPatient() != null && this.patient.getDocument().equals(
-                otherUploadEvent.getPatient().getDocument()));
+                    otherUploadEvent.getPatient().getDocument()));
 
         }
         return false;
     }
 
     @Override
-    public Patient getPatient()
-    {
+    public Patient getPatient() {
         return this.patient;
     }
 
     @Override
-    public String getEventType()
-    {
+    public String getEventType() {
         return null;
     }
 
     @Override
-    public User getAuthor()
-    {
+    public User getAuthor() {
         return null;
     }
 }
