@@ -41,6 +41,8 @@ import org.phenotips.data.Patient;
 import org.xwiki.component.annotation.Role;
 import org.xwiki.component.phase.Initializable;
 
+import java.util.List;
+
 /**
  * The main component meant to interact with the variant store and coordinate PhenoTips events and data.
  *
@@ -72,5 +74,11 @@ public interface VCFUploadManager extends Initializable
      * @param patient A valid PhenoTips patient
      */
     void removeVCF(Patient patient);
+
+    /**
+     * Get a list of patients in the variant store.
+     * @return a list of patients
+     */
+    List<String> getUploadedPatients();
 
 }

@@ -24,6 +24,8 @@ import org.xwiki.component.annotation.Component;
 import org.xwiki.script.service.ScriptService;
 
 
+import java.util.List;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -95,5 +97,13 @@ public class VCFStorageScriptService implements ScriptService
     {
         // I guess this will just query the database??? Doesn't seem like such a good way of doing things.
         return 0;
+    }
+
+    /**
+     * Get a list of uploaded patients.
+     * @return a list of patients.
+     */
+    public List<String> getUploadedPatients() {
+        return uploadManager.getUploadedPatients();
     }
 }

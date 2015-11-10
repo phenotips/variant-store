@@ -37,6 +37,7 @@ import org.xwiki.context.concurrent.ExecutionContextRunnable;
 import org.xwiki.observation.ObservationManager;
 
 import java.io.File;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -194,6 +195,16 @@ public class DefaultVCFUploadManager implements VCFUploadManager
             e.printStackTrace();
         }
 
+    }
+
+    /**
+     * Get a list of patients in the variant store.
+     *
+     * @return a list of patients
+     */
+    @Override
+    public List<String> getUploadedPatients() {
+        return this.varStore.getIndividuals();
     }
 
     private static boolean resolvePatientPermission(Patient patient)
