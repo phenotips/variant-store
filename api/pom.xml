@@ -42,11 +42,6 @@
       <version>${phenotips.version}</version>
     </dependency>
     <dependency>
-        <groupId>javax.servlet</groupId>
-        <artifactId>servlet-api</artifactId>
-        <version>2.5</version>
-    </dependency>
-    <dependency>
       <groupId>org.xwiki.commons</groupId>
       <artifactId>xwiki-commons-job</artifactId>
       <version>${xwiki.version}</version>
@@ -74,14 +69,9 @@
     <!-- Test dependencies -->
     <dependency>
       <groupId>org.xwiki.commons</groupId>
-      <artifactId>xwiki-commons-test-component</artifactId>
+      <artifactId>xwiki-commons-tool-test-component</artifactId>
       <version>${xwiki.version}</version>
       <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.phenotips</groupId>
-      <artifactId>variant-store</artifactId>
-      <version>1.0-SNAPSHOT</version>
     </dependency>
   </dependencies>
 </project>
