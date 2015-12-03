@@ -62,6 +62,13 @@ public interface InputManager extends Service
     VariantIterator getIteratorForIndividual(String id, boolean isPublic);
 
     /**
+     * Given an individual, get the Variant Iterator. The individual is assumed to be private.
+     * @param id the id of the individual
+     * @return the variant iterator
+     */
+    VariantIterator getIteratorForIndividual(String id);
+
+    /**
      * Get All individuals stored in the variant store.
      *
      * @return a list of individual IDs

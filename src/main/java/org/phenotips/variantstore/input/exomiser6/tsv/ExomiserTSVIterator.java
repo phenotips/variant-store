@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.phenotips.variantstore.input.tsv;
+package org.phenotips.variantstore.input.exomiser6.tsv;
 
 import org.phenotips.variantstore.input.AbstractVariantIterator;
 import org.phenotips.variantstore.input.VariantHeader;
@@ -97,7 +97,6 @@ public class ExomiserTSVIterator extends AbstractVariantIterator
 
         int i = 0;
         for (String field : tsvRecordIterator.next()) {
-
             // try to add the field different ways, see what sticks.
             addFieldToVariant(variant, field, i);
             addFieldToVariantInfo(variant, field, i);
@@ -177,6 +176,13 @@ public class ExomiserTSVIterator extends AbstractVariantIterator
                     }
                 }
                 String[] split = field.split(splitter);
+
+                if (".".equals(split[0])) {
+                    //TODO: SHOULD NOT BE DOING THIS.
+                    call.setGenotype(Arrays.asList(0, 0));
+                    break;
+                }
+
                 call.setGenotype(Arrays.asList(Integer.valueOf(split[0]), Integer.valueOf(split[1])));
                 break;
             default:
@@ -210,13 +216,7 @@ public class ExomiserTSVIterator extends AbstractVariantIterator
 
     private double getMaxExacFreqFromField(double exacFreq, String field, int i) {
         switch (columns[i]) {
-            case EXAC_AFR_FREQ:
-            case EXAC_AMR_FREQ:
-            case EXAC_EAS_FREQ:
-            case EXAC_FIN_FREQ:
-            case EXAC_NFE_FREQ:
-            case EXAC_SAS_FREQ:
-            case EXAC_OTH_FREQ:
+            case MAX_FREQUENCY:
                 if (!".".equals(field)) {
                     return Math.max(exacFreq, Double.parseDouble(field));
                 }

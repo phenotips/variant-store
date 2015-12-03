@@ -18,27 +18,33 @@
 package org.phenotips.variantstore;
 
 import org.phenotips.variantstore.db.DatabaseController;
+import org.phenotips.variantstore.db.newsolr.solr.NewSolrController;
 import org.phenotips.variantstore.db.solr.SolrController;
 import org.phenotips.variantstore.input.InputManager;
-import org.phenotips.variantstore.input.tsv.ExomiserTSVManager;
+import org.phenotips.variantstore.input.exomiser6.tsv.ExomiserTSVManager;
 import org.phenotips.variantstore.input.vcf.VCFManager;
 import org.phenotips.variantstore.shared.VariantStoreException;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.log4j.Logger;
 import org.ga4gh.GAVariant;
 
 /**
- * The Variant Store is capable of storing a large number of individuals genomic variants for further
- * querying and sorting.
+ * The Variant Store is capable of storing a large number of individuals genomic variants for further querying and
+ * sorting.
  *
  * @version $Id$
  */
@@ -80,7 +86,7 @@ public class VariantStore implements VariantStoreInterface
 
         vs = new VariantStore(
                 new ExomiserTSVManager(),
-                new SolrController()
+                new NewSolrController()
         );
 
         try {
@@ -94,14 +100,29 @@ public class VariantStore implements VariantStoreInterface
         logger.debug("Started");
 
 
+        Collection<File> files = FileUtils.listFiles(Paths.get("/data/vcf/c4r/pc-full/").toFile(),
+                TrueFileFilter.INSTANCE,
+                TrueFileFilter.INSTANCE);
         try {
-            for (Object id : Arrays.asList()) {
+            for (File tsv : files) {
+                String id = FilenameUtils.removeExtension(tsv.getName());
+                if (vs.getIndividuals().contains(id)) {
+                    continue;
+                }
+                long startTime;
+                long endTime;
 
+                startTime = System.currentTimeMillis();
                 vs.addIndividual(
                         (String) id,
                         true,
-                        Paths.get("/data/vcf/c4r/internal-tsvs/" + id + ".variants.tsv")
+                        Paths.get(tsv.toURI())
                 ).get();
+                endTime = System.currentTimeMillis();
+                logger.debug(String.format("csv: Insertion (ms): %d", endTime - startTime));
+
+                timeQueries(vs);
+
             }
         } catch (InterruptedException | ExecutionException | VariantStoreException e) {
             logger.error("Error", e);
@@ -109,27 +130,58 @@ public class VariantStore implements VariantStoreInterface
             return;
         }
 
-        Map<String, List<GAVariant>> map;
-
-        Map<String, Double> af = new HashMap<>();
-        af.put("EXAC", (double) 1.0);
-        af.put("PhenomeCentral", (double) 0.5);
-        map = vs.getIndividualsWithGene("SRCAP", Arrays.asList("STOPGAIN"), af);
-        logger.debug("Individuals w Genes: " + map);
-
-        try {
-            for (Object id : Arrays.asList()) {
-                logger.debug("Removing");
-                vs.removeIndividual((String) id).get();
-            }
-        } catch (InterruptedException | ExecutionException | VariantStoreException e) {
-            logger.error("Eror", e);
-            vs.stop();
-            return;
-        }
-
         vs.stop();
         logger.debug("Stopped");
+    }
+
+    private static void timeQueries(VariantStore vs) {
+        long startTime;
+        long endTime;
+
+        startTime = System.currentTimeMillis();
+        logger.debug(String.format("csv: Beacon: %s", vs.beacon("chr1", (long) 120572547, "C")));
+        endTime = System.currentTimeMillis();
+        logger.debug(String.format("csv: Beacon (ms): %d", endTime - startTime));
+
+        List<String> effects = Arrays.asList("MISSENSE",
+                "FS_DELETION",
+                "FS_INSERTION",
+                "NON_FS_DELETION",
+                "NON_FS_INSERTION",
+                "STOPGAIN",
+                "STOPLOSS",
+                "FS_DUPLICATION",
+                "SPLICING",
+                "NON_FS_DUPLICATION",
+                "FS_SUBSTITUTION",
+                "NON_FS_SUBSTITUTION",
+                "STARTLOSS",
+                "ncRNA_EXONIC",
+                "ncRNA_SPLICING",
+                "UTR3",
+                "UTR5",
+                "SYNONYMOUS",
+                "INTRONIC",
+                "ncRNA_INTRONIC",
+                "UPSTREAM",
+                "DOWNSTREAM",
+                "INTERGENIC");
+        Map<String, Double> afs = new HashMap<>();
+        afs.put("EXAC", 0.01);
+        afs.put("PhenomeCentral", 0.1);
+        for (String gene : Arrays.asList("EFTUD", "NGLY1", "SRCAP", "TTN", "NOTCH2")) {
+            startTime = System.currentTimeMillis();
+            vs.getIndividualsWithGene(gene, effects, afs);
+            endTime = System.currentTimeMillis();
+            logger.debug(String.format("csv: Mendelian for %s (ms): %d", gene, endTime - startTime));
+        }
+
+        startTime = System.currentTimeMillis();
+        logger.debug(String.format("csv: Total Variants: %d", vs.getTotNumVariants()));
+        endTime = System.currentTimeMillis();
+        logger.debug(String.format("csv: Total Variants (ms): %d", endTime - startTime));
+        logger.debug(String.format("csv: Total Individuals: %d", vs.getIndividuals().size()));
+
     }
 
     @Override
@@ -146,7 +198,7 @@ public class VariantStore implements VariantStoreInterface
 
     @Override
     public Future addIndividual(String id, boolean isPublic, Path file) throws VariantStoreException {
-        logger.debug("Adding " + id);
+        logger.debug("Adding " + id + " from " + file.toString());
         // copy file to file cache
         inputManager.addIndividual(id, file);
 
@@ -156,7 +208,7 @@ public class VariantStore implements VariantStoreInterface
     @Override
     public Future removeIndividual(String id) throws VariantStoreException {
         this.inputManager.removeIndividual(id);
-        return this.db.removeIndividual(id);
+        return this.db.removeIndividual(this.inputManager.getIteratorForIndividual(id));
     }
 
     @Override
@@ -192,17 +244,20 @@ public class VariantStore implements VariantStoreInterface
      * @param chr    chromosome
      * @param pos    position
      * @param allele allele
+     *
      * @return the allele frequency of this variant in the db.
      */
-    public double beacon(String chr, int pos, String allele) {
-        Map<String, List<GAVariant>> map = this.getIndividualsWithVariant(chr, pos, null, allele);
+    public double beacon(String chr, long pos, String allele) {
+        return (double) this.db.beacon(chr, pos, allele) / ((double) this.getIndividuals().size() * 2);
+    }
 
-        if (map.size() == 0) {
-            map = this.getIndividualsWithVariant(chr, pos, allele, null);
-        }
-
-        //TODO: THIS MATH IS SO WRONG
-        return (double) map.size() / (double) this.getIndividuals().size();
+    /**
+     * Get the total number of variants in the db.
+     *
+     * @return the total number of variants in the db.
+     */
+    public long getTotNumVariants() {
+        return db.getTotNumVariants();
     }
 
 }

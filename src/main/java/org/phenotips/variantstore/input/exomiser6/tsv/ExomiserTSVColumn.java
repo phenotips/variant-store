@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
+/*
  * See the NOTICE file distributed with this work for additional
  * information regarding copyright ownership.
  *
@@ -15,16 +14,39 @@
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
--->
-<!DOCTYPE suppressions PUBLIC
-    "-//Puppy Crawl//DTD Suppressions 1.0//EN"
-    "http://www.puppycrawl.com/dtds/suppressions_1_0.dtd">
+ */
+package org.phenotips.variantstore.input.exomiser6.tsv;
 
-<suppressions>
-  <suppress checks="JavadocVariable" files="ExomiserTSVColumn.java" />
-  <suppress checks="MultipleStringLiterals" files="ExomiserTSVIterator.java" />
-  <suppress checks="JavadocVariable" files="VariantsSchema.java" />
-  <suppress checks="JavadocVariable" files="GAVariantInfoFields.java" />
-  <suppress checks="JavadocVariable" files="GACallInfoFields.java" />
-  <suppress checks="UncommentedMain" files="VariantStore.java" /><!--TODO: This is temporary until we have better tests-->
-</suppressions>
+/**
+ * The columns in the supported TSV file, in the order that they come.
+ *
+ * @version $Id$
+ */
+public enum ExomiserTSVColumn {
+    CHROM,
+    POS,
+    REF,
+    ALT,
+    QUAL,
+    FILTER,
+    GENOTYPE,
+    COVERAGE,
+    FUNCTIONAL_CLASS,
+    HGVS,
+    EXOMISER_GENE,
+    CADD,
+    POLYPHEN,
+    MUTATIONTASTER,
+    SIFT,
+    DBSNP_ID,
+    MAX_FREQUENCY,
+    DBSNP_FREQUENCY,
+    EVS_EA_FREQUENCY,
+    EVS_AA_FREQUENCY,
+    EXOMISER_VARIANT_SCORE,
+    EXOMISER_GENE_PHENO_SCORE,
+    EXOMISER_GENE_VARIANT_SCORE,
+    EXOMISER_GENE_COMBINED_SCORE
+}
+
+

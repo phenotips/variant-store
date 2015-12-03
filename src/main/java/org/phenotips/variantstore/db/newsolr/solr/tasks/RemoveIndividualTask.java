@@ -15,10 +15,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.phenotips.variantstore.db.solr.tasks;
+package org.phenotips.variantstore.db.newsolr.solr.tasks;
 
 import org.phenotips.variantstore.db.DatabaseException;
-import org.phenotips.variantstore.db.solr.VariantsSchema;
+import org.phenotips.variantstore.db.newsolr.solr.NewVariantsSchema;
 import org.phenotips.variantstore.input.VariantIterator;
 
 import java.io.IOException;
@@ -39,7 +39,7 @@ public class RemoveIndividualTask implements Callable<Object>
     /**
      * Remove an individual from solr.
      *  @param server the solr server to run the task on
-     * @param iterator     the iterator over the individual's variants
+     * @param iterator an iterator of the individual's variants
      */
     public RemoveIndividualTask(SolrClient server, VariantIterator iterator) {
         this.server = server;
@@ -49,7 +49,8 @@ public class RemoveIndividualTask implements Callable<Object>
     @Override
     public Object call() throws Exception {
         try {
-            server.deleteByQuery(String.format(VariantsSchema.CALLSET_ID + ":%s", iterator.getHeader().getIndividualId()));
+            server.deleteByQuery(String.format(NewVariantsSchema.CALLSET_IDS + ":%s",
+                    iterator.getHeader().getIndividualId()));
             server.commit(true, true);
         } catch (SolrServerException | IOException e) {
             throw new DatabaseException("Error removing individual from solr", e);

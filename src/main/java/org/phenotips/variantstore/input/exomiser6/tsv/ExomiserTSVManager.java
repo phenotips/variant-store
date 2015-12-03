@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.phenotips.variantstore.input.tsv;
+package org.phenotips.variantstore.input.exomiser6.tsv;
 
 import org.phenotips.variantstore.input.InputException;
 import org.phenotips.variantstore.input.InputManager;
@@ -93,6 +93,7 @@ public class ExomiserTSVManager implements InputManager
      *
      * @param id       individual id
      * @param isPublic permission to use variants in aggregate results
+     *
      * @return a variant iterator
      */
     @Override

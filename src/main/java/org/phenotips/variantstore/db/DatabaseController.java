@@ -49,7 +49,7 @@ public interface DatabaseController extends Service
      * @throws DatabaseException if an error is encountered immediately.
      *                           The Future throws exceptions if an error is encountred during insert.
      */
-    Future removeIndividual(String id) throws DatabaseException;
+    Future removeIndividual(VariantIterator id) throws DatabaseException;
 
     /**
      * Fetch all individuals that exhibit the given genes. Filter on variant effects, variant allele frequencies.
@@ -103,4 +103,19 @@ public interface DatabaseController extends Service
      * @return a list of n variants, sorted by harmfulness
      */
     List<GAVariant> getTopHarmfullVariants(String id, int n);
+
+    /**
+     * GA4GH Beacon implementation. Return the allele count for this specific variant in the database.
+     * @param chr chr
+     * @param pos pos
+     * @param allele allele
+     * @return the allele count for this specific variant in the db.
+     */
+    int beacon(String chr, long pos, String allele);
+
+    /**
+     * Get the total number of variants in the database.
+     * @return the total number of variants.
+     */
+    long getTotNumVariants();
 }
