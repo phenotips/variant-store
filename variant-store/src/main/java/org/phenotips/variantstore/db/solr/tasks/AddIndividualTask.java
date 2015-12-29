@@ -15,10 +15,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.phenotips.variantstore.db.newsolr.solr.tasks;
+package org.phenotips.variantstore.db.solr.tasks;
 
 import org.phenotips.variantstore.db.DatabaseException;
-import org.phenotips.variantstore.db.newsolr.solr.SolrVariantUtils;
+import org.phenotips.variantstore.db.solr.SolrVariantUtils;
 import org.phenotips.variantstore.input.VariantIterator;
 import org.phenotips.variantstore.shared.GACallInfoFields;
 import org.phenotips.variantstore.shared.VariantUtils;

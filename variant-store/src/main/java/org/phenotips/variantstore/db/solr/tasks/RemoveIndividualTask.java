@@ -19,18 +19,17 @@ package org.phenotips.variantstore.db.solr.tasks;
 
 import org.phenotips.variantstore.db.DatabaseException;
 import org.phenotips.variantstore.db.solr.SolrVariantUtils;
-import org.phenotips.variantstore.db.solr.VariantsSchema;
 import org.phenotips.variantstore.input.VariantIterator;
+import org.phenotips.variantstore.shared.GACallInfoFields;
+import org.phenotips.variantstore.shared.VariantUtils;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
 
+import org.apache.log4j.Logger;
 import org.apache.solr.client.solrj.SolrClient;
+import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import org.ga4gh.GAVariant;
@@ -38,19 +37,19 @@ import org.ga4gh.GAVariant;
 /**
  * @version $Id$
  */
-public class AddIndividualTask implements Callable<Object>
+public class RemoveIndividualTask implements Callable<Object>
 {
 
-    private final SolrClient server;
+    private Logger logger = Logger.getLogger(getClass());
     private final VariantIterator iterator;
+    private SolrClient server;
 
     /**
-     * Initialize the task.
-     *
-     * @param server   the SolrServer to run the task on
-     * @param iterator the variants to add
+     * Remove an individual from solr.
+     *  @param server the solr server to run the task on
+     * @param iterator an iterator of the individual's variants
      */
-    public AddIndividualTask(SolrClient server, VariantIterator iterator) {
+    public RemoveIndividualTask(SolrClient server, VariantIterator iterator) {
         this.server = server;
         this.iterator = iterator;
     }
@@ -58,41 +57,55 @@ public class AddIndividualTask implements Callable<Object>
     @Override
     public Object call() throws Exception {
         GAVariant variant;
-        Map<String, List<String>> info;
+        SolrQuery q;
+        SolrDocument resp;
         SolrDocument doc;
-        SolrInputDocument aggregateDoc = new SolrInputDocument();
+
+        int hashCollisions = 0;
+        int hashMisses = 0;
 
         while (iterator.hasNext()) {
             variant = iterator.next();
-            doc = SolrVariantUtils.variantToDoc(variant);
 
-            doc.setField(VariantsSchema.HASH,
-                    SolrVariantUtils.getHash(variant, iterator.getHeader().getIndividualId()));
-            doc.setField(VariantsSchema.VARIANT_ID, SolrVariantUtils.getVariantSignature(variant));
-
-            doc.setField(VariantsSchema.CALLSET_ID, iterator.getHeader().getIndividualId());
-
-            if (iterator.getHeader().isPublic()) {
-                doc.setField(VariantsSchema.PUBLIC, true);
+            // skip filter!= PASS
+            if (!"PASS".equals(VariantUtils.getInfo(variant.getCalls().get(0), GACallInfoFields.FILTER))) {
+                continue;
             }
 
-            addDoc(ClientUtils.toSolrInputDocument(doc));
+            /**
+             * Query Solr for existing variant
+             */
+            String hash = SolrVariantUtils.getHash(variant);
 
-            // Make aggregate info doc
-            aggregateDoc.setField(VariantsSchema.HASH,
-                    SolrVariantUtils.getHash(variant, VariantsSchema.AGGREGATE_TABLE));
+            resp = null;
+            try {
+                resp = server.getById(hash);
+            } catch (SolrServerException | IOException e) {
+                logger.error("Failed to check for an existing variant", e);
+                continue;
+            }
 
-            // gotta use atomic update here because we're using increment below.
-            Map<String, String> aggregateVariantIdMap = new HashMap<>();
-            aggregateVariantIdMap.put("set", SolrVariantUtils.getVariantSignature(variant));
-            aggregateDoc.setField(VariantsSchema.AGGREGATE_VARIANT_ID, aggregateVariantIdMap);
+            if (resp == null) {
+                // our variant is totally new. how did this happen?
+                logger.debug("variant not found");
+                hashMisses += 1;
+                continue;
+            }
 
-            Map<String, Integer> copiesSumMap = new HashMap<>();
-            copiesSumMap.put("inc", (Integer) doc.get(VariantsSchema.COPIES));
-            aggregateDoc.addField(VariantsSchema.COPIES_SUM, copiesSumMap);
+            // found a doc, use it.
+            doc = resp;
+            doc.remove("_version_");
+            server.deleteById(hash);
+            hashCollisions++;
 
-            addDoc(aggregateDoc);
+            SolrVariantUtils.removeVariantFromDoc(
+                    doc,
+                    variant,
+                    iterator.getHeader().getIndividualId(),
+                    iterator.getHeader().isPublic());
         }
+        logger.debug("csv: Hash Collisions: " + hashCollisions);
+        logger.debug("csv: Hash Misses: " + hashMisses);
 
         // Solr should commit the fields at it's own optimal pace.
         // We want to commit once at the end to make sure any leftovers in solr buffers are available for querying.
@@ -105,7 +118,7 @@ public class AddIndividualTask implements Callable<Object>
             server.add(doc);
             doc.clear();
         } catch (SolrServerException | IOException e) {
-            throw new DatabaseException(String.format("Error adding variants to Solr"), e);
+            throw new DatabaseException("Error adding variants to Solr", e);
         }
     }
 

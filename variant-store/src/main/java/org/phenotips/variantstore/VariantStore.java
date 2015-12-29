@@ -18,7 +18,6 @@
 package org.phenotips.variantstore;
 
 import org.phenotips.variantstore.db.DatabaseController;
-import org.phenotips.variantstore.db.newsolr.solr.NewSolrController;
 import org.phenotips.variantstore.db.solr.SolrController;
 import org.phenotips.variantstore.input.InputManager;
 import org.phenotips.variantstore.input.exomiser6.tsv.ExomiserTSVManager;
@@ -86,7 +85,7 @@ public class VariantStore implements VariantStoreInterface
 
         vs = new VariantStore(
                 new ExomiserTSVManager(),
-                new NewSolrController()
+                new SolrController()
         );
 
         try {

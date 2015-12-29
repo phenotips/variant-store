@@ -15,14 +15,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.phenotips.variantstore.db.newsolr.solr;
+package org.phenotips.variantstore.db.solr;
 
 import org.phenotips.variantstore.shared.GACallInfoFields;
 import org.phenotips.variantstore.shared.GAVariantInfoFields;
 import static org.phenotips.variantstore.shared.VariantUtils.addInfo;
 import static org.phenotips.variantstore.shared.VariantUtils.getInfo;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -96,7 +95,7 @@ public final class SolrVariantUtils
     public static Map<String, GAVariant> docToVariantMap(SolrDocument doc) {
         Map<String, GAVariant> map = new HashMap<>();
 
-        for (String callsetId : (List<String>) doc.get(NewVariantsSchema.CALLSET_IDS)) {
+        for (String callsetId : (List<String>) doc.get(VariantsSchema.CALLSET_IDS)) {
             map.put(callsetId, docToVariant(doc, callsetId));
         }
 
@@ -115,36 +114,36 @@ public final class SolrVariantUtils
         GAVariant variant = new GAVariant();
 
         // TODO: Whole function needs to be newed, should be doc to list<Variant>
-        variant.setReferenceName(doc.get(NewVariantsSchema.CHROM).toString());
-        variant.setReferenceBases(doc.get(NewVariantsSchema.REF).toString());
-        variant.setStart(Long.valueOf(doc.get(NewVariantsSchema.START).toString()));
-        variant.setEnd(Long.valueOf(doc.get(NewVariantsSchema.END).toString()));
-        variant.setAlternateBases(Collections.singletonList(doc.get(NewVariantsSchema.ALT).toString()));
+        variant.setReferenceName(doc.get(VariantsSchema.CHROM).toString());
+        variant.setReferenceBases(doc.get(VariantsSchema.REF).toString());
+        variant.setStart(Long.valueOf(doc.get(VariantsSchema.START).toString()));
+        variant.setEnd(Long.valueOf(doc.get(VariantsSchema.END).toString()));
+        variant.setAlternateBases(Collections.singletonList(doc.get(VariantsSchema.ALT).toString()));
 
-        addInfo(variant, GAVariantInfoFields.GENE, doc.get(NewVariantsSchema.GENE));
-        addInfo(variant, GAVariantInfoFields.GENE_EFFECT, doc.get(NewVariantsSchema.GENE_EFFECT));
+        addInfo(variant, GAVariantInfoFields.GENE, doc.get(VariantsSchema.GENE));
+        addInfo(variant, GAVariantInfoFields.GENE_EFFECT, doc.get(VariantsSchema.GENE_EFFECT));
 
-        if (doc.containsKey(NewVariantsSchema.EXAC_AF)) {
-            addInfo(variant, GAVariantInfoFields.EXAC_AF, doc.get(NewVariantsSchema.EXAC_AF));
+        if (doc.containsKey(VariantsSchema.EXAC_AF)) {
+            addInfo(variant, GAVariantInfoFields.EXAC_AF, doc.get(VariantsSchema.EXAC_AF));
         }
 
         GACall call = new GACall();
         addInfo(call, GACallInfoFields.QUALITY,
-                getCallsetField(doc, callsetId, NewVariantsSchema.QUAL));
+                getCallsetField(doc, callsetId, VariantsSchema.QUAL));
         addInfo(call, GACallInfoFields.FILTER,
-                getCallsetField(doc, callsetId, NewVariantsSchema.FILTER));
+                getCallsetField(doc, callsetId, VariantsSchema.FILTER));
         addInfo(call, GACallInfoFields.EXOMISER_VARIANT_SCORE,
-                getCallsetField(doc, callsetId, NewVariantsSchema.EXOMISER_VARIANT_SCORE));
+                getCallsetField(doc, callsetId, VariantsSchema.EXOMISER_VARIANT_SCORE));
         addInfo(call, GACallInfoFields.EXOMISER_GENE_PHENO_SCORE,
-                getCallsetField(doc, callsetId, NewVariantsSchema.EXOMISER_GENE_PHENO_SCORE));
+                getCallsetField(doc, callsetId, VariantsSchema.EXOMISER_GENE_PHENO_SCORE));
         addInfo(call, GACallInfoFields.EXOMISER_GENE_VARIANT_SCORE,
-                getCallsetField(doc, callsetId, NewVariantsSchema.EXOMISER_GENE_VARIANT_SCORE));
+                getCallsetField(doc, callsetId, VariantsSchema.EXOMISER_GENE_VARIANT_SCORE));
         addInfo(call, GACallInfoFields.EXOMISER_GENE_COMBINED_SCORE,
-                getCallsetField(doc, callsetId, NewVariantsSchema.EXOMISER_GENE_COMBINED_SCORE));
+                getCallsetField(doc, callsetId, VariantsSchema.EXOMISER_GENE_COMBINED_SCORE));
         variant.setCalls(Collections.singletonList(call));
 
-        variant.setAlternateBases(Collections.singletonList(doc.get(NewVariantsSchema.ALT).toString()));
-        if ((int) getCallsetField(doc, callsetId, NewVariantsSchema.AC) == 2) {
+        variant.setAlternateBases(Collections.singletonList(doc.get(VariantsSchema.ALT).toString()));
+        if ((int) getCallsetField(doc, callsetId, VariantsSchema.AC) == 2) {
             call.setGenotype(Arrays.asList(1, 1));
         } else {
             call.setGenotype(Arrays.asList(0, 1));
@@ -154,7 +153,7 @@ public final class SolrVariantUtils
     }
 
     private static Object getCallsetField(SolrDocument doc, String callsetId, String fieldName) {
-        return doc.get(NewVariantsSchema.getCallsetsFieldName(callsetId, fieldName));
+        return doc.get(VariantsSchema.getCallsetsFieldName(callsetId, fieldName));
     }
 
     /**
@@ -167,25 +166,25 @@ public final class SolrVariantUtils
     public static SolrDocument variantToDoc(GAVariant variant) {
         SolrDocument doc = new SolrDocument();
 
-        doc.setField(NewVariantsSchema.HASH, getHash(variant));
-        doc.setField(NewVariantsSchema.CHROM, variant.getReferenceName());
-        doc.setField(NewVariantsSchema.START, variant.getStart());
-        doc.setField(NewVariantsSchema.END, variant.getStart() + variant.getReferenceBases().length());
-        doc.setField(NewVariantsSchema.REF, variant.getReferenceBases());
-        doc.setField(NewVariantsSchema.REF_LENGTH, variant.getReferenceBases().length());
-        doc.setField(NewVariantsSchema.ALT, variant.getAlternateBases().get(0));
-        doc.setField(NewVariantsSchema.ALT_LENGHT, variant.getAlternateBases().get(0).length());
-        doc.setField(NewVariantsSchema.LENGTH, Math.max((int) doc.get(NewVariantsSchema.REF_LENGTH),
-                (int) doc.get(NewVariantsSchema.ALT_LENGHT)));
+        doc.setField(VariantsSchema.HASH, getHash(variant));
+        doc.setField(VariantsSchema.CHROM, variant.getReferenceName());
+        doc.setField(VariantsSchema.START, variant.getStart());
+        doc.setField(VariantsSchema.END, variant.getStart() + variant.getReferenceBases().length());
+        doc.setField(VariantsSchema.REF, variant.getReferenceBases());
+        doc.setField(VariantsSchema.REF_LENGTH, variant.getReferenceBases().length());
+        doc.setField(VariantsSchema.ALT, variant.getAlternateBases().get(0));
+        doc.setField(VariantsSchema.ALT_LENGHT, variant.getAlternateBases().get(0).length());
+        doc.setField(VariantsSchema.LENGTH, Math.max((int) doc.get(VariantsSchema.REF_LENGTH),
+                (int) doc.get(VariantsSchema.ALT_LENGHT)));
 
-        doc.setField(NewVariantsSchema.GENE, getInfo(variant, GAVariantInfoFields.GENE));
-        doc.setField(NewVariantsSchema.GENE_EFFECT, getInfo(variant, GAVariantInfoFields.GENE_EFFECT));
+        doc.setField(VariantsSchema.GENE, getInfo(variant, GAVariantInfoFields.GENE));
+        doc.setField(VariantsSchema.GENE_EFFECT, getInfo(variant, GAVariantInfoFields.GENE_EFFECT));
 
-        doc.setField(NewVariantsSchema.EXAC_AF, safeValueOf(getInfo(variant, GAVariantInfoFields.EXAC_AF)));
+        doc.setField(VariantsSchema.EXAC_AF, safeValueOf(getInfo(variant, GAVariantInfoFields.EXAC_AF)));
 
-        doc.setField(NewVariantsSchema.AC_TOT, 0);
-        doc.setField(NewVariantsSchema.GT_HET, 0);
-        doc.setField(NewVariantsSchema.GT_HOM, 0);
+        doc.setField(VariantsSchema.AC_TOT, 0);
+        doc.setField(VariantsSchema.GT_HET, 0);
+        doc.setField(VariantsSchema.GT_HOM, 0);
         return doc;
     }
 
@@ -198,7 +197,7 @@ public final class SolrVariantUtils
      * @param isPublic  whether these variants can be used in an aggregate search.
      */
     public static void addVariantToDoc(SolrDocument doc, GAVariant variant, String callsetId, boolean isPublic) {
-        doc.setField(NewVariantsSchema.CALLSET_IDS, callsetId);
+        doc.setField(VariantsSchema.CALLSET_IDS, callsetId);
 
         GACall call = variant.getCalls().get(0);
         int copies = 0;
@@ -207,29 +206,29 @@ public final class SolrVariantUtils
                 copies++;
             }
         }
-        doc.setField(NewVariantsSchema.AC_TOT, (int) doc.getFieldValue(NewVariantsSchema.AC_TOT) + copies);
+        doc.setField(VariantsSchema.AC_TOT, (int) doc.getFieldValue(VariantsSchema.AC_TOT) + copies);
         if (copies == 1) {
-            doc.setField(NewVariantsSchema.AC_TOT, (int) doc.getFieldValue(NewVariantsSchema.GT_HET) + 1);
+            doc.setField(VariantsSchema.AC_TOT, (int) doc.getFieldValue(VariantsSchema.GT_HET) + 1);
         } else if (copies == 2) {
-            doc.setField(NewVariantsSchema.AC_TOT, (int) doc.getFieldValue(NewVariantsSchema.GT_HOM) + 1);
+            doc.setField(VariantsSchema.AC_TOT, (int) doc.getFieldValue(VariantsSchema.GT_HOM) + 1);
         }
 
-        setCallsetField(doc, callsetId, NewVariantsSchema.PUBLIC, isPublic);
-        setCallsetField(doc, callsetId, NewVariantsSchema.AC, copies);
-        setCallsetField(doc, callsetId, NewVariantsSchema.QUAL, getInfo(call, GACallInfoFields.QUALITY));
-        setCallsetField(doc, callsetId, NewVariantsSchema.FILTER, getInfo(call, GACallInfoFields.FILTER));
-        setCallsetField(doc, callsetId, NewVariantsSchema.EXOMISER_VARIANT_SCORE,
+        setCallsetField(doc, callsetId, VariantsSchema.PUBLIC, isPublic);
+        setCallsetField(doc, callsetId, VariantsSchema.AC, copies);
+        setCallsetField(doc, callsetId, VariantsSchema.QUAL, getInfo(call, GACallInfoFields.QUALITY));
+        setCallsetField(doc, callsetId, VariantsSchema.FILTER, getInfo(call, GACallInfoFields.FILTER));
+        setCallsetField(doc, callsetId, VariantsSchema.EXOMISER_VARIANT_SCORE,
                 safeValueOf(getInfo(call, GACallInfoFields.EXOMISER_VARIANT_SCORE)));
-        setCallsetField(doc, callsetId, NewVariantsSchema.EXOMISER_GENE_PHENO_SCORE,
+        setCallsetField(doc, callsetId, VariantsSchema.EXOMISER_GENE_PHENO_SCORE,
                 safeValueOf(getInfo(call, GACallInfoFields.EXOMISER_GENE_PHENO_SCORE)));
-        setCallsetField(doc, callsetId, NewVariantsSchema.EXOMISER_GENE_VARIANT_SCORE,
+        setCallsetField(doc, callsetId, VariantsSchema.EXOMISER_GENE_VARIANT_SCORE,
                 safeValueOf(getInfo(call, GACallInfoFields.EXOMISER_GENE_VARIANT_SCORE)));
-        setCallsetField(doc, callsetId, NewVariantsSchema.EXOMISER_GENE_COMBINED_SCORE,
+        setCallsetField(doc, callsetId, VariantsSchema.EXOMISER_GENE_COMBINED_SCORE,
                 safeValueOf(getInfo(call, GACallInfoFields.EXOMISER_GENE_COMBINED_SCORE)));
     }
 
-    private static void setCallsetField(SolrDocument doc, String callsetId, String fieldName, Serializable value) {
-        doc.setField(NewVariantsSchema.getCallsetsFieldName(callsetId, fieldName), value);
+    private static void setCallsetField(SolrDocument doc, String callsetId, String fieldName, Object value) {
+        doc.setField(VariantsSchema.getCallsetsFieldName(callsetId, fieldName), value);
     }
 
     /**
@@ -282,5 +281,50 @@ public final class SolrVariantUtils
         }
         return new String(arr);
 
+    }
+
+    public static void removeVariantFromDoc(SolrDocument doc, GAVariant variant, String callsetId, boolean isPublic) {
+
+        removeMultiFieldValue(doc, VariantsSchema.CALLSET_IDS, callsetId);
+
+        GACall call = variant.getCalls().get(0);
+        int copies = 0;
+        for (int i : call.getGenotype()) {
+            if (i == 1) {
+                copies--;
+            }
+        }
+        doc.setField(VariantsSchema.AC_TOT, (int) doc.getFieldValue(VariantsSchema.AC_TOT) - copies);
+        if (copies == 1) {
+            doc.setField(VariantsSchema.AC_TOT, (int) doc.getFieldValue(VariantsSchema.GT_HET) - 1);
+        } else if (copies == 2) {
+            doc.setField(VariantsSchema.AC_TOT, (int) doc.getFieldValue(VariantsSchema.GT_HOM) - 1);
+        }
+
+        removeCallsetFieldValue(doc, callsetId, VariantsSchema.PUBLIC, isPublic);
+        removeCallsetFieldValue(doc, callsetId, VariantsSchema.AC, copies);
+        removeCallsetFieldValue(doc, callsetId, VariantsSchema.QUAL, getInfo(call, GACallInfoFields.QUALITY));
+        removeCallsetFieldValue(doc, callsetId, VariantsSchema.FILTER, getInfo(call, GACallInfoFields.FILTER));
+        removeCallsetFieldValue(doc, callsetId, VariantsSchema.EXOMISER_VARIANT_SCORE,
+                safeValueOf(getInfo(call, GACallInfoFields.EXOMISER_VARIANT_SCORE)));
+        removeCallsetFieldValue(doc, callsetId, VariantsSchema.EXOMISER_GENE_PHENO_SCORE,
+                safeValueOf(getInfo(call, GACallInfoFields.EXOMISER_GENE_PHENO_SCORE)));
+        removeCallsetFieldValue(doc, callsetId, VariantsSchema.EXOMISER_GENE_VARIANT_SCORE,
+                safeValueOf(getInfo(call, GACallInfoFields.EXOMISER_GENE_VARIANT_SCORE)));
+        removeCallsetFieldValue(doc, callsetId, VariantsSchema.EXOMISER_GENE_COMBINED_SCORE,
+                safeValueOf(getInfo(call, GACallInfoFields.EXOMISER_GENE_COMBINED_SCORE)));
+    }
+
+    private static void removeMultiFieldValue(SolrDocument doc, String key, Object value) {
+        // clone array, sometimes it's unmodifiable
+        List<Object> values = new ArrayList<>(doc.getFieldValues(key));
+        values.remove(value);
+        doc.setField(key, values);
+    }
+
+    private static void removeCallsetFieldValue(SolrDocument doc, String callsetId, String fieldName, Object value) {
+        doc.removeFields(VariantsSchema.getCallsetsFieldName(callsetId, fieldName));
+        // since callset fields are copied to multivalued fields, we need to remove that too.
+        removeMultiFieldValue(doc, fieldName, value);
     }
 }

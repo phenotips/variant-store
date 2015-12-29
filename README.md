@@ -1,8 +1,9 @@
 Variant Store
 =============
 
-The Variant Store is a Java library that wraps the complexity of processing and handling VCF files, exposing a nice
-interface for other applications to query the content of the VCF files.
+The Variant Store is a Java library that wraps the complexity of processing and
+handling VCF files, exposing a nice interface for other applications to query
+the content of the VCF files.
 
 # Annotations
 

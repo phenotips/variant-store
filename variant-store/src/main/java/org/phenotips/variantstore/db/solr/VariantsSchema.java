@@ -15,12 +15,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.phenotips.variantstore.db.newsolr.solr;
+package org.phenotips.variantstore.db.solr;
 
 /**
  * @version $Id$
  */
-public final class NewVariantsSchema
+public final class VariantsSchema
 {
     //  a hash of chrom, pos, ref, alt
     public static final String HASH = "hash";
@@ -62,7 +62,7 @@ public final class NewVariantsSchema
     // TODO this is the important score. sort on it
     public static final String EXOMISER_GENE_COMBINED_SCORE = "exomiser_gene_combined_score";
 
-    private NewVariantsSchema() {
+    private VariantsSchema() {
         throw new AssertionError();
     }
 
