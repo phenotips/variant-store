@@ -36,7 +36,7 @@ import static org.mockito.Mockito.mock;
 /**
  * Tests for the {@link DefaultVCFUploadManager} .
  *
- * @version $Id: f5805e3443d52c6e851b125b01713a2d1b7e774b $
+ * @version $Id$
  */
 public class DefaultVCFUploadManagerTest
 {

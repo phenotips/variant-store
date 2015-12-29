@@ -39,7 +39,7 @@ import javax.inject.Inject;
 import org.ga4gh.GAVariant;
 
 /**
- * @version $Id: 1f3bc36ff53b79ba95f90d7f1eaa24fa48d6bf4a $
+ * @version $Id$
  */
 @Component
 public class DefaultVariantStoreService implements Initializable, VariantStoreService

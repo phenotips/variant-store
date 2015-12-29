@@ -32,7 +32,7 @@ import org.ga4gh.GAVariant;
 /**
  * Service that exposes Phenotip's Variant Store.
  *
- * @version $Id: 47fbeef7d4aac08639f2dc9016b2e6c6d3923293 $
+ * @version $Id$
  * @since 1.1M1
  */
 @Unstable

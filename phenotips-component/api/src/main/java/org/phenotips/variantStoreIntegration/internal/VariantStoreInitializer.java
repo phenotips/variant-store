@@ -35,7 +35,7 @@ import javax.inject.Singleton;
 /**
  * Hook into phenotips startup to pre-initialize the Variant Store.
  *
- * @version $Id: 1350962f052f3c535d6c023116cd41ad5f064e87 $
+ * @version $Id$
  * @since 1.1M1
  */
 
