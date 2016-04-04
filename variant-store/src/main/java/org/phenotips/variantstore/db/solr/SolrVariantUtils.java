@@ -127,15 +127,7 @@ public final class SolrVariantUtils
             addInfo(variant, GAVariantInfoFields.EXAC_AF, doc.get(VariantsSchema.EXAC_AF));
         }
 
-c.get(VariantsSchema.EXAC_AF));
-        }
-
-        addInfo(variant, GAVariantInfoFields.EXOMISER_GENE_PHENO_SCORE,
-                doc.get(VariantsSchema.EXOMISER_GENE_PHENO_SCORE));
-        addInfo(variant, GAVariantInfoFields.EXOMISER_GENE_VARIANT_SCORE,
-                doc.get(VariantsSchema.EXOMISER_GENE_VARIANT_SCORE));
-        addInfo(variant, GAVariantInfoFields.EXOMISER_GENE_COMBINED_SCORE,
-                doc.get(Varia        GACall call = new GACall();
+        GACall call = new GACall();
         addInfo(call, GACallInfoFields.QUALITY,
                 getCallsetField(doc, callsetId, VariantsSchema.QUAL));
         addInfo(call, GACallInfoFields.FILTER,
