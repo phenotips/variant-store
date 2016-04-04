@@ -180,7 +180,7 @@ public class VariantStore implements VariantStoreInterface
             List<String> topGenes = vs.getTopGenesForIndividual(id, 5);
             for (String gene : topGenes) {
                 List<GAVariant> variants = vs.getTopHarmfullVariantsForGene(id, gene, 5);
-                System.out.println("variants = " + variants);
+                logger.debug("variants = " + variants);
             }
 
         }

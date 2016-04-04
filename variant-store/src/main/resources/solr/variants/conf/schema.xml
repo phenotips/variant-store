@@ -71,7 +71,7 @@
     <field name="length" type="int" indexed="true" stored="true" />
 
     <!-- Fields with a single value per variant (chrom, pos, ref, alt) -->
-    <field name="gene" type="string" indexed="true" stored="true" multiValued="true" />
+    <field name="gene" type="string" indexed="true" stored="true"/>
     <field name="gene_effect" type="string" indexed="true" stored="true" multiValued="true" />
     <field name="exac_af" type="string" indexed="true" stored="true" />
     <!-- aggregate statistics -->

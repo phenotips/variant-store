@@ -67,11 +67,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class SolrController extends AbstractDatabaseController
 {
     /**
-     * the field name of the EXAC allele frequency value in the allele frequency query map.
+     * the field name of the EXAC allele frequency value in the allele frequency
+     * query map.
      **/
     public static final String EXAC_FREQUENCY_FIELD = "EXAC";
     /**
-     * the field name of the internal (db) allele frequency value in the allele frequency query map.
+     * the field name of the internal (db) allele frequency value in the allele
+     * frequency query map.
      */
     public static final String DB_FREQUENCY_FIELD = "PhenomeCentral";
 
@@ -83,7 +85,8 @@ public class SolrController extends AbstractDatabaseController
     private SolrClient server;
 
     /**
-     * Create a SolrController, that will store it's files and configuration in a directory inside of rootPath.
+     * Create a SolrController, that will store it's files and configuration in
+     * a directory inside of rootPath.
      */
     public SolrController() {
         super();
@@ -171,7 +174,8 @@ public class SolrController extends AbstractDatabaseController
     }
 
     /**
-     * GA4GH Beacon implementation. Return the allele count for this specific variant in the database.
+     * GA4GH Beacon implementation. Return the allele count for this specific
+     * variant in the database.
      *
      * @param chr    chr
      * @param pos    pos
@@ -300,7 +304,9 @@ public class SolrController extends AbstractDatabaseController
         SolrQuery q = new SolrQuery()
                 .setQuery(queryString)
                 .setRows(k)
-                .setSort(VariantsSchema.EXOMISER_GENE_COMBINED_SCORE, SolrQuery.ORDER.desc)
+                .setSort(
+                        VariantsSchema.getCallsetsFieldName(id, VariantsSchema.EXOMISER_GENE_COMBINED_SCORE),
+                        SolrQuery.ORDER.desc)
                 .setParam(GroupParams.GROUP, true)
                 .setParam(GroupParams.GROUP_FIELD, VariantsSchema.GENE);
 
