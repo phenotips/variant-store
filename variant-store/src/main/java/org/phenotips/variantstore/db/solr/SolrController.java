@@ -29,22 +29,30 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import java.util.function.Function;
 
 import org.apache.log4j.Logger;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
+import org.apache.solr.client.solrj.response.Group;
+import org.apache.solr.client.solrj.response.GroupCommand;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.util.ClientUtils;
+import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
+import org.apache.solr.common.params.GroupParams;
 import org.apache.solr.core.CoreContainer;
 import org.ga4gh.GAVariant;
 
@@ -96,7 +104,7 @@ public class SolrController extends AbstractDatabaseController
         logger.debug(this.path);
         cores = new CoreContainer(this.path.toString());
         cores.load();
-        server = new EmbeddedSolrServer(cores, "new-variants");
+        server = new EmbeddedSolrServer(cores, "variants");
     }
 
     @Override
@@ -221,6 +229,126 @@ public class SolrController extends AbstractDatabaseController
         return resp.getResults().getNumFound();
     }
 
+    /**
+     * Given an individual id, return all the genes stored for that individual.
+     *
+     * @param id the individual's id
+     *
+     * @return the set of genes.
+     */
+    @Override
+    public Set<String> getAllGenesForIndividual(String id) {
+        checkArgument(!id.isEmpty());
+
+        final Set<String> set = new HashSet<>();
+
+        String queryString = String.format("%s:%s ", VariantsSchema.CALLSET_IDS, id);
+
+        SolrQuery q = new SolrQuery().setQuery(queryString);
+
+        try {
+            SolrUtils.processAllDocs(server, q, new Function<Collection<SolrDocument>, Boolean>()
+            {
+                @Override
+                public Boolean apply(Collection<SolrDocument> solrDocuments) {
+                    for (SolrDocument doc : solrDocuments) {
+                        set.add((String) doc.get(VariantsSchema.GENE));
+                    }
+                    return false;
+                }
+            });
+        } catch (SolrServerException | IOException e) {
+            logger.error(e);
+            return set;
+        }
+
+        return set;
+    }
+
+    @Override
+    public Double getGeneScore(String id, String gene) {
+        String queryString = String.format("%s:%s AND %s:%s",
+                VariantsSchema.CALLSET_IDS, id,
+                VariantsSchema.GENE, gene);
+
+        SolrQuery q = new SolrQuery()
+                .setQuery(queryString)
+                .setRows(1);
+
+        QueryResponse resp;
+        try {
+            resp = server.query(q);
+        } catch (SolrServerException | IOException e) {
+            logger.error(e);
+            return 0D;
+        }
+
+        SolrDocumentList results = resp.getResults();
+        if (results.size() != 1) {
+            return 0D;
+        }
+
+        return (Double) results.get(0).get(VariantsSchema.EXOMISER_GENE_COMBINED_SCORE);
+    }
+
+    @Override
+    public List<String> getTopGenesForIndividual(String id, Integer k) {
+        final List<String> list = new ArrayList<>();
+
+        String queryString = String.format("%s:%s", VariantsSchema.CALLSET_IDS, id);
+
+        SolrQuery q = new SolrQuery()
+                .setQuery(queryString)
+                .setRows(k)
+                .setSort(VariantsSchema.EXOMISER_GENE_COMBINED_SCORE, SolrQuery.ORDER.desc)
+                .setParam(GroupParams.GROUP, true)
+                .setParam(GroupParams.GROUP_FIELD, VariantsSchema.GENE);
+
+        QueryResponse resp;
+        try {
+            resp = server.query(q);
+        } catch (SolrServerException | IOException e) {
+            logger.error(e);
+            return list;
+        }
+
+        for (GroupCommand command : resp.getGroupResponse().getValues()) {
+            for (Group group : command.getValues()) {
+                list.add(group.getGroupValue());
+            }
+        }
+
+        return list;
+    }
+
+    @Override
+    public List<GAVariant> getTopHarmfullVariantsForGene(String id, String gene, Integer k) {
+        final List<GAVariant> list = new ArrayList<>();
+
+        String queryString = String.format("%s:%s  ", VariantsSchema.CALLSET_IDS, id);
+
+        SolrQuery q = new SolrQuery()
+                .setQuery(queryString)
+                .setRows(k)
+                .setSort(
+                        VariantsSchema.getCallsetsFieldName(id, VariantsSchema.EXOMISER_VARIANT_SCORE),
+                        SolrQuery.ORDER.desc);
+
+        QueryResponse resp;
+        try {
+            resp = server.query(q);
+        } catch (SolrServerException | IOException e) {
+            logger.error(e);
+            return list;
+        }
+
+        for (SolrDocument doc : resp.getResults()) {
+            list.add(SolrVariantUtils.docToVariant(doc, id));
+        }
+
+        return list;
+    }
+
     @Override
     public List<GAVariant> getTopHarmfulWithGene(String id,
                                                  int n,
@@ -283,13 +411,14 @@ public class SolrController extends AbstractDatabaseController
                 SolrVariantUtils.documentListToMapList(resp.getResults()));
 
         if (map.containsKey(id)) {
-            list =  map.get(id);
+            list = map.get(id);
         }
         return list;
     }
 
     /**
      * beacon.
+     *
      * @return the allele count
      */
     public int beacon() {

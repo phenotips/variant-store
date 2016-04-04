@@ -127,7 +127,15 @@ public final class SolrVariantUtils
             addInfo(variant, GAVariantInfoFields.EXAC_AF, doc.get(VariantsSchema.EXAC_AF));
         }
 
-        GACall call = new GACall();
+c.get(VariantsSchema.EXAC_AF));
+        }
+
+        addInfo(variant, GAVariantInfoFields.EXOMISER_GENE_PHENO_SCORE,
+                doc.get(VariantsSchema.EXOMISER_GENE_PHENO_SCORE));
+        addInfo(variant, GAVariantInfoFields.EXOMISER_GENE_VARIANT_SCORE,
+                doc.get(VariantsSchema.EXOMISER_GENE_VARIANT_SCORE));
+        addInfo(variant, GAVariantInfoFields.EXOMISER_GENE_COMBINED_SCORE,
+                doc.get(Varia        GACall call = new GACall();
         addInfo(call, GACallInfoFields.QUALITY,
                 getCallsetField(doc, callsetId, VariantsSchema.QUAL));
         addInfo(call, GACallInfoFields.FILTER,
@@ -152,7 +160,18 @@ public final class SolrVariantUtils
         return variant;
     }
 
-    private static Object getCallsetField(SolrDocument doc, String callsetId, String fieldName) {
+    /**
+     * Get the value of a field on the doc thats unique to a callset (i.e. not
+     * share by two callsets). For example, a variant quality indicator would be
+     * specific to an individual's read.
+     *
+     * @param doc       the doc to add a field do
+     * @param callsetId the callset this field belongs to
+     * @param fieldName the name of the field
+     *
+     * @return the value of the field
+     */
+    public static Object getCallsetField(SolrDocument doc, String callsetId, String fieldName) {
         return doc.get(VariantsSchema.getCallsetsFieldName(callsetId, fieldName));
     }
 
@@ -194,7 +213,8 @@ public final class SolrVariantUtils
      * @param doc       The existing document
      * @param variant   the variant
      * @param callsetId the id of the callset
-     * @param isPublic  whether these variants can be used in an aggregate search.
+     * @param isPublic  whether these variants can be used in an aggregate
+     *                  search.
      */
     public static void addVariantToDoc(SolrDocument doc, GAVariant variant, String callsetId, boolean isPublic) {
         doc.setField(VariantsSchema.CALLSET_IDS, callsetId);
@@ -227,7 +247,17 @@ public final class SolrVariantUtils
                 safeValueOf(getInfo(call, GACallInfoFields.EXOMISER_GENE_COMBINED_SCORE)));
     }
 
-    private static void setCallsetField(SolrDocument doc, String callsetId, String fieldName, Object value) {
+    /**
+     * Set a field on the doc thats unique to a callset (i.e. not share by two
+     * callsets). For example, a variant quality indicator would be specific to
+     * an individual's read.
+     *
+     * @param doc       the doc to add a field do
+     * @param callsetId the callset this field belongs to
+     * @param fieldName the name of the field
+     * @param value     the value
+     */
+    static void setCallsetField(SolrDocument doc, String callsetId, String fieldName, Object value) {
         doc.setField(VariantsSchema.getCallsetsFieldName(callsetId, fieldName), value);
     }
 
@@ -264,7 +294,8 @@ public final class SolrVariantUtils
     }
 
     /**
-     * Turns bytes[] into a hex String. Copied from {@link org.apache.solr.update.processor.SignatureUpdateProcessorFactory}.
+     * Turns bytes[] into a hex String. Copied from {@link
+     * org.apache.solr.update.processor.SignatureUpdateProcessorFactory}.
      *
      * @param bytes a byte array
      *
@@ -283,6 +314,15 @@ public final class SolrVariantUtils
 
     }
 
+    /**
+     * Remove a variant from a document. The call set ID must be provided to
+     * specify which callset to remove the variant from.
+     *
+     * @param doc       the SolrDocument
+     * @param variant   the GAVatriant to remove
+     * @param callsetId the callsetId that the variant belongs to
+     * @param isPublic  whether the variant was public
+     */
     public static void removeVariantFromDoc(SolrDocument doc, GAVariant variant, String callsetId, boolean isPublic) {
 
         removeMultiFieldValue(doc, VariantsSchema.CALLSET_IDS, callsetId);

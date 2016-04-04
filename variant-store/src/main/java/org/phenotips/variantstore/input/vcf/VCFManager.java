@@ -93,6 +93,18 @@ public class VCFManager implements InputManager
         return new VCFIterator(this.getIndividual(id), new VariantHeader(id, true));
     }
 
+    /**
+     * Given an individual, get the Variant Iterator. The individual is assumed to be private.
+     *
+     * @param id the id of the individual
+     *
+     * @return the variant iterator
+     */
+    @Override
+    public VariantIterator getIteratorForIndividual(String id) {
+        return getIteratorForIndividual(id, false);
+    }
+
     @Override
     public List<String> getAllIndividuals() {
         final List<String> list = new ArrayList<>();

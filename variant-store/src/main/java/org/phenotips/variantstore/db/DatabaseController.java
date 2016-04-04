@@ -22,6 +22,7 @@ import org.phenotips.variantstore.shared.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Future;
 
 import org.ga4gh.GAVariant;
@@ -118,4 +119,43 @@ public interface DatabaseController extends Service
      * @return the total number of variants.
      */
     long getTotNumVariants();
+
+    /**
+     * Given an individual id, return all the genes stored for that individual.
+     * @param id the individual's id
+     * @return the set of genes.
+     */
+    Set<String> getAllGenesForIndividual(String id);
+
+    /**
+     * Get the exomiser harmfulness score for a gene for an individual.
+     *
+     * @param id   the individual's id
+     * @param gene the gene
+     *
+     * @return the exomiser harmfulness score for the gene for the individual.
+     */
+    Double getGeneScore(String id, String gene);
+
+    /**
+     * Get a list of top k harmfull genes for an individual, sorted by harmfulness.
+     *
+     * @param id the individual's id
+     * @param k  the max number of genes to return
+     *
+     * @return the list of genes
+     */
+    List<String> getTopGenesForIndividual(String id, Integer k);
+
+     /**
+     * Get a list of at most k variants with a known gene of an individual, sorted by
+     * harmfulness.
+     *
+     * @param id   the individual
+     * @param gene the gene
+     * @param k    the max number of variants to return
+     *
+     * @return the list of variants
+     */
+    List<GAVariant> getTopHarmfullVariantsForGene(String id, String gene, Integer k);
 }

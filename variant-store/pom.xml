@@ -23,7 +23,6 @@
     <groupId>org.phenotips</groupId>
     <artifactId>variant-store-parent</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <relativePath />
   </parent>
   <groupId>org.phenotips</groupId>
   <artifactId>variant-store</artifactId>
@@ -174,6 +173,25 @@
             </goals>
             <configuration>
               <mainClass>org.phenotips.variantstore.VariantStore</mainClass>
+            </configuration>
+          </execution>
+          <execution>
+            <id>debug</id>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <executable>java</executable>
+              <!-- optional -->
+              <arguments>
+                <argument>-Xdebug</argument>
+                <argument>-Xnoagent</argument>
+                <argument>-Xjava.compiler=NONE</argument>
+                <argument>-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005</argument>
+                <argument>-jar</argument>
+                <argument>${basedir}/target/${build.finalName}.jar</argument>
+                <argument>org.phenotips.variantstore.VariantStore</argument>
+              </arguments>
             </configuration>
           </execution>
         </executions>

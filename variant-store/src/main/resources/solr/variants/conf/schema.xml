@@ -36,22 +36,6 @@
 <!--
  For more information, on how to customize this file, please see
  http://wiki.apache.org/solr/SchemaXml
-
- PERFORMANCE NOTE: this schema includes many optional features and should not
- be used for benchmarking.  To improve performance one could
-  - set stored="false" for all fields possible (esp large fields) when you
-    only need to search on the field but don't need to return the original
-    value.
-  - set indexed="false" if you don't need to search on the field, but only
-    return the field as a result of searching on other indexed fields.
-  - remove all unneeded copyField statements
-  - for best index size and searching performance, set "index" to false
-    for all general text fields, use copyField to copy them to the
-    catchall "text" field, and use that for searching.
-  - For maximum indexing performance, use the StreamingUpdateSolrServer
-    java client.
-  - Remember to run the JVM in server mode, and use a higher logging level
-    that avoids logging every request
 -->
 
 <schema name="variants" version="1.5">
@@ -71,45 +55,66 @@
   <fields>
     <field name="_version_" type="long" indexed="true" stored="true" multiValued="false"/>
 
-    <!-- a hash of chrom, pos, ref, alt, individual -->
-    <field name="hash" type="string" indexed="true" stored="true" required="false" />
+    <!-- a hash of chrom, pos, ref, alt -->
+    <field name="hash" type="string" indexed="true" stored="true" />
 
-    <!--CallSet id (individual identifier)-->
-    <field name="callset_id" type="string" indexed="true" stored="true" required="false" default="reference" />
+    <field name="chrom" type="string" indexed="true" stored="true" />
+    <!-- start = pos - 1 (0-indexed) -->
+    <field name="start" type="int" indexed="true" stored="true" />
+    <!-- end = start + len(ref) (exclusive) -->
+    <field name="end" type="int" indexed="true" stored="true" />
+    <field name="ref" type="string" indexed="true" stored="true" />
+    <field name="ref_length" type="int" indexed="true" stored="true" />
+    <field name="alt" type="string" indexed="true" stored="true" />
+    <field name="alt_length" type="int" indexed="true" stored="true" />
+    <!-- length = max(len(ref), len(alt)) -->
+    <field name="length" type="int" indexed="true" stored="true" />
 
-    <!-- a hash of chrom, pos, ref, alt. Used to identify indentical variants -->
-    <field name="variant_id" type="string" indexed="true" stored="true" required="false" />
+    <!-- Fields with a single value per variant (chrom, pos, ref, alt) -->
+    <field name="gene" type="string" indexed="true" stored="true" multiValued="true" />
+    <field name="gene_effect" type="string" indexed="true" stored="true" multiValued="true" />
+    <field name="exac_af" type="string" indexed="true" stored="true" />
+    <!-- aggregate statistics -->
+    <field name="ac_tot" type="int" indexed="true" stored="true" />
+    <field name="gt_het" type="int" indexed="true" stored="true" />
+    <field name="gt_hom" type="int" indexed="true" stored="true" />
 
-    <field name="chrom" type="string" indexed="true" stored="true" required="false" />
-    <field name="pos" type="int" indexed="true" stored="true" required="false" />
-    <field name="ref" type="string" indexed="true" stored="true" required="false" />
-    <field name="alt" type="string" indexed="true" stored="true" required="false" />
+    <!-- multi-valued callset ids (individuals) -->
+    <field name="callset_ids" type="string" indexed="true" stored="true" multiValued="true" />
 
-    <!--the number of copies of this variant that this individual has, as per GT field in VCF-->
-    <field name="copies" type="int" indexed="true" stored="true" required="false" />
+    <!-- Fields with a separate value per individual (CallsetId + '__field') -->
+    <dynamicField name="*__is_public" type="bool" indexed="true" stored="true"/>
+    <field name="is_public" type="bool" indexed="true" stored="false" multiValued="true"/>
+    <copyField source="*__is_public" dest="is_public" />
 
-    <field name="is_public" type="bool" indexed="true" stored="true" required="false" default="false"/>
+    <dynamicField name="*__ac" type="int" indexed="true" stored="true" />
+    <field name="ac" type="int" indexed="true" stored="false" multiValued="true"/>
+    <copyField source="*__ac" dest="ac" />
 
-    <field name="qual" type="string" indexed="true" stored="true" required="false" />
-    <field name="filter" type="string" indexed="true" stored="true" required="false" />
+    <dynamicField name="*__qual" type="float" indexed="true" stored="true" />
+    <field name="qual" type="float" indexed="true" stored="false" multiValued="true"/>
+    <copyField source="*__qual" dest="qual" />
 
-    <field name="exomiser_variant_score" type="float" indexed="true" stored="true" required="false" />
-    <field name="exomiser_gene_pheno_score" type="float" indexed="true" stored="true" required="false" />
-    <field name="exomiser_gene_combined_score" type="float" indexed="true" stored="true" required="false" />
-    <field name="exomiser_gene_variant_score" type="float" indexed="true" stored="true" required="false" />
+    <dynamicField name="*__filter" type="string" indexed="true" stored="true" />
+    <field name="filter" type="string" indexed="true" stored="false" multiValued="true"/>
+    <copyField source="*__filter" dest="filter" />
 
-    <field name="gene" type="string" indexed="true" stored="true" required="false" />
-    <field name="gene_effect" type="string" indexed="true" stored="true" required="false" />
+    <dynamicField name="*__exomiser_variant_score" type="float" indexed="true" stored="true" />
+    <field name="exomiser_variant_score" type="float" indexed="true" stored="false" multiValued="true"/>
+    <copyField source="*__exomiser_variant_score" dest="exomiser_variant_score" />
 
-    <field name="exac_af" type="string" indexed="true" stored="true" required="false" />
+    <dynamicField name="*__exomiser_gene_variant_score" type="float" indexed="true" stored="true" />
+    <field name="exomiser_gene_variant_score" type="float" indexed="true" stored="false" multiValued="true"/>
+    <copyField source="*__exomiser_gene_variant_score" dest="exomiser_gene_variant_score" />
 
-    <!--##################################-->
-    <!-- Aggregate variant info below. This is inserted separate from the per-individual variant above.-->
+    <dynamicField name="*__exomiser_gene_pheno_score" type="float" indexed="true" stored="true" />
+    <field name="exomiser_gene_pheno_score" type="float" indexed="true" stored="false" multiValued="true"/>
+    <copyField source="*__exomiser_gene_pheno_score" dest="exomiser_gene_pheno_score" />
 
-    <!--foreign key, maps 1-1 to variant_id -->
-    <field name="aggregate_variant_id" type="string" indexed="true" stored="true" required="false" />
-    <!--total number of copies in the DB for this variant-->
-    <field name="copies_sum" type="int" indexed="true" stored="true" required="false" />
+    <dynamicField name="*__exomiser_gene_combined_score" type="float" indexed="true" stored="true" />
+    <field name="exomiser_gene_combined_score" type="float" indexed="true" stored="false" multiValued="true"/>
+    <copyField source="*__exomiser_gene_combined_score" dest="exomiser_gene_combined_score" />
+
 
     <!-- Ignore everyting else -->
     <dynamicField name="*" type="ignored" multiValued="true" />

@@ -13,25 +13,23 @@
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see http://www.gnu.org/licenses/
  */
-package org.phenotips.variantstore.input.tsv;
+package org.phenotips.variantStoreIntegration;
 
-import org.phenotips.variantstore.input.VariantHeader;
-import org.phenotips.variantstore.shared.ResourceManager;
+import org.phenotips.variantstore.VariantStoreInterface;
 
-import java.io.IOException;
-import java.nio.file.FileSystem;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import org.xwiki.component.annotation.Role;
+import org.xwiki.stability.Unstable;
 
-import org.apache.commons.io.FileUtils;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-import static org.junit.Assert.*;
-
-public class ExomiserTSVIteratorTest
+/**
+ * Service that exposes Phenotip's Variant Store.
+ *
+ * @version $Id$
+ * @since 1.1M1
+ */
+@Unstable
+@Role
+public interface VariantStoreService extends VariantStoreInterface
 {
 }

@@ -32,6 +32,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -175,6 +176,15 @@ public class VariantStore implements VariantStoreInterface
             logger.debug(String.format("csv: Mendelian for %s (ms): %d", gene, endTime - startTime));
         }
 
+        for (String id : vs.getIndividuals()) {
+            List<String> topGenes = vs.getTopGenesForIndividual(id, 5);
+            for (String gene : topGenes) {
+                List<GAVariant> variants = vs.getTopHarmfullVariantsForGene(id, gene, 5);
+                System.out.println("variants = " + variants);
+            }
+
+        }
+
         startTime = System.currentTimeMillis();
         logger.debug(String.format("csv: Total Variants: %d", vs.getTotNumVariants()));
         endTime = System.currentTimeMillis();
@@ -235,6 +245,26 @@ public class VariantStore implements VariantStoreInterface
     @Override
     public List<String> getIndividuals() {
         return this.inputManager.getAllIndividuals();
+    }
+
+    @Override
+    public Set<String> getAllGenesForIndividual(String id) {
+        return this.db.getAllGenesForIndividual(id);
+    }
+
+    @Override
+    public Double getGeneScore(String id, String gene) {
+        return this.db.getGeneScore(id, gene);
+    }
+
+    @Override
+    public List<GAVariant> getTopHarmfullVariantsForGene(String id, String gene, Integer k) {
+        return this.db.getTopHarmfullVariantsForGene(id, gene, k);
+    }
+
+    @Override
+    public List<String> getTopGenesForIndividual(String id, Integer k) {
+        return this.db.getTopGenesForIndividual(id, k);
     }
 
     /**

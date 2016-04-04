@@ -72,6 +72,9 @@ public class TestUtils
         VariantUtils.addInfo(variant, GAVariantInfoFields.GENE, gene);
         VariantUtils.addInfo(variant, GAVariantInfoFields.GENE_EFFECT, gene_effect);
         VariantUtils.addInfo(variant, GAVariantInfoFields.EXAC_AF, exac_af);
+        VariantUtils.addInfo(variant, GAVariantInfoFields.EXOMISER_GENE_PHENO_SCORE, exomiser_gene_pheno_score);
+        VariantUtils.addInfo(variant, GAVariantInfoFields.EXOMISER_GENE_VARIANT_SCORE, exomiser_gene_variant_score);
+        VariantUtils.addInfo(variant, GAVariantInfoFields.EXOMISER_GENE_COMBINED_SCORE, exomiser_gene_combined_score);
 
         GACall call = new GACall();
 
@@ -79,9 +82,6 @@ public class TestUtils
         VariantUtils.addInfo(call, GACallInfoFields.QUALITY, qual);
         VariantUtils.addInfo(call, GACallInfoFields.FILTER, filter);
         VariantUtils.addInfo(call, GACallInfoFields.EXOMISER_VARIANT_SCORE, exomiser_variant_score);
-        VariantUtils.addInfo(call, GACallInfoFields.EXOMISER_GENE_PHENO_SCORE, exomiser_gene_pheno_score);
-        VariantUtils.addInfo(call, GACallInfoFields.EXOMISER_GENE_VARIANT_SCORE, exomiser_gene_variant_score);
-        VariantUtils.addInfo(call, GACallInfoFields.EXOMISER_GENE_COMBINED_SCORE, exomiser_gene_combined_score);
         variant.setCalls(Collections.singletonList(call));
 
         return variant;
