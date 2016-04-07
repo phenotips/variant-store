@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -243,15 +244,17 @@ public class SolrController extends AbstractDatabaseController
     @Override
     public Set<String> getAllGenesForIndividual(String id) {
         checkArgument(!id.isEmpty());
+        logger.debug("getAllGenesForIndividual(" + id + ")");
 
         final Set<String> set = new HashSet<>();
 
         String queryString = String.format("%s:%s ", VariantsSchema.CALLSET_IDS, id);
 
         SolrQuery q = new SolrQuery().setQuery(queryString);
+        // sort on unique
 
         try {
-            SolrUtils.processAllDocs(server, q, new Function<Collection<SolrDocument>, Boolean>()
+            SolrUtils.processAllDocs(server, q, VariantsSchema.HASH, new Function<Collection<SolrDocument>, Boolean>()
             {
                 @Override
                 public Boolean apply(Collection<SolrDocument> solrDocuments) {
@@ -271,6 +274,7 @@ public class SolrController extends AbstractDatabaseController
 
     @Override
     public Double getGeneScore(String id, String gene) {
+        logger.debug(String.format("getGeneScore(%s, %s)", id, gene));
         String queryString = String.format("%s:%s AND %s:%s",
                 VariantsSchema.CALLSET_IDS, id,
                 VariantsSchema.GENE, gene);
@@ -292,12 +296,20 @@ public class SolrController extends AbstractDatabaseController
             return 0D;
         }
 
-        return (Double) results.get(0).get(VariantsSchema.EXOMISER_GENE_COMBINED_SCORE);
+        Float result = (Float) results.get(0).get(VariantsSchema.getCallsetsFieldName(
+                id, VariantsSchema.EXOMISER_GENE_COMBINED_SCORE));
+
+        if (result != null) {
+            return result.doubleValue();
+        } else {
+            return 0D;
+        }
     }
 
     @Override
     public List<String> getTopGenesForIndividual(String id, Integer k) {
-        final List<String> list = new ArrayList<>();
+        logger.debug(String.format("getTopGenesForIndividual(%s, %d)", id, k));
+        final List<String> list = new LinkedList<>();
 
         String queryString = String.format("%s:%s", VariantsSchema.CALLSET_IDS, id);
 
@@ -329,7 +341,8 @@ public class SolrController extends AbstractDatabaseController
 
     @Override
     public List<GAVariant> getTopHarmfullVariantsForGene(String id, String gene, Integer k) {
-        final List<GAVariant> list = new ArrayList<>();
+        logger.debug(String.format("getTopHarmfullVariantsForGene(%s, %s, %d)", id, gene, k));
+        final List<GAVariant> list = new LinkedList<>();
 
         String queryString = String.format("%s:%s  ", VariantsSchema.CALLSET_IDS, id);
 

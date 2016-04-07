@@ -30,20 +30,21 @@ import net.sf.json.JSONObject;
 
 /**
  * A class of static methods for translating {@link org.ga4gh.GAVariant} to {@link net.sf.json.JSON}.
+ *
  * @version $Id$
  */
 public final class VariantJSONUtils
 {
-    private VariantJSONUtils()
-    {
+    private VariantJSONUtils() {
         throw new AssertionError();
     }
 
-    /**Converts a {@link GAVariant} to a {@link JSONObject}.
+    /**
+     * Converts a {@link GAVariant} to a {@link JSONObject}.
      *
      * @param gaVariant The representation of the variant
-     * @return A JSON representation of the variant in the following form:
      *
+     * @return A JSON representation of the variant in the following form:
      */
     public static JSONObject convertGAVariantToJSON(GAVariant gaVariant) {
         JSONObject resultJSON = new JSONObject();
@@ -69,7 +70,7 @@ public final class VariantJSONUtils
             info.put("EXOMISER_VARIANT_SCORE", Double.parseDouble(infoField));
         }
 
-        infoField = VariantUtils.getInfo(gaVariant, GAVariantInfoFields.EXOMISER_GENE_COMBINED_SCORE);
+        infoField = VariantUtils.getInfo(gaVariant, GACallInfoFields.EXOMISER_GENE_COMBINED_SCORE);
         if (infoField != null) {
             info.put("EXOMISER_GENE_VARIANT_SCORE", Double.parseDouble(infoField));
         }

@@ -45,18 +45,22 @@ public final class SolrUtils
      *
      * @param server    the solr db
      * @param q         the query
-     * @param processor the processor to handle the data. If the function returns true, we stop fetching more data.
-     *
-     * @throws IOException
+     * @param uniqueKey the solr uniqueKey field to sort on. Required for solr's Cursor functionality.
+     *@param processor the processor to handle the data. If the function returns true, we stop fetching more data.
+     *  @throws IOException
      * @throws SolrServerException
      */
     static void processAllDocs(SolrClient server, SolrQuery q,
-                               Function<Collection<SolrDocument>, Boolean> processor
+                               String uniqueKey, Function<Collection<SolrDocument>, Boolean> processor
     ) throws IOException, SolrServerException {
         boolean done = false;
         String oldCursorMark;
         String cursorMark = CursorMarkParams.CURSOR_MARK_START;
         QueryResponse resp;
+
+        // Cursor functionality requires a sort containing a uniqueKey field tie breaker
+        q.addSort(uniqueKey, SolrQuery.ORDER.desc);
+
         while (!done) {
             oldCursorMark = cursorMark;
             q.set(CursorMarkParams.CURSOR_MARK_PARAM, cursorMark);

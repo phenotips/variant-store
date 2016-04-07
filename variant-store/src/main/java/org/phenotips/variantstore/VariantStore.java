@@ -37,7 +37,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.log4j.Logger;
 import org.ga4gh.GAVariant;
@@ -104,8 +103,8 @@ public class VariantStore implements VariantStoreInterface
                 TrueFileFilter.INSTANCE,
                 TrueFileFilter.INSTANCE);
         try {
-            for (File tsv : files) {
-                String id = FilenameUtils.removeExtension(tsv.getName());
+            for (String id : Arrays.asList("F0000012", "F0000013")) {
+//                String id = FilenameUtils.removeExtension(tsv.getName());
                 if (vs.getIndividuals().contains(id)) {
                     continue;
                 }
@@ -116,14 +115,13 @@ public class VariantStore implements VariantStoreInterface
                 vs.addIndividual(
                         (String) id,
                         true,
-                        Paths.get(tsv.toURI())
+                        Paths.get(String.format("/data/vcf/c4r/pc/%s.variants.tsv.pass", id))
                 ).get();
                 endTime = System.currentTimeMillis();
                 logger.debug(String.format("csv: Insertion (ms): %d", endTime - startTime));
 
-                timeQueries(vs);
-
             }
+            timeQueries(vs);
         } catch (InterruptedException | ExecutionException | VariantStoreException e) {
             logger.error("Error", e);
             vs.stop();
@@ -176,14 +174,36 @@ public class VariantStore implements VariantStoreInterface
             logger.debug(String.format("csv: Mendelian for %s (ms): %d", gene, endTime - startTime));
         }
 
-        for (String id : vs.getIndividuals()) {
-            List<String> topGenes = vs.getTopGenesForIndividual(id, 5);
-            for (String gene : topGenes) {
-                List<GAVariant> variants = vs.getTopHarmfullVariantsForGene(id, gene, 5);
-                logger.debug("variants = " + variants);
-            }
-
-        }
+//        for (String id : vs.getIndividuals()) {
+//        for (String id : Arrays.asList("F0000012", "F0000013")) {
+//            startTime = System.currentTimeMillis();
+//            Set<String> genes = vs.getAllGenesForIndividual(id);
+//            endTime = System.currentTimeMillis();
+//            logger.debug(String.format("csv: getAllGenesForIndividual(%s).size() = %d (ms): %d",
+//                    id, genes.size(), endTime - startTime));
+//
+//            if (genes.size() > 0) {
+//                String gene = genes.iterator().next();
+//
+//                startTime = System.currentTimeMillis();
+//                Double score = vs.getGeneScore(id, gene);
+//                endTime = System.currentTimeMillis();
+//                logger.debug(String.format("csv: getGeneScore(%s, %s) = %f (ms): %d",
+//                        id, gene, score, endTime - startTime));
+//
+//                startTime = System.currentTimeMillis();
+//                List<GAVariant> variants = vs.getTopHarmfullVariantsForGene(id, gene, 5);
+//                endTime = System.currentTimeMillis();
+//                logger.debug(String.format("csv: getTopHarmfullVariantsForGene(%s, %s).size() = %d (ms): %d",
+//                        id, gene, variants.size(), endTime - startTime));
+//            }
+//
+//            startTime = System.currentTimeMillis();
+//            List<String> topGenes = vs.getTopGenesForIndividual(id, 5);
+//            endTime = System.currentTimeMillis();
+//            logger.debug(String.format("csv: getTopGenesForIndividual(%s).size() = %d (ms): %d",
+//                    id, topGenes.size(), endTime - startTime));
+//        }
 
         startTime = System.currentTimeMillis();
         logger.debug(String.format("csv: Total Variants: %d", vs.getTotNumVariants()));
