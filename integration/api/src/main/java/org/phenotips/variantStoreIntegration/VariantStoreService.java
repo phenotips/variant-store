@@ -23,7 +23,7 @@ import org.xwiki.component.annotation.Role;
 import org.xwiki.stability.Unstable;
 
 /**
- * Service that exposes Phenotip's Variant Store.
+ * Service that exposes the Phenotips Variant Store.
  *
  * @version $Id$
  * @since 1.1M1

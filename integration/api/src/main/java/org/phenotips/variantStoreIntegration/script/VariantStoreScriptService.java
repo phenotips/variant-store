@@ -15,45 +15,49 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see http://www.gnu.org/licenses/
  */
-package org.phenotips.variantStoreIntegration.internal;
+package org.phenotips.variantStoreIntegration.script;
 
-import org.phenotips.variantstore.VariantStore;
-import org.phenotips.variantstore.db.solr.SolrController;
-import org.phenotips.variantstore.input.tsv.ExomiserTSVManager;
-import org.phenotips.variantstore.shared.VariantStoreException;
+import org.phenotips.variantStoreIntegration.VariantStoreService;
+import org.phenotips.variantStoreIntegration.internal.AbstractVariantStoreProxy;
 
 import org.xwiki.component.annotation.Component;
 import org.xwiki.component.phase.Initializable;
 import org.xwiki.component.phase.InitializationException;
-import org.xwiki.environment.Environment;
-
-import java.nio.file.Paths;
+import org.xwiki.script.service.ScriptService;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 
 /**
+ * A script service that directly exposes all methods in {{@link org.phenotips.variantstore.VariantStore}} to velocity.
+ *
+ * Often in PhenoTips you see fat ScriptServices that pass methods onto the actual Component with the buisness logic.
+ * In this case, both the Component and the ScriptService implement a "proxy" functionality, where they just
+ * marshall the method calls onto the actual {{@link org.phenotips.variantstore.VariantStore}} implementation.
+ *
  * @version $Id$
  */
 @Component
+@Named("VariantStore")
 @Singleton
-public class DefaultVariantStoreService extends AbstractVariantStoreProxy implements Initializable
+public class VariantStoreScriptService extends AbstractVariantStoreProxy implements ScriptService, Initializable
 {
     @Inject
-    private Environment env;
+    protected VariantStoreService variantStoreService;
 
     @Override
     public void initialize() throws InitializationException {
-        this.variantStore = new VariantStore(
-                new ExomiserTSVManager(),
-                new SolrController()
-        );
+        this.variantStore = variantStoreService;
+    }
 
-        try {
-            this.variantStore.init(Paths.get(this.env.getPermanentDirectory().getPath()).resolve("variant-store"));
-        } catch (VariantStoreException e) {
-            throw new InitializationException("Error setting up Variant Store", e);
-        }
+    /**
+     * test.
+     *
+     * @return test
+     */
+    public String test() {
+        return "test";
     }
 
 }
