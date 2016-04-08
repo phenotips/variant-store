@@ -32,7 +32,8 @@ import java.util.jar.JarFile;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Manage the resources for the application. Set them up, clean them up, the whole 9 yards.
@@ -41,7 +42,7 @@ import org.apache.log4j.Logger;
  */
 public final class ResourceManager
 {
-    private static Logger logger = Logger.getLogger(ResourceManager.class);
+    private static Logger logger = LoggerFactory.getLogger(ResourceManager.class);
 
     private ResourceManager() {
         throw new AssertionError();

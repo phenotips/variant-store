@@ -26,7 +26,6 @@ import org.phenotips.variantstore.shared.VariantUtils;
 import java.io.IOException;
 import java.util.concurrent.Callable;
 
-import org.apache.log4j.Logger;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -34,6 +33,8 @@ import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import org.ga4gh.GAVariant;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @version $Id$
@@ -43,7 +44,7 @@ public class AddIndividualTask implements Callable<Object>
 
     private final SolrClient server;
     private final VariantIterator iterator;
-    private Logger logger = Logger.getLogger(getClass());
+    private Logger logger = LoggerFactory.getLogger(getClass());
 
     /**
      * Initialize the task.

@@ -42,7 +42,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.function.Function;
 
-import org.apache.log4j.Logger;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -56,6 +55,8 @@ import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.params.GroupParams;
 import org.apache.solr.core.CoreContainer;
 import org.ga4gh.GAVariant;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -78,7 +79,7 @@ public class SolrController extends AbstractDatabaseController
      */
     public static final String DB_FREQUENCY_FIELD = "PhenomeCentral";
 
-    private Logger logger = Logger.getLogger(getClass());
+    private Logger logger = LoggerFactory.getLogger(getClass());
 
     private ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
@@ -105,7 +106,7 @@ public class SolrController extends AbstractDatabaseController
         ResourceManager.copyResourcesToPath(this.getStoragePathSuffix(), this.path);
 
         // Spin Solr up
-        logger.debug(this.path);
+        logger.debug(String.valueOf(this.path));
         cores = new CoreContainer(this.path.toString());
         cores.load();
         server = new EmbeddedSolrServer(cores, "variants");
@@ -204,7 +205,7 @@ public class SolrController extends AbstractDatabaseController
         try {
             resp = server.query(q);
         } catch (SolrServerException | IOException e) {
-            logger.error(e);
+            logger.error("Beacon Solr Exception", e);
             return 0;
         }
 
@@ -227,7 +228,7 @@ public class SolrController extends AbstractDatabaseController
         try {
             resp = server.query(q);
         } catch (SolrServerException | IOException e) {
-            logger.error(e);
+            logger.error("TotNumVariants Solr Exception", e);
             return 0;
         }
 
@@ -265,7 +266,7 @@ public class SolrController extends AbstractDatabaseController
                 }
             });
         } catch (SolrServerException | IOException e) {
-            logger.error(e);
+            logger.error("AllGenesForIndividual Solr Exception", e);
             return set;
         }
 
@@ -287,7 +288,7 @@ public class SolrController extends AbstractDatabaseController
         try {
             resp = server.query(q);
         } catch (SolrServerException | IOException e) {
-            logger.error(e);
+            logger.error("GeneScore Solr Exception", e);
             return 0D;
         }
 
@@ -326,7 +327,7 @@ public class SolrController extends AbstractDatabaseController
         try {
             resp = server.query(q);
         } catch (SolrServerException | IOException e) {
-            logger.error(e);
+            logger.error("Solr Exception", e);
             return list;
         }
 
@@ -357,7 +358,7 @@ public class SolrController extends AbstractDatabaseController
         try {
             resp = server.query(q);
         } catch (SolrServerException | IOException e) {
-            logger.error(e);
+            logger.error("Caught Solr Exception", e);
             return list;
         }
 

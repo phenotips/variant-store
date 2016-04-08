@@ -34,7 +34,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @version $Id$
@@ -42,7 +43,7 @@ import org.apache.log4j.Logger;
 public class ExomiserTSVManager implements InputManager
 {
     private static String suffix = ".variants.tsv";
-    private Logger logger = Logger.getLogger(ExomiserTSVManager.class);
+    private Logger logger = LoggerFactory.getLogger(ExomiserTSVManager.class);
     private Path path;
 
     @Override
@@ -93,6 +94,7 @@ public class ExomiserTSVManager implements InputManager
      *
      * @param id       individual id
      * @param isPublic permission to use variants in aggregate results
+     *
      * @return a variant iterator
      */
     @Override

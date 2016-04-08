@@ -33,7 +33,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Manage the raw VCF files that we store.
@@ -43,7 +44,7 @@ import org.apache.log4j.Logger;
 public class VCFManager implements InputManager
 {
     private static String suffix = ".vcf";
-    private static Logger logger = Logger.getLogger(VCFManager.class);
+    private static Logger logger = LoggerFactory.getLogger(VCFManager.class);
     private Path path;
 
     @Override

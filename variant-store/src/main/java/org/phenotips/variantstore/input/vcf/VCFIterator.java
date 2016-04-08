@@ -32,7 +32,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
-import org.apache.log4j.Logger;
 import org.ga4gh.GACall;
 import org.ga4gh.GAVariant;
 
@@ -51,7 +50,6 @@ public class VCFIterator extends AbstractVariantIterator
 {
     private final VCFFileReader reader;
     private final CloseableIterator<VariantContext> iterator;
-    private Logger logger = Logger.getLogger(getClass());
     private Map<String, List<String>> filter;
     private VariantContext nextRow;
     private int altIndex;

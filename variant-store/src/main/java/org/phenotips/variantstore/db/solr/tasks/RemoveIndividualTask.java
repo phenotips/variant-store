@@ -26,13 +26,14 @@ import org.phenotips.variantstore.shared.VariantUtils;
 import java.io.IOException;
 import java.util.concurrent.Callable;
 
-import org.apache.log4j.Logger;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import org.ga4gh.GAVariant;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @version $Id$
@@ -40,13 +41,14 @@ import org.ga4gh.GAVariant;
 public class RemoveIndividualTask implements Callable<Object>
 {
 
-    private Logger logger = Logger.getLogger(getClass());
     private final VariantIterator iterator;
+    private Logger logger = LoggerFactory.getLogger(getClass());
     private SolrClient server;
 
     /**
      * Remove an individual from solr.
-     *  @param server the solr server to run the task on
+     *
+     * @param server   the solr server to run the task on
      * @param iterator an iterator of the individual's variants
      */
     public RemoveIndividualTask(SolrClient server, VariantIterator iterator) {

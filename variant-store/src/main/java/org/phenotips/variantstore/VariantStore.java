@@ -38,8 +38,9 @@ import java.util.concurrent.Future;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
-import org.apache.log4j.Logger;
 import org.ga4gh.GAVariant;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The Variant Store is capable of storing a large number of individuals genomic variants for further querying and
@@ -49,7 +50,7 @@ import org.ga4gh.GAVariant;
  */
 public class VariantStore implements VariantStoreInterface
 {
-    private static Logger logger = Logger.getLogger(VariantStore.class);
+    private static Logger logger = LoggerFactory.getLogger(VariantStore.class);
     private Path path;
     private InputManager inputManager;
     private DatabaseController db;

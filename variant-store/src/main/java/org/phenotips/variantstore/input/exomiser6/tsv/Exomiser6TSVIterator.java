@@ -35,9 +35,10 @@ import java.util.NoSuchElementException;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
-import org.apache.log4j.Logger;
 import org.ga4gh.GACall;
 import org.ga4gh.GAVariant;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Parse the `*.variants.tsv` files returned by [Exomiser](http://www.sanger.ac.uk/science/tools/exomiser). Expose each
@@ -49,7 +50,7 @@ public class Exomiser6TSVIterator extends AbstractVariantIterator
 {
     private static Exomiser6TSVColumn[] columns = Exomiser6TSVColumn.values();
 
-    private Logger logger = Logger.getLogger(Exomiser6TSVIterator.class);
+    private Logger logger = LoggerFactory.getLogger(Exomiser6TSVIterator.class);
     private CSVParser tsvParser;
     private Iterator<CSVRecord> tsvRecordIterator;
 
