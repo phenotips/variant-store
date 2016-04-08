@@ -22,7 +22,8 @@ package org.phenotips.variantstore.input.exomiser6.tsv;
  *
  * @version $Id$
  */
-public enum ExomiserTSVColumn {
+public enum Exomiser6TSVColumn
+{
     CHROM,
     POS,
     REF,

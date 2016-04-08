@@ -39,10 +39,10 @@ import org.apache.log4j.Logger;
 /**
  * @version $Id$
  */
-public class ExomiserTSVManager implements InputManager
+public class Exomiser6TSVManager implements InputManager
 {
     private static String suffix = ".variants.tsv";
-    private Logger logger = Logger.getLogger(ExomiserTSVManager.class);
+    private Logger logger = Logger.getLogger(Exomiser6TSVManager.class);
     private Path path;
 
     @Override
@@ -98,7 +98,7 @@ public class ExomiserTSVManager implements InputManager
      */
     @Override
     public VariantIterator getIteratorForIndividual(String id, boolean isPublic) {
-        return new ExomiserTSVIterator(this.getIndividual(id), new VariantHeader(id, isPublic));
+        return new Exomiser6TSVIterator(this.getIndividual(id), new VariantHeader(id, isPublic));
     }
 
     /**

@@ -23,6 +23,8 @@
 <suppressions>
   <suppress checks="JavadocVariable" files="ExomiserTSVColumn.java" />
   <suppress checks="MultipleStringLiterals" files="ExomiserTSVIterator.java" />
+  <suppress checks="JavadocVariable" files="Exomiser6TSVColumn.java" />
+  <suppress checks="MultipleStringLiterals" files="Exomiser6TSVIterator.java" />
   <suppress checks="JavadocVariable" files="VariantsSchema.java" />
   <suppress checks="JavadocVariable" files="GAVariantInfoFields.java" />
   <suppress checks="JavadocVariable" files="GACallInfoFields.java" />

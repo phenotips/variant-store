@@ -19,7 +19,7 @@ package org.phenotips.variantStoreIntegration.internal;
 
 import org.phenotips.variantstore.VariantStore;
 import org.phenotips.variantstore.db.solr.SolrController;
-import org.phenotips.variantstore.input.tsv.ExomiserTSVManager;
+import org.phenotips.variantstore.input.exomiser6.tsv.Exomiser6TSVManager;
 import org.phenotips.variantstore.shared.VariantStoreException;
 
 import org.xwiki.component.annotation.Component;
@@ -45,7 +45,7 @@ public class DefaultVariantStoreService extends AbstractVariantStoreProxy implem
     @Override
     public void initialize() throws InitializationException {
         this.variantStore = new VariantStore(
-                new ExomiserTSVManager(),
+                new Exomiser6TSVManager(),
                 new SolrController()
         );
 

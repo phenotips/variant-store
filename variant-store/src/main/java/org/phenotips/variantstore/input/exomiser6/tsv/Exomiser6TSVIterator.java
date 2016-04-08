@@ -45,11 +45,11 @@ import org.ga4gh.GAVariant;
  *
  * @version $Id$
  */
-public class ExomiserTSVIterator extends AbstractVariantIterator
+public class Exomiser6TSVIterator extends AbstractVariantIterator
 {
-    private static ExomiserTSVColumn[] columns = ExomiserTSVColumn.values();
+    private static Exomiser6TSVColumn[] columns = Exomiser6TSVColumn.values();
 
-    private Logger logger = Logger.getLogger(ExomiserTSVIterator.class);
+    private Logger logger = Logger.getLogger(Exomiser6TSVIterator.class);
     private CSVParser tsvParser;
     private Iterator<CSVRecord> tsvRecordIterator;
 
@@ -59,7 +59,7 @@ public class ExomiserTSVIterator extends AbstractVariantIterator
      * @param path          the path to the file
      * @param variantHeader the header with file meta-information
      */
-    public ExomiserTSVIterator(Path path, VariantHeader variantHeader) {
+    public Exomiser6TSVIterator(Path path, VariantHeader variantHeader) {
         super(path, variantHeader);
 
         Reader reader = null;
