@@ -17,7 +17,6 @@
  */
 package org.phenotips.variantStoreIntegration.internal;
 
-import org.phenotips.variantStoreIntegration.VariantStoreService;
 import org.phenotips.variantstore.VariantStoreInterface;
 import org.phenotips.variantstore.shared.VariantStoreException;
 
@@ -34,7 +33,7 @@ import org.ga4gh.GAVariant;
  *
  * @version $Id$
  */
-public abstract class AbstractVariantStoreProxy implements VariantStoreService
+public abstract class AbstractVariantStoreProxy implements VariantStoreInterface
 {
     protected VariantStoreInterface variantStore;
 

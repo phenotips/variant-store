@@ -17,6 +17,7 @@
  */
 package org.phenotips.variantStoreIntegration.internal;
 
+import org.phenotips.variantStoreIntegration.VariantStoreService;
 import org.phenotips.variantstore.VariantStore;
 import org.phenotips.variantstore.db.solr.SolrController;
 import org.phenotips.variantstore.input.exomiser6.tsv.Exomiser6TSVManager;
@@ -37,7 +38,7 @@ import javax.inject.Singleton;
  */
 @Component
 @Singleton
-public class DefaultVariantStoreService extends AbstractVariantStoreProxy implements Initializable
+public class DefaultVariantStoreService extends AbstractVariantStoreProxy implements Initializable, VariantStoreService
 {
     @Inject
     private Environment env;

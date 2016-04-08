@@ -50,14 +50,4 @@ public class VariantStoreScriptService extends AbstractVariantStoreProxy impleme
     public void initialize() throws InitializationException {
         this.variantStore = variantStoreService;
     }
-
-    /**
-     * test.
-     *
-     * @return test
-     */
-    public String test() {
-        return "test";
-    }
-
 }
