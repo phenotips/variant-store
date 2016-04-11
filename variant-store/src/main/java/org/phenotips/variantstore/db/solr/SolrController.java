@@ -345,7 +345,9 @@ public class SolrController extends AbstractDatabaseController
         logger.debug(String.format("getTopHarmfullVariantsForGene(%s, %s, %d)", id, gene, k));
         final List<GAVariant> list = new LinkedList<>();
 
-        String queryString = String.format("%s:%s  ", VariantsSchema.CALLSET_IDS, id);
+        String queryString = String.format("%s:%s AND  %s:%s",
+                VariantsSchema.CALLSET_IDS, id,
+                VariantsSchema.GENE, gene);
 
         SolrQuery q = new SolrQuery()
                 .setQuery(queryString)

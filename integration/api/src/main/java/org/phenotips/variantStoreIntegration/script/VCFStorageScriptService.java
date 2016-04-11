@@ -18,10 +18,15 @@
 package org.phenotips.variantStoreIntegration.script;
 
 import org.phenotips.data.Patient;
+import org.phenotips.data.PatientRepository;
 import org.phenotips.variantStoreIntegration.VCFUploadManager;
 
 import org.xwiki.component.annotation.Component;
 import org.xwiki.script.service.ScriptService;
+import org.xwiki.security.authorization.AuthorizationManager;
+import org.xwiki.security.authorization.Right;
+import org.xwiki.users.User;
+import org.xwiki.users.UserManager;
 
 
 import java.util.List;
@@ -48,6 +53,15 @@ public class VCFStorageScriptService implements ScriptService
     @Inject
     private VCFUploadManager uploadManager;
 
+    @Inject
+    private PatientRepository repository;
+
+    @Inject
+    private UserManager users;
+
+    @Inject
+    private AuthorizationManager access;
+
     /**
      * @param patientID A PhenoTips patient ID.
      * @param filePath The path to where the patients VCF is stored
@@ -58,9 +72,23 @@ public class VCFStorageScriptService implements ScriptService
     public JSONObject upload(String patientID, String filePath)
     {
         JSONObject response = new JSONObject();
+
+        Patient patient = this.repository.getPatientById(patientID);
+        if (patient == null) {
+            response.element(STATUS_STRING, 404);
+            response.element("message", "patient " + patientID + " not found");
+            return response;
+        }
+        User currentUser = this.users.getCurrentUser();
+        if (!this.access.hasAccess(Right.EDIT, currentUser == null ? null : currentUser.getProfileDocument(),
+                patient.getDocument())) {
+            response.element(STATUS_STRING, 401);
+            response.element("message", "The current user is not authorized to edit this patient");
+            return response;
+        }
         try {
             this.uploadManager.uploadVCF(patientID, filePath);
-            response.element(STATUS_STRING, 201);
+            response.element(STATUS_STRING, 202);
         } catch (Exception e) {
             response.element(STATUS_STRING, 500);
             response.element("message", e.getMessage());
