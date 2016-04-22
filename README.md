@@ -30,8 +30,7 @@ vs.init(Paths.get("/where/to/store/data/");
 vs.addIndividual("IndividualId", true, Path.get("/path/to/variant/file"));
 ```
 
-### Architecture
-
+# Architecture
 
 The input-file handling and the variant storage are decoupled. This allows us to support multiple file 
 types, and allow for the possibility of switching out the underlying database. 
@@ -81,7 +80,7 @@ Assuming you have a cluster up and running, you can add a new `DatabaseControlle
 The new contoller would configure SolrJ to connect to the SolrCloud zookeeper instance. See the 
 [Solr docs](https://cwiki.apache.org/confluence/display/solr/Using+SolrJ) for more info.
 
-#### Future steps
+# Future steps
 
 * auto-detect the desired input manager to use based on the file's file path.
 * Integrate jannovar or exomiser as a pre-processing step for files.
