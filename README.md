@@ -62,14 +62,14 @@ Queries return `GAVariants`, which are objects generated from the ga4gh schemas.
 This is the primary use-case for the Variant Store. This flow is used by PhenoTips' 
 [patient-network](https://github.com/phenotips/patient-network);
 
+![Inserting a VCF](https://cdn.rawgit.com/phenotips/variant-store/master/doc/inserting-diagram.svg)
+
 1. VCFs are processed into TSVs by Exomiser externally (not handled by the Variant Store)
 2. Exomiser output TSV files are passed to the Variant Store
 3. The Variant Store
 	1. Passes the TSV to the `TSVManager`
 	2. the `SolrController` spins up a task to add the individual
 	3. the `AddIndividualTask` 
-	
-![Inserting a VCF](https://cdn.rawgit.com/phenotips/variant-store/master/doc/inserting-diagram.svg)
 
 #### Scaling to multiple nodes
 
