@@ -69,7 +69,7 @@ This is the primary use-case for the Variant Store. This flow is used by PhenoTi
 	2. the `SolrController` spins up a task to add the individual
 	3. the `AddIndividualTask` 
 	
-![Inserting a VCF](doc/inserting-diagram.svg?raw=true)
+![Inserting a VCF](https://cdn.rawgit.com/phenotips/variant-store/master/doc/inserting-diagram.svg)
 
 #### Scaling to multiple nodes
 
