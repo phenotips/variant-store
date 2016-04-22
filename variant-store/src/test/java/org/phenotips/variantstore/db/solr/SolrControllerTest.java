@@ -63,7 +63,7 @@ public class SolrControllerTest
         Future future = controller.addIndividual(iterator);
 
         future.get();
-        //todo: see what error gets thrown on get, fix it.
-
+        future = controller.addIndividual(iterator);
+        future.get();
     }
 }
