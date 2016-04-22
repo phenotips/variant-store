@@ -5,6 +5,11 @@ The Variant Store is a Java library that wraps the complexity of processing and
 handling large number of variants, exposing an interface for other applications to query
 the collected content of the VCF files. 
 
+This repo provides two projects:
+
+- `./variant-store` -- the actual Variant Store
+- `./integration` -- the PhenoTips - Variant Store integration
+
 ### Supported Annotations
 
 * [Exomiser](http://www.sanger.ac.uk/resources/software/exomiser/)
@@ -48,7 +53,6 @@ Queries return `GAVariants`, which are objects generated from the ga4gh schemas.
 * Automatic deploy from a single jar with no manual actions by the user.
 * Fast inserts and queries on single-node and multi-node installations
 * Be flexible w.r.t. input file types and storage backends.
-
 
 #### Startup
 

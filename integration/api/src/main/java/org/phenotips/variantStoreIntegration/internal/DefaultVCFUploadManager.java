@@ -160,6 +160,8 @@ public class DefaultVCFUploadManager implements VCFUploadManager
         String id = patient.getId();
 
         if (this.currentUploads.get(id) != null) {
+            // TODO: Canceling a Future doesn't actually cancel the running job, it effectively just sets a flag on it.
+            // The VariantStore should probably implement a way to check if a task is canceled, and undo it.
             this.currentUploads.get(id).cancel(true);
             this.currentUploads.remove(id);
         } else {
