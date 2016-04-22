@@ -104,11 +104,11 @@ public class VariantStore implements VariantStoreInterface
                 TrueFileFilter.INSTANCE,
                 TrueFileFilter.INSTANCE);
         try {
-            for (String id : Arrays.asList("F0000012", "F0000013")) {
+            for (String id : Arrays.asList("F0000012", "F0000012", "F0000012")) {
 //                String id = FilenameUtils.removeExtension(tsv.getName());
-                if (vs.getIndividuals().contains(id)) {
-                    continue;
-                }
+//                if (vs.getIndividuals().contains(id)) {
+//                    continue;
+//                }
                 long startTime;
                 long endTime;
 
@@ -176,35 +176,35 @@ public class VariantStore implements VariantStoreInterface
         }
 
 //        for (String id : vs.getIndividuals()) {
-//        for (String id : Arrays.asList("F0000012", "F0000013")) {
-//            startTime = System.currentTimeMillis();
-//            Set<String> genes = vs.getAllGenesForIndividual(id);
-//            endTime = System.currentTimeMillis();
-//            logger.debug(String.format("csv: getAllGenesForIndividual(%s).size() = %d (ms): %d",
-//                    id, genes.size(), endTime - startTime));
-//
-//            if (genes.size() > 0) {
-//                String gene = genes.iterator().next();
-//
-//                startTime = System.currentTimeMillis();
-//                Double score = vs.getGeneScore(id, gene);
-//                endTime = System.currentTimeMillis();
-//                logger.debug(String.format("csv: getGeneScore(%s, %s) = %f (ms): %d",
-//                        id, gene, score, endTime - startTime));
-//
-//                startTime = System.currentTimeMillis();
-//                List<GAVariant> variants = vs.getTopHarmfullVariantsForGene(id, gene, 5);
-//                endTime = System.currentTimeMillis();
-//                logger.debug(String.format("csv: getTopHarmfullVariantsForGene(%s, %s).size() = %d (ms): %d",
-//                        id, gene, variants.size(), endTime - startTime));
-//            }
-//
-//            startTime = System.currentTimeMillis();
-//            List<String> topGenes = vs.getTopGenesForIndividual(id, 5);
-//            endTime = System.currentTimeMillis();
-//            logger.debug(String.format("csv: getTopGenesForIndividual(%s).size() = %d (ms): %d",
-//                    id, topGenes.size(), endTime - startTime));
-//        }
+        for (String id : Arrays.asList("F0000012", "F0000013")) {
+            startTime = System.currentTimeMillis();
+            Set<String> genes = vs.getAllGenesForIndividual(id);
+            endTime = System.currentTimeMillis();
+            logger.debug(String.format("csv: getAllGenesForIndividual(%s).size() = %d (ms): %d",
+                    id, genes.size(), endTime - startTime));
+
+            if (genes.size() > 0) {
+                String gene = genes.iterator().next();
+
+                startTime = System.currentTimeMillis();
+                Double score = vs.getGeneScore(id, gene);
+                endTime = System.currentTimeMillis();
+                logger.debug(String.format("csv: getGeneScore(%s, %s) = %f (ms): %d",
+                        id, gene, score, endTime - startTime));
+
+                startTime = System.currentTimeMillis();
+                List<GAVariant> variants = vs.getTopHarmfullVariantsForGene(id, gene, 5);
+                endTime = System.currentTimeMillis();
+                logger.debug(String.format("csv: getTopHarmfullVariantsForGene(%s, %s).size() = %d (ms): %d",
+                        id, gene, variants.size(), endTime - startTime));
+            }
+
+            startTime = System.currentTimeMillis();
+            List<String> topGenes = vs.getTopGenesForIndividual(id, 5);
+            endTime = System.currentTimeMillis();
+            logger.debug(String.format("csv: getTopGenesForIndividual(%s).size() = %d (ms): %d",
+                    id, topGenes.size(), endTime - startTime));
+        }
 
         startTime = System.currentTimeMillis();
         logger.debug(String.format("csv: Total Variants: %d", vs.getTotNumVariants()));
