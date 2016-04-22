@@ -20,24 +20,15 @@ package org.phenotips.variantstore;
 import org.phenotips.variantstore.db.DatabaseController;
 import org.phenotips.variantstore.db.solr.SolrController;
 import org.phenotips.variantstore.input.InputManager;
-import org.phenotips.variantstore.input.exomiser6.tsv.Exomiser6TSVManager;
 import org.phenotips.variantstore.input.vcf.VCFManager;
 import org.phenotips.variantstore.shared.VariantStoreException;
 
-import java.io.File;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.ga4gh.GAVariant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

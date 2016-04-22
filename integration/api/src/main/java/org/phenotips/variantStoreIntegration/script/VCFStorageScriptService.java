@@ -28,13 +28,11 @@ import org.xwiki.security.authorization.Right;
 import org.xwiki.users.User;
 import org.xwiki.users.UserManager;
 
-
 import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-
 
 import net.sf.json.JSONObject;
 
@@ -49,6 +47,7 @@ import net.sf.json.JSONObject;
 @Singleton
 public class VCFStorageScriptService implements ScriptService
 {
+    static final String MESSAGE = "message";
     private static final String STATUS_STRING = "status";
     @Inject
     private VCFUploadManager uploadManager;
@@ -64,26 +63,26 @@ public class VCFStorageScriptService implements ScriptService
 
     /**
      * @param patientID A PhenoTips patient ID.
-     * @param filePath The path to where the patients VCF is stored
+     * @param filePath  The path to where the patients VCF is stored
+     *
      * @return A json object with key status representing the status of the intial request. NOTE: The status is only
      * relevant to the submission of the request. Failures during asynchronous vcf processing will not effect the status
      * of the request.
      */
-    public JSONObject upload(String patientID, String filePath)
-    {
+    public JSONObject upload(String patientID, String filePath) {
         JSONObject response = new JSONObject();
 
         Patient patient = this.repository.getPatientById(patientID);
         if (patient == null) {
             response.element(STATUS_STRING, 404);
-            response.element("message", "patient " + patientID + " not found");
+            response.element(MESSAGE, "patient " + patientID + " not found");
             return response;
         }
         User currentUser = this.users.getCurrentUser();
         if (!this.access.hasAccess(Right.EDIT, currentUser == null ? null : currentUser.getProfileDocument(),
                 patient.getDocument())) {
             response.element(STATUS_STRING, 401);
-            response.element("message", "The current user is not authorized to edit this patient");
+            response.element(MESSAGE, "The current user is not authorized to edit this patient");
             return response;
         }
         try {
@@ -91,7 +90,7 @@ public class VCFStorageScriptService implements ScriptService
             response.element(STATUS_STRING, 202);
         } catch (Exception e) {
             response.element(STATUS_STRING, 500);
-            response.element("message", e.getMessage());
+            response.element(MESSAGE, e.getMessage());
             response.element("trace", e.getStackTrace());
         }
         return response;
@@ -102,8 +101,7 @@ public class VCFStorageScriptService implements ScriptService
      *
      * @param patient a phenotips patient
      */
-    public void cancelUpload(Patient patient)
-    {
+    public void cancelUpload(Patient patient) {
         this.uploadManager.cancelUpload(patient);
     }
 
@@ -112,23 +110,23 @@ public class VCFStorageScriptService implements ScriptService
      *
      * @param patient a PhenoTips patient
      */
-    public void removeVCF(Patient patient)
-    {
+    public void removeVCF(Patient patient) {
         this.uploadManager.removeVCF(patient);
     }
 
     /**
      * @param patient a PhenoTips patient
+     *
      * @return The current status of the VCF file 0-Unknown. 1-Uploading 2-Stored -1-Removing
      */
-    public int getVCFStatus(Patient patient)
-    {
+    public int getVCFStatus(Patient patient) {
         // I guess this will just query the database??? Doesn't seem like such a good way of doing things.
         return 0;
     }
 
     /**
      * Get a list of uploaded patients.
+     *
      * @return a list of patients.
      */
     public List<String> getUploadedPatients() {
