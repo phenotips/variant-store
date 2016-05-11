@@ -79,7 +79,8 @@ public class SolrController extends AbstractDatabaseController
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    private ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+    // ensure that insertion and deletions are done synchronously, one task at a time
+    private ExecutorService executor = Executors.newFixedThreadPool(1);
 
     private CoreContainer cores;
     private SolrClient server;
