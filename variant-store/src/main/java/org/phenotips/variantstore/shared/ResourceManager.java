@@ -67,6 +67,19 @@ public final class ResourceManager
      * @throws DatabaseException if an error occurs
      */
     public static void copyResourcesToPath(final Path source, Path destination) throws DatabaseException {
+        copyResourcesToPath(source, destination, ResourceManager.class);
+    }
+
+    /**
+     * Copy resources bundled with the application to a specified folder.
+     *
+     * @param source      the path of the resources relative to the resource folder
+     * @param destination the destination
+     * @param clazz       the class that owns the resource we want
+     * @throws DatabaseException if an error occurs
+     */
+    public static void copyResourcesToPath(final Path source, Path destination, Class<?> clazz)
+        throws DatabaseException {
         Path dest = destination;
         // Check if storage dirs exists
         if (Files.isDirectory(dest)) {
@@ -77,9 +90,6 @@ public final class ResourceManager
         if (dest.endsWith(source)) {
             dest = dest.getParent();
         }
-
-        // Get path to where the resources are stored
-        Class clazz = ResourceManager.class;
 
         if (clazz.getProtectionDomain().getCodeSource() == null) {
             throw new DatabaseException("This is running in a jar loaded from the system class loader. "
