@@ -27,9 +27,7 @@
     <artifactId>variant-store-parent</artifactId>
     <version>1.0-SNAPSHOT</version>
   </parent>
-  <groupId>org.phenotips</groupId>
   <artifactId>variant-store</artifactId>
-  <version>1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>Variant Storage Standalone Library</name>
@@ -339,6 +337,5 @@
         </plugin>
       </plugins>
     </pluginManagement>
-
   </build>
 </project>
