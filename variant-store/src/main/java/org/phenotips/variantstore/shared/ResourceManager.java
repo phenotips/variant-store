@@ -20,6 +20,8 @@ package org.phenotips.variantstore.shared;
 import org.phenotips.variantstore.db.DatabaseException;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -95,8 +97,15 @@ public final class ResourceManager
             throw new DatabaseException("This is running in a jar loaded from the system class loader. "
                     + "Don't know how to handle this.");
         }
-
-        Path resourcesPath = Paths.get(clazz.getProtectionDomain().getCodeSource().getLocation().getPath());
+        // Windows adds leading `/` to the path resulting in
+        // java.nio.file.InvalidPathException: Illegal char <:> at index 2: /C:/...
+        URL path = clazz.getProtectionDomain().getCodeSource().getLocation();
+        Path resourcesPath;
+        try {
+            resourcesPath = Paths.get(path.toURI());
+        } catch (URISyntaxException ex) {
+            throw new DatabaseException("Incorrect resource path", ex);
+        }
 
         try {
 

@@ -21,8 +21,13 @@ import org.phenotips.variantstore.input.VariantHeader;
 import org.phenotips.variantstore.input.tsv.ExomiserTSVIterator;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.Future;
 
 import org.apache.commons.io.FileUtils;
@@ -30,6 +35,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+
 import static org.junit.Assert.*;
 
 /**
@@ -40,6 +46,8 @@ public class SolrControllerTest
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
 
+    public static final List<String> TSV_FILES = Arrays.asList("large-field.variants.tsv", "patient.variants.tsv");
+
     private Path tsvs;
     private Path solr;
 
@@ -47,8 +55,16 @@ public class SolrControllerTest
 
     @Before
     public void before() throws IOException {
+        Files.createDirectories(folder.getRoot().toPath().resolve("tsvs"));
         // copy resources
-        FileUtils.copyDirectoryToDirectory(Paths.get(getClass().getResource("/tsvs").getPath()).toFile(), folder.getRoot());
+        for (String file : TSV_FILES) {
+            InputStream in = getClass().getResourceAsStream("/tsvs/" + file);
+            if (in == null) {
+                continue;
+            }
+            Files.copy(in, folder.getRoot().toPath().resolve("tsvs/" + file), StandardCopyOption.REPLACE_EXISTING);
+        }
+
         tsvs = folder.getRoot().toPath().resolve("tsvs");
         solr = folder.getRoot().toPath().resolve("solr");
 
