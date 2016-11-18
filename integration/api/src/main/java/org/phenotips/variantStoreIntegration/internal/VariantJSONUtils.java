@@ -26,10 +26,10 @@ import java.util.List;
 import org.ga4gh.GACall;
 import org.ga4gh.GAVariant;
 
-import net.sf.json.JSONObject;
+import org.json.JSONObject;
 
 /**
- * A class of static methods for translating {@link org.ga4gh.GAVariant} to {@link net.sf.json.JSON}.
+ * A class of static methods for translating {@link org.ga4gh.GAVariant} to {@link org.json.JSON}.
  *
  * @version $Id$
  */
@@ -89,7 +89,7 @@ public final class VariantJSONUtils
         if (infoField != null) {
             info.put(GAVariantInfoFields.EXAC_AF, infoField);
         }
-        resultJSON.element("info", info);
+        resultJSON.put("info", info);
         return resultJSON;
     }
 }

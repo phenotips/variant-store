@@ -34,7 +34,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-import net.sf.json.JSONObject;
+import org.json.JSONObject;
 
 /**
  * API for providing access to the variant store.
@@ -74,24 +74,24 @@ public class VCFStorageScriptService implements ScriptService
 
         Patient patient = this.repository.getPatientById(patientID);
         if (patient == null) {
-            response.element(STATUS_STRING, 404);
-            response.element(MESSAGE, "patient " + patientID + " not found");
+            response.put(STATUS_STRING, 404);
+            response.put(MESSAGE, "patient " + patientID + " not found");
             return response;
         }
         User currentUser = this.users.getCurrentUser();
         if (!this.access.hasAccess(Right.EDIT, currentUser == null ? null : currentUser.getProfileDocument(),
                 patient.getDocument())) {
-            response.element(STATUS_STRING, 401);
-            response.element(MESSAGE, "The current user is not authorized to edit this patient");
+            response.put(STATUS_STRING, 401);
+            response.put(MESSAGE, "The current user is not authorized to edit this patient");
             return response;
         }
         try {
             this.uploadManager.uploadVCF(patientID, filePath);
-            response.element(STATUS_STRING, 202);
+            response.put(STATUS_STRING, 202);
         } catch (Exception e) {
-            response.element(STATUS_STRING, 500);
-            response.element(MESSAGE, e.getMessage());
-            response.element("trace", e.getStackTrace());
+            response.put(STATUS_STRING, 500);
+            response.put(MESSAGE, e.getMessage());
+            response.put("trace", e.getStackTrace());
         }
         return response;
     }
