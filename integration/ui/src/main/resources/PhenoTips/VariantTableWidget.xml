@@ -142,7 +142,7 @@
                     Not every field must be present but failing to include one may cause certain columns to fail.
       {
         referenceName : chromosome (chr1-22, X, Y),
-        start : The start position at which this variant occurs (0-based),
+        start : The start position at which this variant occurs (1-based),
         end : The end position (exclusive),
         referenceBases : The reference bases for this variant,
         alternateBases : The bases that appear instead of the reference bases,
@@ -318,7 +318,7 @@
         if (start != end) {
           var positionText = this.Strings["positionPhrase"].replace("__CHROMOSOME__", variant.referenceName.toUpperCase()).replace("__START__", start).replace("__STOP__", + end);
         } else {
-          var positionText = this.Strings["positionPhrase"].replace("__CHROMOSOME__", variant.referenceName.toUpperCase()).replace("__START__-", start).replace("__STOP__", "");
+          var positionText = this.Strings["snvPositionPhrase"].replace("__CHROMOSOME__", variant.referenceName.toUpperCase()).replace("__START__", start);
         }
         var positionURLFragment = variant.referenceName.toUpperCase() + ": " + start + "-" + end;
         var assembly = variant.assembly || "hg19";
@@ -373,6 +373,7 @@
       'exacAF.heading'      : "allele frequency",
       'UCSC_POSITION_LINK.heading': "variant",
       "positionPhrase"      : "__CHROMOSOME__:__START__-__STOP__",
+      "snvPositionPhrase"   : "__CHROMOSOME__:__START__",
       "UCSCLinkTitle"       : 'Visualize in the UCSC Genome Browser',
       'message.EmptyInFo'   : "unavailable"
     }
