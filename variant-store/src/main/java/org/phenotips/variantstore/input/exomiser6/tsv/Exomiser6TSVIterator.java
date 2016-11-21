@@ -135,7 +135,7 @@ public class Exomiser6TSVIterator extends AbstractVariantIterator
                 variant.setReferenceName(field);
                 break;
             case POS:
-                // GA4GH uses 0-based indexing, unlike VCF's 1-based.
+                // GA4GH uses 0-based indexing, unlike TSV's 1-based.
                 variant.setStart(Long.valueOf(field) - 1);
                 break;
             case REF:

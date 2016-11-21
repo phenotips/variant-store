@@ -142,7 +142,7 @@
                     Not every field must be present but failing to include one may cause certain columns to fail.
       {
         referenceName : chromosome (chr1-22, X, Y),
-        start : The start position at which this variant occurs (0-based),
+        start : The start position at which this variant occurs (1-based),
         end : The end position (exclusive),
         referenceBases : The reference bases for this variant,
         alternateBases : The bases that appear instead of the reference bases,
@@ -314,8 +314,12 @@
       if (variant.referenceName &amp;&amp; variant.start &amp;&amp; variant.referenceBases) {
         var _this = this;
         var start = variant.start;
-        var end = variant.end || variant.start + variant.referenceBases.length;
-        var positionText = this.Strings["positionPhrase"].replace("__CHROMOSOME__", variant.referenceName.toUpperCase()).replace("__START__", start).replace("__STOP__", + end);
+        var end = variant.end || variant.start + variant.referenceBases.length - 1;
+        if (start != end) {
+          var positionText = this.Strings["positionPhrase"].replace("__CHROMOSOME__", variant.referenceName.toUpperCase()).replace("__START__", start).replace("__STOP__", + end);
+        } else {
+          var positionText = this.Strings["snvPositionPhrase"].replace("__CHROMOSOME__", variant.referenceName.toUpperCase()).replace("__START__", start);
+        }
         var positionURLFragment = variant.referenceName.toUpperCase() + ": " + start + "-" + end;
         var assembly = variant.assembly || "hg19";
         var position = new Element('a', {
@@ -369,6 +373,7 @@
       'exacAF.heading'      : "allele frequency",
       'UCSC_POSITION_LINK.heading': "variant",
       "positionPhrase"      : "__CHROMOSOME__:__START__-__STOP__",
+      "snvPositionPhrase"   : "__CHROMOSOME__:__START__",
       "UCSCLinkTitle"       : 'Visualize in the UCSC Genome Browser',
       'message.EmptyInFo'   : "unavailable"
     }
@@ -477,12 +482,10 @@ table.variant-display-table td {
   padding: .4em .5em;
   text-align: left;
 }
-table.variant-display-table th {
-  border: none;
-  border-bottom: solid black 1px;
-}
-.variant-position.button{
-  width: 100%;
+table .variant-display-heading {
+  font-weight: normal;
+  font-variant: small-caps;
+  text-transform: capitalize;
 }</code>
     </property>
     <property>
