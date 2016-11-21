@@ -126,7 +126,8 @@ public class VCFIterator extends AbstractVariantIterator
         Map<String, List<String>> info = new HashMap<>();
 
         variant.setReferenceName(context.getChr());
-        variant.setStart((long) context.getStart());
+        // GA4GH uses 0-based indexing, unlike VCF's 1-based.
+        variant.setStart((long) context.getStart() - 1);
         variant.setEnd((long) context.getEnd());
         variant.setReferenceBases(context.getReference().getBaseString());
 

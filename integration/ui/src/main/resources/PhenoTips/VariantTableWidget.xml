@@ -314,8 +314,12 @@
       if (variant.referenceName &amp;&amp; variant.start &amp;&amp; variant.referenceBases) {
         var _this = this;
         var start = variant.start;
-        var end = variant.end || variant.start + variant.referenceBases.length;
-        var positionText = this.Strings["positionPhrase"].replace("__CHROMOSOME__", variant.referenceName.toUpperCase()).replace("__START__", start).replace("__STOP__", + end);
+        var end = variant.end || variant.start + variant.referenceBases.length - 1;
+        if (start != end) {
+          var positionText = this.Strings["positionPhrase"].replace("__CHROMOSOME__", variant.referenceName.toUpperCase()).replace("__START__", start).replace("__STOP__", + end);
+        } else {
+          var positionText = this.Strings["positionPhrase"].replace("__CHROMOSOME__", variant.referenceName.toUpperCase()).replace("__START__-", start).replace("__STOP__", "");
+        }
         var positionURLFragment = variant.referenceName.toUpperCase() + ": " + start + "-" + end;
         var assembly = variant.assembly || "hg19";
         var position = new Element('a', {
@@ -477,12 +481,10 @@ table.variant-display-table td {
   padding: .4em .5em;
   text-align: left;
 }
-table.variant-display-table th {
-  border: none;
-  border-bottom: solid black 1px;
-}
-.variant-position.button{
-  width: 100%;
+table .variant-display-heading {
+  font-weight: normal;
+  font-variant: small-caps;
+  text-transform: capitalize;
 }</code>
     </property>
     <property>
