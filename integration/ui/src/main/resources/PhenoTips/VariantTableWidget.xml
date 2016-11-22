@@ -127,14 +127,15 @@
       [
       "UCSC_POSITION_LINK", ##Link is displayed as chr?:????-?????
       "B_UCSC_POSITION_LINK", ##Same as previous but displayed as a PhenoTips secondary action button
-      "chr",
-      "pos",
-      "ref",
-      "alt",
-      "EXOMISER_VARIANT_SCORE",
-      "GENE",
-      "EXOMISER_GENE_VARIANT_SCORE",
-      "GENE_EFFECT",
+      "referenceName",
+      "start",
+      "referenceBases",
+      "alternateBases",
+      "zygosity",
+      "score",
+      "geneSymbol",
+      "geneScore",
+      "effect",
       "EXAC_AF"
       ]
 
@@ -146,12 +147,12 @@
         end : The end position (exclusive),
         referenceBases : The reference bases for this variant,
         alternateBases : The bases that appear instead of the reference bases,
-        info : {
-          EXOMISER_VARIANT_SCORE : The exomiser score for the variant,
-          GENE : The name of the gene to which this variant belongs,
-          EXOMISER_GENE_VARIANT_SCORE : The exomiser harmfulness of the gene,
-          GENE_EFFECT : The effect of this mutation (ie MISSENSE, STOPGAIN etc.),
-          EXAC_AF : The exac allele frequency of this variant
+        zygosity : The exac allele frequency of this variant,
+        effect : The effect of this mutation (ie MISSENSE, STOPGAIN etc.),
+        score : The exomiser score for the variant,
+        annotations : {
+          geneSymbol : The HGNC ID of the gene to which this variant belongs,
+          geneScore : The exomiser combined harmfulness score of the gene,
         }
       }
 
@@ -174,36 +175,40 @@
       var _this = this;
       var activeColumns = {};
       var columnTemplates = {
-        "chr" : {
+        "referenceName" : {
           display : _this.displayPlainTextCell.bind(_this, "referenceName"),
           heading : _this.Strings["chromosome.heading"]
         },
-        "pos"      : {
+        "start"      : {
           display : _this.displayPlainTextCell.bind(_this, "start"),
           heading : _this.Strings["position.heading"]
         },
-        "ref": {
+        "referenceBases": {
           display : _this.displayBasesCell.bind(_this, "referenceBases"),
           heading : _this.Strings["reference.heading"]
         },
-        "alt" : {
+        "alternateBases" : {
           display : _this.displayBasesCell.bind(_this, "alternateBases"),
           heading : _this.Strings["alternate.heading"]
         },
-        "EXOMISER_VARIANT_SCORE" : {
-          display : _this.displayScoreBarCell.bind(_this, "EXOMISER_VARIANT_SCORE"),
+        "zygosity" : {
+          display :  _this.displayPlainTextCell.bind(_this, "zygosity"),
+          heading : _this.Strings["zygosity.heading"]
+        },
+        "score" : {
+          display : _this.displayScoreBarCell.bind(_this, "score"),
           heading : _this.Strings["variantScore.heading"]
         },
-        "GENE" : {
-          display : _this.displayPlainTextCell.bind(_this, "GENE"),
+        "geneSymbol" : {
+          display : _this.displayPlainTextCell.bind(_this, "geneSymbol"),
           heading : _this.Strings["gene.heading"]
         },
-        "EXOMISER_GENE_VARIANT_SCORE" : {
-          display : _this.displayScoreBarCell.bind(_this, "EXOMISER_GENE_VARIANT_SCORE"),
+        "geneScore" : {
+          display : _this.displayScoreBarCell.bind(_this, "geneScore"),
           heading : _this.Strings["geneScore.heading"]
         },
-        "GENE_EFFECT" : {
-          display : _this.displayPlainTextCell.bind(_this, "GENE_EFFECT"),
+        "effect" : {
+          display : _this.displayPlainTextCell.bind(_this, "effect"),
           heading : _this.Strings["codingEffect.heading"]
         },
         "EXAC_AF" : {
@@ -215,7 +220,7 @@
           heading : _this.Strings["UCSC_POSITION_LINK.heading"]
         },
         "B_UCSC_POSITION_LINK" : {
-          display: _this.displayButtonUCSCPositionCell.bind(_this),
+          display : _this.displayButtonUCSCPositionCell.bind(_this),
           heading : _this.Strings["UCSC_POSITION_LINK.heading"]
         }
       };
@@ -357,7 +362,7 @@
 
     Utils :{
       deepFind : function (variant, key) {
-        return variant[key] || variant.info[key];
+        return variant[key] || variant.annotations[key];
       }
     },
 
@@ -368,10 +373,11 @@
       'alternate.heading'   : "alt",
       'variantScore.heading': "variant score",
       'gene.heading'        : "gene symbol",
-      'geneScore.heading'   : "gene score",
+      'geneScore.heading'   : "exomizer score",
       'codingEffect.heading': "gene effect",
       'exacAF.heading'      : "allele frequency",
       'UCSC_POSITION_LINK.heading': "variant",
+      'zygosity.heading'    : "zygosity",
       "positionPhrase"      : "__CHROMOSOME__:__START__-__STOP__",
       "snvPositionPhrase"   : "__CHROMOSOME__:__START__",
       "UCSCLinkTitle"       : 'Visualize in the UCSC Genome Browser',
