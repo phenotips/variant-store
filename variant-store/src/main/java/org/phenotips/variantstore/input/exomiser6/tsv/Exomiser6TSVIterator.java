@@ -94,8 +94,6 @@ public class Exomiser6TSVIterator extends AbstractVariantIterator
 
         variant.setCalls(Collections.singletonList(call));
 
-        double exacFreq = 0;
-
         int i = 0;
         for (String field : tsvRecordIterator.next()) {
             // try to add the field different ways, see what sticks.
@@ -105,14 +103,7 @@ public class Exomiser6TSVIterator extends AbstractVariantIterator
             addGenotypeToVariant(call, field, i);
             addFieldToCallInfo(call, field, i);
 
-            exacFreq = getMaxExacFreqFromField(exacFreq, field, i);
-
             i++;
-        }
-
-        if (exacFreq != 0) {
-            VariantUtils.addInfo(variant,
-                    GAVariantInfoFields.EXAC_AF, String.valueOf(exacFreq));
         }
 
         variant.setEnd(variant.getStart() + variant.getReferenceBases().length());
@@ -155,6 +146,18 @@ public class Exomiser6TSVIterator extends AbstractVariantIterator
                 break;
             case FUNCTIONAL_CLASS:
                 VariantUtils.addInfo(variant, GAVariantInfoFields.GENE_EFFECT, field);
+                break;
+            case MAX_FREQUENCY:
+                double freq = 0.0;
+                if (!".".equals(field)) {
+                    try {
+                        freq = Double.parseDouble(field);
+                    } catch (NumberFormatException e) {
+                        // do nothing, stay with default 0.0 value
+                    }
+                }
+                VariantUtils.addInfo(variant,
+                    GAVariantInfoFields.EXAC_AF, String.valueOf(freq));
                 break;
             default:
         }
@@ -213,17 +216,5 @@ public class Exomiser6TSVIterator extends AbstractVariantIterator
                 break;
             default:
         }
-    }
-
-    private double getMaxExacFreqFromField(double exacFreq, String field, int i) {
-        switch (columns[i]) {
-            case MAX_FREQUENCY:
-                if (!".".equals(field)) {
-                    return Math.max(exacFreq, Double.parseDouble(field));
-                }
-                break;
-            default:
-        }
-        return 0;
     }
 }
