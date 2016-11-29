@@ -136,7 +136,7 @@
       "geneSymbol",
       "geneScore",
       "effect",
-      "EXAC_AF"
+      "exacAF"
       ]
 
     @param variants Variants must be passed as a list of JSONs in the following format based on http://ga4gh.org/#/schemas.
@@ -147,13 +147,14 @@
         end : The end position (exclusive),
         referenceBases : The reference bases for this variant,
         alternateBases : The bases that appear instead of the reference bases,
-        zygosity : The exac allele frequency of this variant,
-        effect : The effect of this mutation (ie MISSENSE, STOPGAIN etc.),
+        zygosity : number of copies of alternative alleles ("1/1" - homozygous, otherwise heterozygous),
+        effect : The effect of this mutation (i.e. MISSENSE, STOPGAIN etc.),
         score : The exomiser score for the variant,
         annotations : {
-          geneSymbol : The HGNC ID of the gene to which this variant belongs,
+          geneSymbol : The symbol of the gene to which this variant belongs,
           geneScore : The exomiser combined harmfulness score of the gene,
-        }
+        },
+        "exacAF" : The allele frequency of the variant in the Exome Aggregation Consortium (ExAC) dataset
       }
 
     @param container the HTML element you would like the table to be contained within. div is recommended.
@@ -211,8 +212,8 @@
           display : _this.displayPlainTextCell.bind(_this, "effect"),
           heading : _this.Strings["codingEffect.heading"]
         },
-        "EXAC_AF" : {
-          display : _this.displayAF.bind(_this, "EXAC_AF"),
+        "exacAF" : {
+          display : _this.displayAF.bind(_this, "exacAF"),
           heading : _this.Strings["exacAF.heading"]
         },
         "UCSC_POSITION_LINK" : {
