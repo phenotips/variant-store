@@ -140,14 +140,12 @@ public final class SolrVariantUtils
                 getCallsetField(doc, callsetId, VariantsSchema.EXOMISER_GENE_VARIANT_SCORE));
         addInfo(call, GACallInfoFields.EXOMISER_GENE_COMBINED_SCORE,
                 getCallsetField(doc, callsetId, VariantsSchema.EXOMISER_GENE_COMBINED_SCORE));
-        variant.setCalls(Collections.singletonList(call));
-
-        variant.setAlternateBases(Collections.singletonList(doc.get(VariantsSchema.ALT).toString()));
         if ((int) getCallsetField(doc, callsetId, VariantsSchema.AC) == 2) {
             call.setGenotype(Arrays.asList(1, 1));
         } else {
             call.setGenotype(Arrays.asList(0, 1));
         }
+        variant.setCalls(Collections.singletonList(call));
 
         return variant;
     }
