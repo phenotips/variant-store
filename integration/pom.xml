@@ -60,6 +60,8 @@
   </repositories>
 
   <properties>
+    <patientNetwork.version>1.0-SNAPSHOT</patientNetwork.version>
+    <variantStore.version>1.0-SNAPSHOT</variantStore.version>
     <!-- Disable Clirr since this is the first version -->
     <clirr.skip>true</clirr.skip>
   </properties>
