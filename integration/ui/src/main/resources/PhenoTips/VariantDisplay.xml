@@ -253,7 +253,7 @@
             var _this = this;
 
             if (PhenoTips &amp;&amp; PhenoTips.widgets &amp;&amp; PhenoTips.widgets.VariantDisplayTable) { 
-              var variantColumns =["geneSymbol", "geneScore", "B_UCSC_POSITION_LINK", "referenceBases", "alternateBases", "effect", "zygosity", "exacAF"];
+              var variantColumns =["geneSymbol", "geneScore", "B_UCSC_POSITION_LINK", "referenceBases", "alternateBases", "effect", "zygosity", "exacAF", "gtCounts"];
               new PhenoTips.widgets.VariantDisplayTable(data.results, variantColumns, this.tableContainer);
             } else {
               console.log("Unable to display top exomiser hits: VariantTableWidget not found");

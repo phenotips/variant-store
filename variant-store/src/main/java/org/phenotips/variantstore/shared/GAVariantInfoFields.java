@@ -26,6 +26,8 @@ public final class GAVariantInfoFields
     public static final String EXAC_AF = "EXAC_AF";
     public static final String GENE = "GENE";
     public static final String GENE_EFFECT = "GENE_EFFECT";
+    public static final String GT_HET = "GT_HET";
+    public static final String GT_HOM = "GT_HOM";
 
     private GAVariantInfoFields() {
         throw new AssertionError();

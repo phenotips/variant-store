@@ -126,6 +126,12 @@ public final class SolrVariantUtils
         if (doc.containsKey(VariantsSchema.EXAC_AF)) {
             addInfo(variant, GAVariantInfoFields.EXAC_AF, doc.get(VariantsSchema.EXAC_AF));
         }
+        if (doc.containsKey(VariantsSchema.GT_HET)) {
+            addInfo(variant, GAVariantInfoFields.GT_HET, doc.get(VariantsSchema.GT_HET));
+        }
+        if (doc.containsKey(VariantsSchema.GT_HOM)) {
+            addInfo(variant, GAVariantInfoFields.GT_HOM, doc.get(VariantsSchema.GT_HOM));
+        }
 
         GACall call = new GACall();
         addInfo(call, GACallInfoFields.QUALITY,
@@ -221,9 +227,9 @@ public final class SolrVariantUtils
         }
         doc.setField(VariantsSchema.AC_TOT, (int) doc.getFieldValue(VariantsSchema.AC_TOT) + copies);
         if (copies == 1) {
-            doc.setField(VariantsSchema.AC_TOT, (int) doc.getFieldValue(VariantsSchema.GT_HET) + 1);
+            doc.setField(VariantsSchema.GT_HET, (int) doc.getFieldValue(VariantsSchema.GT_HET) + 1);
         } else if (copies == 2) {
-            doc.setField(VariantsSchema.AC_TOT, (int) doc.getFieldValue(VariantsSchema.GT_HOM) + 1);
+            doc.setField(VariantsSchema.GT_HOM, (int) doc.getFieldValue(VariantsSchema.GT_HOM) + 1);
         }
 
         setCallsetField(doc, callsetId, VariantsSchema.PUBLIC, isPublic);

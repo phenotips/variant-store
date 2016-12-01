@@ -154,6 +154,8 @@
           geneSymbol : The symbol of the gene to which this variant belongs,
           geneScore : The exomiser combined harmfulness score of the gene,
           exacAF : The allele frequency of the variant in the Exome Aggregation Consortium (ExAC) dataset
+          gtHet : the number of individuals heterozygous for this variant
+          gtHom : the number of individuals homozygous for this variant
         }
       }
 
@@ -215,6 +217,10 @@
         "exacAF" : {
           display : _this.displayAF.bind(_this, "exacAF"),
           heading : _this.Strings["exacAF.heading"]
+        },
+        "gtCounts" : {
+          display : _this.displayGtCounts.bind(_this),
+          heading : _this.Strings["gtCounts.heading"]
         },
         "UCSC_POSITION_LINK" : {
           display : _this.displayUCSCPositionCell.bind(_this),
@@ -361,6 +367,18 @@
       return cell;
     },
 
+    displayGtCounts : function(variant) {
+      var gtHet = this.Utils.deepFind(variant, "gtHet");
+      var gtHom = this.Utils.deepFind(variant, "gtHom");
+      var cell = new Element('td');
+      if (!isNaN(gtHet) &amp;&amp; !isNaN(gtHom)) {
+        cell.insert(gtHet + '/' + gtHom);
+      } else {
+        cell.insert(this.Strings['message.EmptyInFo']);
+      }
+      return cell;
+    },
+
     Utils :{
       deepFind : function (variant, key) {
         return (variant.hasOwnProperty(key)) ? variant[key] : variant.annotations[key];
@@ -376,7 +394,8 @@
       'gene.heading'        : "gene symbol",
       'geneScore.heading'   : "exomizer score",
       'codingEffect.heading': "gene effect",
-      'exacAF.heading'      : "allele frequency",
+      'exacAF.heading'      : "allele freq.",
+      'gtCounts.heading'    : "N het/hom",
       'UCSC_POSITION_LINK.heading': "variant",
       'zygosity.heading'    : "zygosity",
       "positionPhrase"      : "__CHROMOSOME__:__START__-__STOP__",
