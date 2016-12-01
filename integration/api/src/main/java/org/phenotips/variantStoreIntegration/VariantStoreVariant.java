@@ -40,8 +40,9 @@ public class VariantStoreVariant extends AbstractVariant
      * org.phenotips.variantstore.VariantStoreInterface}.
      *
      * @param gaVariant a {@link GAVariant}
+     * @param totIndividuals number of all the individual IDs stored in the variant store
      */
-    public VariantStoreVariant(GAVariant gaVariant) {
+    public VariantStoreVariant(GAVariant gaVariant, Integer totIndividuals) {
         setChrom(gaVariant.getReferenceName());
         setPosition((int) (gaVariant.getStart() + 1));
 
@@ -64,5 +65,13 @@ public class VariantStoreVariant extends AbstractVariant
         setAnnotation("geneScore", VariantUtils.getInfo(call, GACallInfoFields.EXOMISER_GENE_COMBINED_SCORE));
         setAnnotation("geneSymbol", VariantUtils.getInfo(gaVariant, GAVariantInfoFields.GENE));
         setAnnotation("exacAF", VariantUtils.getInfo(gaVariant, GAVariantInfoFields.EXAC_AF));
+        setAnnotation("gtHet", VariantUtils.getInfo(gaVariant, GAVariantInfoFields.GT_HET));
+        setAnnotation("gtHom", VariantUtils.getInfo(gaVariant, GAVariantInfoFields.GT_HOM));
+
+        if (totIndividuals != null) {
+            value = VariantUtils.getInfo(gaVariant, GAVariantInfoFields.AC_TOT);
+            Double pcAF = Double.valueOf(value) / totIndividuals * 2;
+            setAnnotation("pcAF", pcAF.toString());
+        }
     }
 }

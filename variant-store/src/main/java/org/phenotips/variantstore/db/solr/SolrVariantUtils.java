@@ -20,6 +20,7 @@ package org.phenotips.variantstore.db.solr;
 import org.phenotips.variantstore.db.DatabaseException;
 import org.phenotips.variantstore.shared.GACallInfoFields;
 import org.phenotips.variantstore.shared.GAVariantInfoFields;
+
 import static org.phenotips.variantstore.shared.VariantUtils.addInfo;
 import static org.phenotips.variantstore.shared.VariantUtils.getInfo;
 
@@ -141,6 +142,10 @@ public final class SolrVariantUtils
         }
         if (doc.containsKey(VariantsSchema.GT_HOM)) {
             addInfo(variant, GAVariantInfoFields.GT_HOM, doc.get(VariantsSchema.GT_HOM));
+        }
+
+        if (doc.containsKey(VariantsSchema.AC_TOT)) {
+            addInfo(variant, GAVariantInfoFields.AC_TOT, doc.get(VariantsSchema.AC_TOT));
         }
 
         GACall call = new GACall();
