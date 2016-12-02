@@ -73,8 +73,8 @@ public abstract class AbstractVariantStoreProxy implements VariantStoreInterface
     }
 
     @Override
-    public List<String> getIndividuals() {
-        return this.variantStore.getIndividuals();
+    public List<String> getAllIndividuals() {
+        return this.variantStore.getAllIndividuals();
     }
 
     @Override

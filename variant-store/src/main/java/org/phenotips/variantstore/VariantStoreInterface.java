@@ -74,7 +74,7 @@ public interface VariantStoreInterface extends Service
      *
      * @param geneSymbol        the gene symbol
      * @param variantEffects    the variant effects
-     * @param alleleFrequencies the allele frequenceis
+     * @param alleleFrequencies the allele frequencies
      *
      * @return a map of individuals and respective variants
      */
@@ -93,13 +93,6 @@ public interface VariantStoreInterface extends Service
      * @return a map of individuals and respective variants.
      */
     Map<String, List<GAVariant>> getIndividualsWithVariant(String chr, int pos, String ref, String alt);
-
-    /**
-     * Get a list of all the individual IDs stored in the variant store.
-     *
-     * @return a list of individual IDs.
-     */
-    List<String> getIndividuals();
 
     /**
      * Get a set of all known genes for an individual.
@@ -132,7 +125,7 @@ public interface VariantStoreInterface extends Service
     List<GAVariant> getTopHarmfullVariantsForGene(String id, String gene, Integer k);
 
     /**
-     * Get a list of top k harmfull genes for an individual, sorted by harmfulness.
+     * Get a list of top k harmful genes for an individual, sorted by harmfulness.
      *
      * @param id the individual's id
      * @param k  the max number of genes to return
@@ -140,4 +133,11 @@ public interface VariantStoreInterface extends Service
      * @return the list of genes
      */
     List<String> getTopGenesForIndividual(String id, Integer k);
+
+    /**
+     * Get a list of all the individual IDs stored in the variant store.
+     *
+     * @return a list of individual IDs
+     */
+    List<String> getAllIndividuals();
 }

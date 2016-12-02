@@ -23,7 +23,7 @@ package org.phenotips.variantstore.db.solr;
 public final class VariantsSchema
 {
     //  a hash of chrom, pos, ref, alt
-    public static final String HASH = "hash";
+    public static final String ID = "id";
 
     public static final String CHROM = "chrom";
     //  start = pos - 1 (0-indexed)

@@ -24,16 +24,10 @@ import org.phenotips.variantstore.input.VariantIterator;
 import org.phenotips.variantstore.shared.VariantStoreException;
 
 import java.io.IOException;
-import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
-import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -112,30 +106,5 @@ public class ExomiserTSVManager implements InputManager
     @Override
     public VariantIterator getIteratorForIndividual(String id) {
         return getIteratorForIndividual(id, false);
-    }
-
-    @Override
-    public List<String> getAllIndividuals() {
-        final List<String> list = new ArrayList<>();
-
-        try {
-            Files.walkFileTree(this.path, new SimpleFileVisitor<Path>()
-            {
-                @Override
-                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                    if (attrs.isDirectory()) {
-                        return FileVisitResult.CONTINUE;
-                    }
-                    String filename = file.getFileName().toString();
-                    String id = StringUtils.removeEnd(filename, suffix);
-                    list.add(id);
-                    return FileVisitResult.CONTINUE;
-                }
-            });
-        } catch (IOException e) {
-            logger.error("Error getting all individuals", e);
-        }
-
-        return list;
     }
 }

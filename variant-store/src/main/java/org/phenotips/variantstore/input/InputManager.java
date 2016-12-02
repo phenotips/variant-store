@@ -20,7 +20,6 @@ package org.phenotips.variantstore.input;
 import org.phenotips.variantstore.shared.Service;
 
 import java.nio.file.Path;
-import java.util.List;
 
 /**
  * An input handler is responsible for orchestrating the transformation of variant data from one format to a
@@ -67,11 +66,4 @@ public interface InputManager extends Service
      * @return the variant iterator
      */
     VariantIterator getIteratorForIndividual(String id);
-
-    /**
-     * Get All individuals stored in the variant store.
-     *
-     * @return a list of individual IDs
-     */
-    List<String> getAllIndividuals();
 }

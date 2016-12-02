@@ -56,7 +56,7 @@
     <field name="_version_" type="long" indexed="true" stored="true" multiValued="false"/>
 
     <!-- a hash of chrom, pos, ref, alt -->
-    <field name="hash" type="string" indexed="true" stored="true" />
+    <field name="id" type="string" indexed="true" stored="true" />
 
     <field name="chrom" type="string" indexed="true" stored="true" />
     <!-- start = pos - 1 (0-indexed) -->
@@ -116,12 +116,12 @@
     <copyField source="*__exomiser_gene_combined_score" dest="exomiser_gene_combined_score" />
 
 
-    <!-- Ignore everyting else -->
+    <!-- Ignore everything else -->
     <dynamicField name="*" type="ignored" multiValued="true" />
   </fields>
 
   <!-- Field to use to determine and enforce document uniqueness.
        Unless this field is marked with required="false", it will be a required field
     -->
-  <uniqueKey>hash</uniqueKey>
+  <uniqueKey>id</uniqueKey>
 </schema>

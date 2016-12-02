@@ -17,8 +17,8 @@
  */
 package org.phenotips.variantstore.db.solr.tasks;
 
-import org.phenotips.variantstore.db.DatabaseException;
 import org.phenotips.variantstore.db.solr.SolrVariantUtils;
+import org.phenotips.variantstore.db.solr.VariantsSchema;
 import org.phenotips.variantstore.input.VariantIterator;
 import org.phenotips.variantstore.shared.GACallInfoFields;
 import org.phenotips.variantstore.shared.VariantUtils;
@@ -27,10 +27,9 @@ import java.io.IOException;
 import java.util.concurrent.Callable;
 
 import org.apache.solr.client.solrj.SolrClient;
-import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrDocument;
-import org.apache.solr.common.SolrInputDocument;
 import org.ga4gh.GAVariant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,12 +58,13 @@ public class RemoveIndividualTask implements Callable<Object>
     @Override
     public Object call() throws Exception {
         GAVariant variant;
-        SolrQuery q;
         SolrDocument resp;
         SolrDocument doc;
 
         int hashCollisions = 0;
         int hashMisses = 0;
+
+        String individualId = iterator.getHeader().getIndividualId();
 
         while (iterator.hasNext()) {
             variant = iterator.next();
@@ -103,25 +103,21 @@ public class RemoveIndividualTask implements Callable<Object>
             SolrVariantUtils.removeVariantFromDoc(
                     doc,
                     variant,
-                    iterator.getHeader().getIndividualId(),
+                    individualId,
                     iterator.getHeader().isPublic());
+            SolrVariantUtils.addDoc(ClientUtils.toSolrInputDocument(doc), server);
         }
         logger.debug("csv: Hash Collisions: " + hashCollisions);
         logger.debug("csv: Hash Misses: " + hashMisses);
+
+        // removing individual id from the metadata document
+        SolrDocument metaDoc = SolrVariantUtils.getMetaDocument(server);
+        SolrVariantUtils.removeMultiFieldValue(metaDoc, VariantsSchema.CALLSET_IDS, individualId);
+        SolrVariantUtils.addDoc(ClientUtils.toSolrInputDocument(metaDoc), server);
 
         // Solr should commit the fields at it's own optimal pace.
         // We want to commit once at the end to make sure any leftovers in solr buffers are available for querying.
         server.commit(true, true);
         return null;
     }
-
-    private void addDoc(SolrInputDocument doc) throws DatabaseException {
-        try {
-            server.add(doc);
-            doc.clear();
-        } catch (SolrServerException | IOException e) {
-            throw new DatabaseException("Error adding variants to Solr", e);
-        }
-    }
-
 }

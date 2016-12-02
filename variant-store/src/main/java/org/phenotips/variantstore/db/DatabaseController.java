@@ -158,4 +158,11 @@ public interface DatabaseController extends Service
      * @return the list of variants
      */
     List<GAVariant> getTopHarmfullVariantsForGene(String id, String gene, Integer k);
+
+    /**
+     * Get a list of all the individual IDs stored in the variant store.
+     *
+     * @return a list of individual IDs
+     */
+    List<String> getAllIndividuals();
 }

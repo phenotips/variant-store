@@ -89,7 +89,7 @@ public class MockVariantStore implements VariantStoreInterface
     }
 
     @Override
-    public List<String> getIndividuals()
+    public List<String> getAllIndividuals()
     {
         return null;
     }
