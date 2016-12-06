@@ -38,6 +38,7 @@ public enum ExomiserTSVColumn {
     POLYPHEN,
     MUTATIONTASTER,
     SIFT,
+    REMM,
     DBSNP_ID,
     MAX_FREQUENCY,
     DBSNP_FREQUENCY,

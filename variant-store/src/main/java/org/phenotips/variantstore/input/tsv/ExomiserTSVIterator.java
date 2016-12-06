@@ -94,11 +94,8 @@ public class ExomiserTSVIterator extends AbstractVariantIterator
 
         variant.setCalls(Collections.singletonList(call));
 
-        double exacFreq = 0;
-
         int i = 0;
         for (String field : tsvRecordIterator.next()) {
-
             // try to add the field different ways, see what sticks.
             addFieldToVariant(variant, field, i);
             addFieldToVariantInfo(variant, field, i);
@@ -106,17 +103,10 @@ public class ExomiserTSVIterator extends AbstractVariantIterator
             addGenotypeToVariant(call, field, i);
             addFieldToCallInfo(call, field, i);
 
-            exacFreq = getMaxExacFreqFromField(exacFreq, field, i);
-
             i++;
         }
 
-        if (exacFreq != 0) {
-            VariantUtils.addInfo(variant,
-                    GAVariantInfoFields.EXAC_AF, String.valueOf(exacFreq));
-        }
-
-        variant.setEnd(variant.getStart() + variant.getReferenceBases().length());
+        variant.setEnd(variant.getStart() + variant.getReferenceBases().length() - 1);
 
         if (!this.hasNext()) {
             // Cleanup
@@ -157,6 +147,18 @@ public class ExomiserTSVIterator extends AbstractVariantIterator
             case FUNCTIONAL_CLASS:
                 VariantUtils.addInfo(variant, GAVariantInfoFields.GENE_EFFECT, field);
                 break;
+            case MAX_FREQUENCY:
+                double freq = 0.0;
+                if (!".".equals(field)) {
+                    try {
+                        freq = Double.parseDouble(field);
+                    } catch (NumberFormatException e) {
+                        // do nothing, stay with default 0.0 value
+                    }
+                }
+                VariantUtils.addInfo(variant,
+                    GAVariantInfoFields.EXAC_AF, String.valueOf(freq));
+                break;
             default:
         }
     }
@@ -178,6 +180,13 @@ public class ExomiserTSVIterator extends AbstractVariantIterator
                     }
                 }
                 String[] split = field.split(splitter);
+
+                if (".".equals(split[0])) {
+                    //TODO: SHOULD NOT BE DOING THIS.
+                    call.setGenotype(Arrays.asList(0, 0));
+                    break;
+                }
+
                 call.setGenotype(Arrays.asList(Integer.valueOf(split[0]), Integer.valueOf(split[1])));
                 break;
             default:
@@ -207,23 +216,5 @@ public class ExomiserTSVIterator extends AbstractVariantIterator
                 break;
             default:
         }
-    }
-
-    private double getMaxExacFreqFromField(double exacFreq, String field, int i) {
-        switch (columns[i]) {
-            case EXAC_AFR_FREQ:
-            case EXAC_AMR_FREQ:
-            case EXAC_EAS_FREQ:
-            case EXAC_FIN_FREQ:
-            case EXAC_NFE_FREQ:
-            case EXAC_SAS_FREQ:
-            case EXAC_OTH_FREQ:
-                if (!".".equals(field)) {
-                    return Math.max(exacFreq, Double.parseDouble(field));
-                }
-                break;
-            default:
-        }
-        return 0;
     }
 }
