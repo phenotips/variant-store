@@ -106,7 +106,7 @@ public class Exomiser6TSVIterator extends AbstractVariantIterator
             i++;
         }
 
-        variant.setEnd(variant.getStart() + variant.getReferenceBases().length());
+        variant.setEnd(variant.getStart() + variant.getReferenceBases().length() - 1);
 
         if (!this.hasNext()) {
             // Cleanup
