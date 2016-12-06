@@ -38,7 +38,6 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.util.StrUtils;
-import org.apache.solr.update.processor.Lookup3Signature;
 import org.ga4gh.GACall;
 import org.ga4gh.GAVariant;
 
@@ -312,13 +311,10 @@ public final class SolrVariantUtils
      * @return the signature
      */
     public static String getHash(GAVariant variant) {
-        Lookup3Signature signatureBuilder = new Lookup3Signature();
-        signatureBuilder.add(variant.getReferenceName());
-        signatureBuilder.add(variant.getStart().toString());
-        signatureBuilder.add(variant.getReferenceBases());
-        signatureBuilder.add(variant.getAlternateBases().get(0));
-
-        return byteArrayToString(signatureBuilder.getSignature());
+        return variant.getReferenceName() + ":"
+            + variant.getStart().toString() + ":"
+            + variant.getReferenceBases() + ":"
+            + variant.getAlternateBases().get(0);
     }
 
     /**
