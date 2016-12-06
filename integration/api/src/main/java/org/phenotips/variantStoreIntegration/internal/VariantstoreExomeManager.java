@@ -25,7 +25,6 @@ import org.phenotips.variantStoreIntegration.VariantStoreService;
 import org.xwiki.component.annotation.Component;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 /**
@@ -36,7 +35,6 @@ import javax.inject.Singleton;
  * @since 1.0M6
  */
 @Component
-@Named("variantstore")
 @Singleton
 public class VariantstoreExomeManager implements ExomeManager
 {
