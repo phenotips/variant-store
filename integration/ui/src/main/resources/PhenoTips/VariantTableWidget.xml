@@ -153,8 +153,8 @@
         annotations : {
           geneSymbol : The symbol of the gene to which this variant belongs,
           geneScore : The exomiser combined harmfulness score of the gene,
-        },
-        "exacAF" : The allele frequency of the variant in the Exome Aggregation Consortium (ExAC) dataset
+          exacAF : The allele frequency of the variant in the Exome Aggregation Consortium (ExAC) dataset
+        }
       }
 
     @param container the HTML element you would like the table to be contained within. div is recommended.
@@ -353,7 +353,7 @@
     displayAF : function(key, variant) {
       var af = this.Utils.deepFind(variant, key);
       var cell = new Element('td');
-      if (af) {
+      if (!isNaN(af)) {
         cell.insert(af);
       } else {
         cell.insert(this.Strings['message.EmptyInFo']);
@@ -363,7 +363,7 @@
 
     Utils :{
       deepFind : function (variant, key) {
-        return variant[key] || variant.annotations[key];
+        return (variant.hasOwnProperty(key)) ? variant[key] : variant.annotations[key];
       }
     },
 
