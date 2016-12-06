@@ -125,7 +125,7 @@
 
     @param columns Specify which columns to display in the table. The columns will be displayed in the order they are listed. The currently supported columns are:
       [
-      "UCSC_POSITION_LINK", ##Link is displayed as chr?:????-?????
+      "UCSC_POSITION_LINK", ##Link is displayed as ?:????-?????
       "B_UCSC_POSITION_LINK", ##Same as previous but displayed as a PhenoTips secondary action button
       "referenceName",
       "start",
@@ -332,7 +332,7 @@
         } else {
           var positionText = this.Strings["snvPositionPhrase"].replace("__CHROMOSOME__", variant.referenceName.toUpperCase()).replace("__START__", start);
         }
-        var positionURLFragment = variant.referenceName.toUpperCase() + ": " + start + "-" + end;
+        var positionURLFragment = "chr" + variant.referenceName.toUpperCase() + ":" + start + "-" + end;
         var assembly = variant.assembly || "hg19";
         var position = new Element('a', {
           'href': 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=' + assembly + '&amp;position=' + encodeURIComponent(positionURLFragment),
