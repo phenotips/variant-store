@@ -33,6 +33,21 @@
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
+      <artifactId>variant-store</artifactId>
+      <version>${variantStore.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>patient-similarity-data-api</artifactId>
+      <version>${patientNetwork.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>patient-similarity-data-impl</artifactId>
+      <version>${patientNetwork.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
       <artifactId>patient-data-api</artifactId>
       <version>${phenotips.version}</version>
     </dependency>
@@ -103,21 +118,6 @@
     <dependency>
       <groupId>org.json</groupId>
       <artifactId>json</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>patient-similarity-data-api</artifactId>
-      <version>${patientNetwork.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>patient-similarity-data-impl</artifactId>
-      <version>${patientNetwork.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>variant-store</artifactId>
-      <version>${variantStore.version}</version>
     </dependency>
     <!-- Test dependencies -->
     <dependency>
