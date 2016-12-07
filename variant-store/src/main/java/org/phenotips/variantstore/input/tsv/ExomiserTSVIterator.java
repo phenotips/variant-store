@@ -17,204 +17,76 @@
  */
 package org.phenotips.variantstore.input.tsv;
 
-import org.phenotips.variantstore.input.AbstractVariantIterator;
 import org.phenotips.variantstore.input.VariantHeader;
 import org.phenotips.variantstore.shared.GACallInfoFields;
 import org.phenotips.variantstore.shared.GAVariantInfoFields;
 import org.phenotips.variantstore.shared.VariantUtils;
 
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.Reader;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
 
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVRecord;
 import org.ga4gh.GACall;
 import org.ga4gh.GAVariant;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
- * Parse the `*.variants.tsv` files returned by [Exomiser](http://www.sanger.ac.uk/science/tools/exomiser). Expose each
- * line as a ga4gh GAVariant object.
+ * Parse the `*.variants.tsv` files returned by [Exomiser 7.2.2](http://www.sanger.ac.uk/science/tools/exomiser).
+ * Expose each line as a ga4gh GAVariant object.
  *
  * @version $Id$
  */
-public class ExomiserTSVIterator extends AbstractVariantIterator
+public class ExomiserTSVIterator extends AbstractTSVIterator
 {
-    private static ExomiserTSVColumn[] columns = ExomiserTSVColumn.values();
-
-    private Logger logger = LoggerFactory.getLogger(ExomiserTSVIterator.class);
-    private CSVParser tsvParser;
-    private Iterator<CSVRecord> tsvRecordIterator;
+    private double maxExacFreq;
 
     /**
-     * Create a new TSV iterator for files output by Exomiser.
+     * Create a new iterator over Exomiser TSVs.
      *
      * @param path          the path to the file
      * @param variantHeader the header with file meta-information
      */
     public ExomiserTSVIterator(Path path, VariantHeader variantHeader) {
         super(path, variantHeader);
-
-        Reader reader = null;
-        try {
-            reader = new FileReader(this.path.toString());
-            this.tsvParser = CSVFormat.TDF.parse(reader);
-        } catch (IOException e) {
-            logger.error(String.format("Error when opening file %s, this should NOT be happening", this.path), e);
-        }
-
-        this.tsvRecordIterator = tsvParser.iterator();
-        // skip first row >.>
-        if (this.hasNext()) {
-            tsvRecordIterator.next();
-        }
     }
 
-    @Override
-    public boolean hasNext() {
-        return this.tsvRecordIterator.hasNext();
+    protected void finalizeVariant(GAVariant variant) {
+        super.finalizeVariant(variant);
+        VariantUtils.addInfo(variant, GAVariantInfoFields.EXAC_AF, String.valueOf(maxExacFreq));
     }
 
-    @Override
-    public GAVariant next() {
-        if (!this.hasNext()) {
-            throw new NoSuchElementException();
-        }
-
-        GAVariant variant = new GAVariant();
-        GACall call = new GACall();
-
-        variant.setCalls(Collections.singletonList(call));
-
-        int i = 0;
-        for (String field : tsvRecordIterator.next()) {
-            // try to add the field different ways, see what sticks.
-            addFieldToVariant(variant, field, i);
-            addFieldToVariantInfo(variant, field, i);
-
-            addGenotypeToVariant(call, field, i);
-            addFieldToCallInfo(call, field, i);
-
-            i++;
-        }
-
-        variant.setEnd(variant.getStart() + variant.getReferenceBases().length() - 1);
-
-        if (!this.hasNext()) {
-            // Cleanup
-            try {
-                tsvParser.close();
-            } catch (IOException e) {
-                logger.error(String.format("Error when closing file %s", this.path), e);
-            }
-        }
-
-        return variant;
-    }
-
-    private void addFieldToVariant(GAVariant variant, String field, int i) {
-        switch (columns[i]) {
-            case CHROM:
-                variant.setReferenceName(field);
-                break;
-            case POS:
-                // GA4GH uses 0-based indexing, unlike TSV's 1-based.
-                variant.setStart(Long.valueOf(field) - 1);
-                break;
-            case REF:
-                variant.setReferenceBases(field);
-                break;
-            case ALT:
-                variant.setAlternateBases(Arrays.asList(field.split(",")));
-                break;
-            default:
-        }
-    }
-
-    private void addFieldToVariantInfo(GAVariant variant, String field, int i) {
-        switch (columns[i]) {
-            case EXOMISER_GENE:
+    protected void processField(GAVariant variant, GACall call, String column, String field) {
+        switch (column) {
+            case "EXOMISER_GENE":
                 VariantUtils.addInfo(variant, GAVariantInfoFields.GENE, field);
                 break;
-            case FUNCTIONAL_CLASS:
+            case "FUNCTIONAL_CLASS":
                 VariantUtils.addInfo(variant, GAVariantInfoFields.GENE_EFFECT, field);
                 break;
-            case MAX_FREQUENCY:
-                double freq = 0.0;
-                if (!".".equals(field)) {
-                    try {
-                        freq = Double.parseDouble(field);
-                    } catch (NumberFormatException e) {
-                        // do nothing, stay with default 0.0 value
-                    }
+            case "EXAC_AFR_FREQ":
+            case "EXAC_AMR_FREQ":
+            case "EXAC_EAS_FREQ":
+            case "EXAC_FIN_FREQ":
+            case "EXAC_NFE_FREQ":
+            case "EXAC_SAS_FREQ":
+            case "EXAC_OTH_FREQ":
+                try {
+                    maxExacFreq = Math.max(maxExacFreq, Double.parseDouble(field));
+                } catch (NumberFormatException e) {
+                    // do nothing, stay with default 0.0 value
                 }
-                VariantUtils.addInfo(variant,
-                    GAVariantInfoFields.EXAC_AF, String.valueOf(freq));
                 break;
-            default:
-        }
-    }
-
-
-    private void addGenotypeToVariant(GACall call, String field, int i) {
-        switch (columns[i]) {
-            case GENOTYPE:
-                String splitter = "/";
-                String phasedSplitter = "|";
-                if (!field.contains(splitter)) {
-                    if (field.contains(phasedSplitter)) {
-                        // phased
-                        splitter = phasedSplitter;
-                    } else {
-                        //TODO: SHOULD NOT BE DOING THIS.
-                        call.setGenotype(Arrays.asList(0, 0));
-                        break;
-                    }
-                }
-                String[] split = field.split(splitter);
-
-                if (".".equals(split[0])) {
-                    //TODO: SHOULD NOT BE DOING THIS.
-                    call.setGenotype(Arrays.asList(0, 0));
-                    break;
-                }
-
-                call.setGenotype(Arrays.asList(Integer.valueOf(split[0]), Integer.valueOf(split[1])));
-                break;
-            default:
-        }
-    }
-
-
-    private void addFieldToCallInfo(GACall call, String field, int i) {
-        switch (columns[i]) {
-            case QUAL:
-                VariantUtils.addInfo(call, GACallInfoFields.QUALITY, field);
-                break;
-            case FILTER:
-                VariantUtils.addInfo(call, GACallInfoFields.FILTER, field);
-                break;
-            case EXOMISER_VARIANT_SCORE:
+            case "EXOMISER_VARIANT_SCORE":
                 VariantUtils.addInfo(call, GACallInfoFields.EXOMISER_VARIANT_SCORE, field);
                 break;
-            case EXOMISER_GENE_PHENO_SCORE:
+            case "EXOMISER_GENE_PHENO_SCORE":
                 VariantUtils.addInfo(call, GACallInfoFields.EXOMISER_GENE_PHENO_SCORE, field);
                 break;
-            case EXOMISER_GENE_COMBINED_SCORE:
+            case "EXOMISER_GENE_COMBINED_SCORE":
                 VariantUtils.addInfo(call, GACallInfoFields.EXOMISER_GENE_COMBINED_SCORE, field);
                 break;
-            case EXOMISER_GENE_VARIANT_SCORE:
+            case "EXOMISER_GENE_VARIANT_SCORE":
                 VariantUtils.addInfo(call, GACallInfoFields.EXOMISER_GENE_VARIANT_SCORE, field);
                 break;
             default:
+                super.processField(variant, call, column, field);
         }
     }
 }

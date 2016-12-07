@@ -15,21 +15,22 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see http://www.gnu.org/licenses/
  */
-package org.phenotips.variantstore.input.exomiser6.tsv;
+package org.phenotips.variantstore.input.tsv;
 
 import org.phenotips.variantstore.input.AbstractVariantIterator;
 import org.phenotips.variantstore.input.VariantHeader;
 import org.phenotips.variantstore.shared.GACallInfoFields;
-import org.phenotips.variantstore.shared.GAVariantInfoFields;
 import org.phenotips.variantstore.shared.VariantUtils;
 
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 import org.apache.commons.csv.CSVFormat;
@@ -41,26 +42,25 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Parse the `*.variants.tsv` files returned by [Exomiser](http://www.sanger.ac.uk/science/tools/exomiser). Expose each
- * line as a ga4gh GAVariant object.
+ * Parse variants from TSV files, such as those returned by [Exomiser](http://www.sanger.ac.uk/science/tools/exomiser).
+ * Expose each line as a ga4gh GAVariant object.
  *
  * @version $Id$
  */
-public class Exomiser6TSVIterator extends AbstractVariantIterator
+public abstract class AbstractTSVIterator extends AbstractVariantIterator
 {
-    private static Exomiser6TSVColumn[] columns = Exomiser6TSVColumn.values();
-
-    private Logger logger = LoggerFactory.getLogger(Exomiser6TSVIterator.class);
+    private Logger logger = LoggerFactory.getLogger(AbstractTSVIterator.class);
     private CSVParser tsvParser;
     private Iterator<CSVRecord> tsvRecordIterator;
+    private List<String> columns;
 
     /**
-     * Create a new TSV iterator for files output by Exomiser.
+     * Create a new TSV iterator for files, such as those outputted by Exomiser.
      *
      * @param path          the path to the file
      * @param variantHeader the header with file meta-information
      */
-    public Exomiser6TSVIterator(Path path, VariantHeader variantHeader) {
+    public AbstractTSVIterator(Path path, VariantHeader variantHeader) {
         super(path, variantHeader);
 
         Reader reader = null;
@@ -72,9 +72,13 @@ public class Exomiser6TSVIterator extends AbstractVariantIterator
         }
 
         this.tsvRecordIterator = tsvParser.iterator();
-        // skip first row >.>
+        // Read column names
         if (this.hasNext()) {
-            tsvRecordIterator.next();
+            this.columns = new ArrayList<String>();
+            for (String field : tsvRecordIterator.next()) {
+                // Remove leading hashes
+                columns.add(field.replaceAll("^#+", ""));
+            }
         }
     }
 
@@ -94,19 +98,14 @@ public class Exomiser6TSVIterator extends AbstractVariantIterator
 
         variant.setCalls(Collections.singletonList(call));
 
+        initializeVariant(variant);
         int i = 0;
         for (String field : tsvRecordIterator.next()) {
-            // try to add the field different ways, see what sticks.
-            addFieldToVariant(variant, field, i);
-            addFieldToVariantInfo(variant, field, i);
-
-            addGenotypeToVariant(call, field, i);
-            addFieldToCallInfo(call, field, i);
-
+            String column = columns.get(i);
+            processField(variant, call, column, field);
             i++;
         }
-
-        variant.setEnd(variant.getStart() + variant.getReferenceBases().length() - 1);
+        finalizeVariant(variant);
 
         if (!this.hasNext()) {
             // Cleanup
@@ -120,53 +119,30 @@ public class Exomiser6TSVIterator extends AbstractVariantIterator
         return variant;
     }
 
-    private void addFieldToVariant(GAVariant variant, String field, int i) {
-        switch (columns[i]) {
-            case CHROM:
+    protected void initializeVariant(GAVariant variant) {
+
+    }
+
+    protected void finalizeVariant(GAVariant variant) {
+        variant.setEnd(variant.getStart() + variant.getReferenceBases().length() - 1);
+    }
+
+    protected void processField(GAVariant variant, GACall call, String column, String field) {
+        switch (column) {
+            case "CHROM":
                 variant.setReferenceName(field);
                 break;
-            case POS:
+            case "POS":
                 // GA4GH uses 0-based indexing, unlike TSV's 1-based.
                 variant.setStart(Long.valueOf(field) - 1);
                 break;
-            case REF:
+            case "REF":
                 variant.setReferenceBases(field);
                 break;
-            case ALT:
+            case "ALT":
                 variant.setAlternateBases(Arrays.asList(field.split(",")));
                 break;
-            default:
-        }
-    }
-
-    private void addFieldToVariantInfo(GAVariant variant, String field, int i) {
-        switch (columns[i]) {
-            case EXOMISER_GENE:
-                VariantUtils.addInfo(variant, GAVariantInfoFields.GENE, field);
-                break;
-            case FUNCTIONAL_CLASS:
-                VariantUtils.addInfo(variant, GAVariantInfoFields.GENE_EFFECT, field);
-                break;
-            case MAX_FREQUENCY:
-                double freq = 0.0;
-                if (!".".equals(field)) {
-                    try {
-                        freq = Double.parseDouble(field);
-                    } catch (NumberFormatException e) {
-                        // do nothing, stay with default 0.0 value
-                    }
-                }
-                VariantUtils.addInfo(variant,
-                    GAVariantInfoFields.EXAC_AF, String.valueOf(freq));
-                break;
-            default:
-        }
-    }
-
-
-    private void addGenotypeToVariant(GACall call, String field, int i) {
-        switch (columns[i]) {
-            case GENOTYPE:
+            case "GENOTYPE":
                 String splitter = "/";
                 String phasedSplitter = "|";
                 if (!field.contains(splitter)) {
@@ -189,30 +165,11 @@ public class Exomiser6TSVIterator extends AbstractVariantIterator
 
                 call.setGenotype(Arrays.asList(Integer.valueOf(split[0]), Integer.valueOf(split[1])));
                 break;
-            default:
-        }
-    }
-
-
-    private void addFieldToCallInfo(GACall call, String field, int i) {
-        switch (columns[i]) {
-            case QUAL:
+            case "QUAL":
                 VariantUtils.addInfo(call, GACallInfoFields.QUALITY, field);
                 break;
-            case FILTER:
+            case "FILTER":
                 VariantUtils.addInfo(call, GACallInfoFields.FILTER, field);
-                break;
-            case EXOMISER_VARIANT_SCORE:
-                VariantUtils.addInfo(call, GACallInfoFields.EXOMISER_VARIANT_SCORE, field);
-                break;
-            case EXOMISER_GENE_PHENO_SCORE:
-                VariantUtils.addInfo(call, GACallInfoFields.EXOMISER_GENE_PHENO_SCORE, field);
-                break;
-            case EXOMISER_GENE_COMBINED_SCORE:
-                VariantUtils.addInfo(call, GACallInfoFields.EXOMISER_GENE_COMBINED_SCORE, field);
-                break;
-            case EXOMISER_GENE_VARIANT_SCORE:
-                VariantUtils.addInfo(call, GACallInfoFields.EXOMISER_GENE_VARIANT_SCORE, field);
                 break;
             default:
         }
