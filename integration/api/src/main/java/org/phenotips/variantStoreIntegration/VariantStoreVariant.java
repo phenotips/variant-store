@@ -64,6 +64,7 @@ public class VariantStoreVariant extends AbstractVariant
 
         setAnnotation("geneScore", VariantUtils.getInfo(call, GACallInfoFields.EXOMISER_GENE_COMBINED_SCORE));
         setAnnotation("geneSymbol", VariantUtils.getInfo(gaVariant, GAVariantInfoFields.GENE));
+        setAnnotation("hgvs", VariantUtils.getInfo(gaVariant, GAVariantInfoFields.GENE_HGVS));
         setAnnotation("exacAF", VariantUtils.getInfo(gaVariant, GAVariantInfoFields.EXAC_AF));
         setAnnotation("gtHet", VariantUtils.getInfo(gaVariant, GAVariantInfoFields.GT_HET));
         setAnnotation("gtHom", VariantUtils.getInfo(gaVariant, GAVariantInfoFields.GT_HOM));

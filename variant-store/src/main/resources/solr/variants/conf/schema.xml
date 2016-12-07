@@ -73,6 +73,7 @@
     <!-- Fields with a single value per variant (chrom, pos, ref, alt) -->
     <field name="gene" type="string" indexed="true" stored="true"/>
     <field name="gene_effect" type="string" indexed="true" stored="true"/>
+    <field name="gene_hgvs" type="string" indexed="true" stored="true"/>
     <field name="exac_af" type="string" indexed="true" stored="true" />
     <!-- aggregate statistics -->
     <field name="ac_tot" type="int" indexed="true" stored="true" />

@@ -60,6 +60,9 @@ public class ExomiserTSVIterator extends AbstractTSVIterator
             case "FUNCTIONAL_CLASS":
                 VariantUtils.addInfo(variant, GAVariantInfoFields.GENE_EFFECT, field);
                 break;
+            case "HGVS":
+                VariantUtils.addInfo(variant, GAVariantInfoFields.GENE_HGVS, field);
+                break;
             case "EXAC_AFR_FREQ":
             case "EXAC_AMR_FREQ":
             case "EXAC_EAS_FREQ":

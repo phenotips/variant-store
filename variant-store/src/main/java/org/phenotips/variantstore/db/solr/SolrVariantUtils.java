@@ -132,6 +132,7 @@ public final class SolrVariantUtils
 
         addInfo(variant, GAVariantInfoFields.GENE, doc.get(VariantsSchema.GENE));
         addInfo(variant, GAVariantInfoFields.GENE_EFFECT, doc.get(VariantsSchema.GENE_EFFECT));
+        addInfo(variant, GAVariantInfoFields.GENE_HGVS, doc.get(VariantsSchema.GENE_HGVS));
 
         if (doc.containsKey(VariantsSchema.EXAC_AF)) {
             addInfo(variant, GAVariantInfoFields.EXAC_AF, doc.get(VariantsSchema.EXAC_AF));
@@ -208,6 +209,7 @@ public final class SolrVariantUtils
 
         doc.setField(VariantsSchema.GENE, getInfo(variant, GAVariantInfoFields.GENE));
         doc.setField(VariantsSchema.GENE_EFFECT, getInfo(variant, GAVariantInfoFields.GENE_EFFECT));
+        doc.setField(VariantsSchema.GENE_HGVS, getInfo(variant, GAVariantInfoFields.GENE_HGVS));
 
         doc.setField(VariantsSchema.EXAC_AF, safeValueOf(getInfo(variant, GAVariantInfoFields.EXAC_AF)));
 
