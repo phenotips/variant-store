@@ -70,7 +70,7 @@ public class VariantStoreVariant extends AbstractVariant
 
         if (totIndividuals != null) {
             value = VariantUtils.getInfo(gaVariant, GAVariantInfoFields.AC_TOT);
-            Double pcAF = Double.valueOf(value) / totIndividuals * 2;
+            Double pcAF = Double.valueOf(value) / (totIndividuals * 2);
             setAnnotation("pcAF", pcAF.toString());
         }
     }
