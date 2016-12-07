@@ -19,18 +19,15 @@ package org.phenotips.variantstore.db.solr.tasks;
 
 import org.phenotips.variantstore.db.solr.SolrVariantUtils;
 import org.phenotips.variantstore.db.solr.VariantsSchema;
-import org.phenotips.variantstore.input.VariantIterator;
-import org.phenotips.variantstore.shared.GACallInfoFields;
-import org.phenotips.variantstore.shared.VariantUtils;
 
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.Callable;
 
 import org.apache.solr.client.solrj.SolrClient;
-import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrDocument;
-import org.ga4gh.GAVariant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,79 +37,54 @@ import org.slf4j.LoggerFactory;
 public class RemoveIndividualTask implements Callable<Object>
 {
 
-    private final VariantIterator iterator;
+    private final Iterator<SolrDocument> iterator;
     private Logger logger = LoggerFactory.getLogger(getClass());
     private SolrClient server;
+    private final String individualId;
 
     /**
      * Remove an individual from solr.
      *
-     * @param server   the solr server to run the task on
-     * @param iterator an iterator of the individual's variants
+     * @param server    the solr server to run the task on
+     * @param iterator  an iterator of the individual's variants
+     * @param id the individual id
      */
-    public RemoveIndividualTask(SolrClient server, VariantIterator iterator) {
+    public RemoveIndividualTask(SolrClient server, Iterator<SolrDocument> iterator, String id) {
         this.server = server;
         this.iterator = iterator;
+        this.individualId = id;
     }
 
     @Override
     public Object call() throws Exception {
-        GAVariant variant;
-        SolrDocument resp;
+
         SolrDocument doc;
 
-        int hashCollisions = 0;
-        int hashMisses = 0;
-
-        String individualId = iterator.getHeader().getIndividualId();
+        /*
+         * 1. Find all docs that have our individualId in the callsetIds
+         * 2. For each doc, remove all traces of the individual:
+         *   a. if this individual is the only individual, remove the doc
+         *   b. remove callset from doc
+         */
 
         while (iterator.hasNext()) {
-            variant = iterator.next();
+            doc = iterator.next();
 
-            // skip filter!= PASS
-            if (!"PASS".equals(VariantUtils.getInfo(variant.getCalls().get(0), GACallInfoFields.FILTER))) {
-                continue;
-            }
-
-            /**
-             * Query Solr for existing variant
-             */
-            String hash = SolrVariantUtils.getHash(variant);
-
-            resp = null;
-            try {
-                resp = server.getById(hash);
-            } catch (SolrServerException | IOException e) {
-                logger.error("Failed to check for an existing variant", e);
-                continue;
-            }
-
-            if (resp == null) {
-                // our variant is totally new. how did this happen?
-                logger.debug("variant not found");
-                hashMisses += 1;
-                continue;
-            }
-
-            // found a doc, use it.
-            doc = resp;
             doc.remove("_version_");
-            server.deleteById(hash);
-            hashCollisions++;
+            server.deleteById((String) doc.get("id"));
 
-            SolrVariantUtils.removeVariantFromDoc(
-                    doc,
-                    variant,
-                    individualId,
-                    iterator.getHeader().isPublic());
+            List<Object> values = new ArrayList<>(doc.getFieldValues(VariantsSchema.CALLSET_IDS));
+            if (values.size() == 1) {
+                continue;
+            }
+
+            SolrVariantUtils.removeCallsetFromDoc(doc, this.individualId);
             SolrVariantUtils.addDoc(ClientUtils.toSolrInputDocument(doc), server);
         }
-        logger.debug("csv: Hash Collisions: " + hashCollisions);
-        logger.debug("csv: Hash Misses: " + hashMisses);
 
         // removing individual id from the metadata document
         SolrDocument metaDoc = SolrVariantUtils.getMetaDocument(server);
-        SolrVariantUtils.removeMultiFieldValue(metaDoc, VariantsSchema.CALLSET_IDS, individualId);
+        SolrVariantUtils.removeMultiFieldValue(metaDoc, VariantsSchema.CALLSET_IDS, this.individualId);
         SolrVariantUtils.addDoc(ClientUtils.toSolrInputDocument(metaDoc), server);
 
         // Solr should commit the fields at it's own optimal pace.

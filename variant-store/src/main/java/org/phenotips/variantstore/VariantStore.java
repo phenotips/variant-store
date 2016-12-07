@@ -89,8 +89,10 @@ public class VariantStore implements VariantStoreInterface
 
     @Override
     public Future removeIndividual(String id) throws VariantStoreException {
+        // delete file
         this.inputManager.removeIndividual(id);
-        return this.db.removeIndividual(this.inputManager.getIteratorForIndividual(id));
+        // update variants in db
+        return this.db.removeIndividual(id);
     }
 
     @Override

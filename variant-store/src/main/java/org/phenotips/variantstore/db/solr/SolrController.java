@@ -24,8 +24,6 @@ import org.phenotips.variantstore.db.solr.tasks.RemoveIndividualTask;
 import org.phenotips.variantstore.input.VariantIterator;
 import org.phenotips.variantstore.shared.ResourceManager;
 
-import static org.phenotips.variantstore.db.solr.SolrVariantUtils.documentListToMapList;
-
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -33,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -127,9 +126,10 @@ public class SolrController extends AbstractDatabaseController
     }
 
     @Override
-    public Future removeIndividual(VariantIterator iterator) throws DatabaseException {
-        FutureTask task = new FutureTask<>(new RemoveIndividualTask(server, iterator));
+    public Future removeIndividual(String id) throws DatabaseException {
+        Iterator<SolrDocument> iterator = getAllVariantsDocumentsForIndividual(id).iterator();
 
+        FutureTask task = new FutureTask<>(new RemoveIndividualTask(server, iterator, id));
         executor.submit(task);
 
         return task;
@@ -165,7 +165,7 @@ public class SolrController extends AbstractDatabaseController
             return list;
         }
         // Filter the variants further, to pull out each individual's variant.
-        List<Map<String, GAVariant>> mapList = documentListToMapList(resp.getResults());
+        List<Map<String, GAVariant>> mapList = SolrVariantUtils.documentListToMapList(resp.getResults());
         for (Map<String, GAVariant> map : mapList) {
             if (map.containsKey(id)) {
                 list.add(map.get(id));
