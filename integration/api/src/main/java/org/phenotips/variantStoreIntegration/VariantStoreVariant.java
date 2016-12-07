@@ -40,7 +40,7 @@ public class VariantStoreVariant extends AbstractVariant
      * org.phenotips.variantstore.VariantStoreInterface}.
      *
      * @param gaVariant a {@link GAVariant}
-     * @param totIndividuals number of all the individual IDs stored in the variant store
+     * @param totIndividuals number of individuals stored in the variant store
      */
     public VariantStoreVariant(GAVariant gaVariant, Integer totIndividuals) {
         setChrom(gaVariant.getReferenceName());
