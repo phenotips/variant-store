@@ -96,6 +96,24 @@ public final class SolrVariantUtils
     }
 
     /**
+     * Add the documents in a SolrDocumentList to a list of GAVariants for the individual ID.
+     *
+     * @param documentList the SolrDocumentList
+     * @param callsetId the individual id
+     *
+     * @return the list of GAVariants
+     */
+    public static List<GAVariant> documentListToGAVarintList(SolrDocumentList documentList, String callsetId) {
+        List<GAVariant> list = new ArrayList<>();
+
+        for (SolrDocument doc : documentList) {
+            list.add(docToVariant(doc, callsetId));
+        }
+
+        return list;
+    }
+
+    /**
      * Get all the individual variants out of a doc.
      *
      * @param doc the doc

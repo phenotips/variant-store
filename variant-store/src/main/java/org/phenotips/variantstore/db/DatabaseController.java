@@ -165,4 +165,13 @@ public interface DatabaseController extends Service
      * @return a list of individual IDs
      */
     List<String> getAllIndividuals();
+
+    /**
+     * Get a list of all variants for the individual ID stored in the variant store.
+     *
+     * @param id   the individual
+     *
+     * @return the list of variants
+     */
+    List<GAVariant> getAllVariantsForIndividual(String id);
 }

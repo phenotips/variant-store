@@ -533,4 +533,23 @@ public class SolrController extends AbstractDatabaseController
         return ids;
     }
 
+    @Override
+    public List<GAVariant> getAllVariantsForIndividual(String id) {
+        return SolrVariantUtils.documentListToGAVarintList(getAllVariantsDocumentsForIndividual(id), id);
+    }
+
+    private SolrDocumentList getAllVariantsDocumentsForIndividual(String id) {
+        checkArgument(!id.isEmpty());
+        String queryString = String.format("%s:%s ", VariantsSchema.CALLSET_IDS, id);
+        SolrQuery q = new SolrQuery().setQuery(queryString);
+
+        QueryResponse resp = null;
+        try {
+            resp = server.query(q);
+        } catch (SolrServerException | IOException e) {
+            logger.error("Error getting variants for individual with id " + id, e);
+        }
+
+        return resp.getResults();
+    }
 }
