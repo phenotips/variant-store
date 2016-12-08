@@ -38,15 +38,23 @@
   <content>{{velocity wiki='false'}}
 #if ($request.getMethod() == 'POST')
   $response.setContentType('application/json')
-  #if ($request.getParameter("action") == "upload")
-    #set ($result = $services.VCFStorage.upload($request.getParameter("individualId"), $request.getParameter("path")))
-  #else
-    #if ($request.getParameter("action") == "remove")
+  #if ($request.getParameter("individualId") &amp;&amp; "$request.getParameter('individualId')" != '')
+    #if ($request.getParameter("action") == "upload")
+      #set ($result = $services.VCFStorage.upload($request.getParameter("individualId"), $request.getParameter("path")))
+      $response.setStatus($result.get('status'))
+      $result
+    #elseif ($request.getParameter("action") == "remove")
       #set ($result = $services.VCFStorage.removeVCF($request.getParameter("individualId")))
+      $response.setStatus($result.get('status'))
+      $result
+    #else
+      $response.setStatus(400)
+      {"error" : "Please specify an upload or remove action."}
     #end
+  #else
+    $response.setStatus(400)
+    {"error" : "Patient individual identifier not specified."}
   #end
-  $response.setStatus($result.get('status'))
-  $result
 #else
   $services.VCFStorage.getUploadedPatients()
 #end
