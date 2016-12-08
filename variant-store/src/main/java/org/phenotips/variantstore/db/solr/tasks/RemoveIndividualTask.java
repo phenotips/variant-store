@@ -70,7 +70,6 @@ public class RemoveIndividualTask implements Callable<Object>
         while (iterator.hasNext()) {
             doc = iterator.next();
 
-            doc.remove("_version_");
             server.deleteById((String) doc.get("id"));
 
             List<Object> values = new ArrayList<>(doc.getFieldValues(VariantsSchema.CALLSET_IDS));
@@ -78,6 +77,7 @@ public class RemoveIndividualTask implements Callable<Object>
                 continue;
             }
 
+            doc.remove("_version_");
             SolrVariantUtils.removeCallsetFromDoc(doc, this.individualId);
             SolrVariantUtils.addDoc(ClientUtils.toSolrInputDocument(doc), server);
         }

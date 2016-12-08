@@ -387,8 +387,6 @@ public final class SolrVariantUtils
 
     private static void removeCallsetField(SolrDocument doc, String callsetId, String fieldName) {
         doc.removeFields(VariantsSchema.getCallsetsFieldName(callsetId, fieldName));
-        // since callset fields are copied to multivalued fields, we need to remove that too.
-        // removeMultiFieldValue(doc, fieldName, value);
     }
 
     /**
