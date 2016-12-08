@@ -462,8 +462,8 @@
       $xwiki.ssx.use('PhenoTips.VariantDisplay')##
       $xwiki.jsx.use('PhenoTips.VariantTableWidget', {'minify' : false})##
       $xwiki.ssx.use('PhenoTips.VariantTableWidget')##
-      === Top genes in VCF ===
-      {{html clean=false}}&lt;p class=box hint"&gt;Gene scores are computed from the uploaded VCF file and patient phenotypes using &lt;a href="http://www.sanger.ac.uk/resources/software/exomiser/" target="_blank"&gt;the Exomiser&lt;/a&gt;. Each score reflects the phenotypic relevance of the gene and the harmfulness and allele frequency of the variants.&lt;/p&gt;
+      === $services.localization.render('phenotips.variantDisplay.topGenes.header') ===
+      {{html clean=false}}&lt;p class=box hint"&gt;$services.localization.render('phenotips.variantDisplay.topGenes.hint.exomiser') &lt;a href="http://www.sanger.ac.uk/resources/software/exomiser/" target="_blank"&gt;the Exomiser&lt;/a&gt;. $services.localization.render('phenotips.variantDisplay.topGenes.hint.score')&lt;/p&gt;
 &lt;div id="variant_display_container"&gt;&lt;/div&gt;{{/html}}##
 #end
 {{/velocity}}
