@@ -289,7 +289,9 @@ public final class SolrVariantUtils
     public static void addMultiFieldValue(SolrDocument doc, String key, Object value) {
         // clone array, sometimes it's unmodifiable
         List<Object> values = new ArrayList<>(doc.getFieldValues(key));
-        values.add(value);
+        if (!values.contains(value)) {
+            values.add(value);
+        }
         doc.setField(key, values);
     }
 

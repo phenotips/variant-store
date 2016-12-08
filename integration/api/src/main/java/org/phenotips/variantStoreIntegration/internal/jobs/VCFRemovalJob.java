@@ -17,44 +17,104 @@
  */
 package org.phenotips.variantStoreIntegration.internal.jobs;
 
+import org.phenotips.Constants;
+import org.phenotips.data.Patient;
+import org.phenotips.variantStoreIntegration.events.VCFRemovalCompleteEvent;
+
+import org.xwiki.model.EntityType;
+import org.xwiki.model.reference.EntityReference;
+import org.xwiki.observation.ObservationManager;
+
 import java.util.concurrent.Future;
+
+import javax.inject.Provider;
+
+import com.xpn.xwiki.XWiki;
+import com.xpn.xwiki.XWikiContext;
+import com.xpn.xwiki.XWikiException;
+import com.xpn.xwiki.doc.XWikiDocument;
+import com.xpn.xwiki.objects.BaseObject;
+import com.xpn.xwiki.objects.StringProperty;
 
 /**
  * The wrapper class for the future returned from a call to variant stores remove method.
- * TODO: This class is a stub. Must implement something similar to {@link VCFUploadJob} once upload protocol stabilizes.
  *
  * @version $Id$
  */
 public class VCFRemovalJob implements Runnable
 {
+    /**
+     * Entity reference.
+     */
+    public static final EntityReference CLASS_REFERENCE = new EntityReference("VCFStatusClass", EntityType.DOCUMENT,
+        Constants.CODE_SPACE_REFERENCE);
+
     private Future future;
 
-    private String patientId;
+    private Patient patient;
+
+    private Provider<XWikiContext> contextProvider;
+
+    private ObservationManager observationManager;
 
     /**
-     * @param patientId The unique id of the patient.
+     * @param patient A PhenoTips Patient
      * @param variantStoreFuture The future returned by the variant store.
+     * @param provider The xwiki context provider
+     * @param observationManager The observation manager for event pubs
      */
-    public VCFRemovalJob(String patientId, Future variantStoreFuture)
+    public VCFRemovalJob(Patient patient, Future variantStoreFuture, Provider<XWikiContext> provider,
+        ObservationManager observationManager)
     {
         this.future = variantStoreFuture;
-        this.patientId = patientId;
+        this.patient = patient;
+        this.contextProvider = provider;
+        this.observationManager = observationManager;
     }
 
     @Override
     public void run()
     {
+        String propertyName = "status";
         try {
-            // set patient VCF upload status to 'Removing' on disk
+            // set patient VCF removal status to 'Removing' on disk
+            XWiki xwiki = this.contextProvider.get().getWiki();
+            XWikiDocument d = xwiki.getDocument(this.patient.getDocument(), this.contextProvider.get());
+
+            BaseObject removingStatusObj = d.getXObject(CLASS_REFERENCE, true, this.contextProvider.get());
+            removingStatusObj.set(propertyName, "Removing", this.contextProvider.get());
+            xwiki.saveDocument(d, this.contextProvider.get());
 
             this.future.get();
 
-            // upon successful VCF upload set patient VCF upload status to 'null' on disk
+            // upon successful VCF removal set patient VCF removal status to 'Done' on disk
+            removingStatusObj.set(propertyName, "Done", this.contextProvider.get());
+            xwiki.saveDocument(d, this.contextProvider.get());
+
+            this.observationManager.notify(new VCFRemovalCompleteEvent(this.patient), this);
         } catch (InterruptedException e) {
-            this.future.cancel(true);
+            // variant store job was interrupted (canceled?) set VCF removal status to null.
+            XWiki xwiki = this.contextProvider.get().getWiki();
+            XWikiDocument d;
+            try {
+                d = xwiki.getDocument(this.patient.getDocument(), this.contextProvider.get());
+                BaseObject removingStatusObj = d.getXObject(CLASS_REFERENCE, true, this.contextProvider.get());
+
+                StringProperty status = (StringProperty) removingStatusObj.get(propertyName);
+                status.setValue("Cancelling");
+
+                this.future.cancel(true);
+                status.setValue(null);
+            } catch (XWikiException e1) {
+                this.future.cancel(true);
+                this.observationManager.notify(new VCFRemovalCompleteEvent(this.patient), this);
+            }
 
         } catch (Exception e) {
+
+            this.future.cancel(true);
             e.printStackTrace();
+            this.observationManager.notify(new VCFRemovalCompleteEvent(this.patient), this);
         }
 
     }

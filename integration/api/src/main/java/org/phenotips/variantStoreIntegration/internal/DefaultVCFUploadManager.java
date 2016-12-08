@@ -144,9 +144,10 @@ public class DefaultVCFUploadManager implements VCFUploadManager
             this.currentUploads.add(patientID, this.executor.submit(wrappedJob));
         } catch (VariantStoreException e) {
             this.logger.warn("Variant store exception thrown when trying to upload a vcf for: {}", patientID);
-            e.printStackTrace();
+            //e.printStackTrace();
+            throw new Exception("Variant store exception thrown when trying to upload a vcf for: "
+                + patientID + "| " + e.getMessage());
         }
-
     }
 
     /**
@@ -176,27 +177,36 @@ public class DefaultVCFUploadManager implements VCFUploadManager
      * @see org.phenotips.variantStoreIntegration.VCFUploadManager#removeVCF(org.phenotips.data.Patient)
      */
     @Override
-    public void removeVCF(Patient patient)
+    public void removeVCF(String patientID) throws Exception
     {
-        String id = patient.getId();
-        if (this.currentUploads.get(id) != null) {
-            this.logger.warn("Tried to remove the VCF of {} while it was uploading", patient.toString());
+        Patient patient = this.pr.getPatientById(patientID);
+
+        if (patient == null) {
+            this.logger.warn("No patient found with the id : {}", patientID);
+            throw new Exception("Could not find the patient with ID : " + patientID);
+        }
+
+        if (this.currentUploads.get(patientID) != null) {
+            this.logger.warn("Tried to remove the VCF of {} while it was uploading", patientID);
             return;
-        } else if (this.currentRemovals.get(id) != null) {
-            this.logger.warn("Tried to remove the VCF of {} while it was already removing", patient.toString());
+        } else if (this.currentRemovals.get(patientID) != null) {
+            this.logger.warn("Tried to remove the VCF of {} while it was already removing", patientID);
             return;
         }
 
         Future varStoreFuture = null;
         try {
-            varStoreFuture = this.varStore.removeIndividual(id);
-            VCFRemovalJob newRemovalJob = new VCFRemovalJob(id, varStoreFuture);
-            this.currentRemovals.add(id, this.executor.submit(newRemovalJob));
+            varStoreFuture = this.varStore.removeIndividual(patientID);
+            VCFRemovalJob newRemovalJob = new VCFRemovalJob(patient, varStoreFuture, contextProvider,
+                this.observationManager);
+            ExecutionContextRunnable wrappedJob = new ExecutionContextRunnable(newRemovalJob, componentManager);
+            this.currentRemovals.add(patientID, this.executor.submit(wrappedJob));
         } catch (VariantStoreException e) {
-            this.logger.warn("Variant store exception thrown when trying to remove a vcf for: {}", patient.getId());
-            e.printStackTrace();
+            this.logger.warn("Variant store exception thrown when trying to remove a vcf for: {}", patientID);
+            //e.printStackTrace();
+            throw new Exception("Variant store exception thrown when trying to remove a vcf for: "
+                + patientID + " | " + e.getMessage());
         }
-
     }
 
     /**

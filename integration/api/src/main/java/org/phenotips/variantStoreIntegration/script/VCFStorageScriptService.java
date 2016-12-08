@@ -65,7 +65,7 @@ public class VCFStorageScriptService implements ScriptService
      * @param patientID A PhenoTips patient ID.
      * @param filePath  The path to where the patients VCF is stored
      *
-     * @return A json object with key status representing the status of the intial request. NOTE: The status is only
+     * @return A json object with key status representing the status of the initial request. NOTE: The status is only
      * relevant to the submission of the request. Failures during asynchronous vcf processing will not effect the status
      * of the request.
      */
@@ -82,7 +82,7 @@ public class VCFStorageScriptService implements ScriptService
         if (!this.access.hasAccess(Right.EDIT, currentUser == null ? null : currentUser.getProfileDocument(),
                 patient.getDocument())) {
             response.put(STATUS_STRING, 401);
-            response.put(MESSAGE, "The current user is not authorized to edit this patient");
+            response.put(MESSAGE, "The current user is not authorized to edit this patient ");
             return response;
         }
         try {
@@ -91,7 +91,7 @@ public class VCFStorageScriptService implements ScriptService
         } catch (Exception e) {
             response.put(STATUS_STRING, 500);
             response.put(MESSAGE, e.getMessage());
-            response.put("trace", e.getStackTrace());
+            response.put("trace ", e.getStackTrace());
         }
         return response;
     }
@@ -108,10 +108,37 @@ public class VCFStorageScriptService implements ScriptService
     /**
      * Removes Patients VCF from the variant store.
      *
-     * @param patient a PhenoTips patient
+     * @param patientID a PhenoTips patient ID
+     *
+     * @return A json object with key status representing the status of the initial request. NOTE: The status is only
+     * relevant to the submission of the request. Failures during asynchronous vcf processing will not effect the status
+     * of the request.
      */
-    public void removeVCF(Patient patient) {
-        this.uploadManager.removeVCF(patient);
+    public JSONObject removeVCF(String patientID) {
+        JSONObject response = new JSONObject();
+
+        Patient patient = this.repository.getPatientById(patientID);
+        if (patient == null) {
+            response.put(STATUS_STRING, 404);
+            response.put(MESSAGE, " patient " + patientID + " not found ");
+            return response;
+        }
+        User currentUser = this.users.getCurrentUser();
+        if (!this.access.hasAccess(Right.EDIT, currentUser == null ? null : currentUser.getProfileDocument(),
+                patient.getDocument())) {
+            response.put(STATUS_STRING, 401);
+            response.put(MESSAGE, "The current user is not authorized to edit this patient");
+            return response;
+        }
+        try {
+            this.uploadManager.removeVCF(patientID);
+            response.put(STATUS_STRING, 202);
+        } catch (Exception e) {
+            response.put(STATUS_STRING, 500);
+            response.put(MESSAGE, e.getMessage());
+            response.put("trace", e.getStackTrace());
+        }
+        return response;
     }
 
     /**

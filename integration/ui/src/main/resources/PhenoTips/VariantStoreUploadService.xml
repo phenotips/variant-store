@@ -38,7 +38,13 @@
   <content>{{velocity wiki='false'}}
 #if ($request.getMethod() == 'POST')
   $response.setContentType('application/json')
-  #set ($result = $services.VCFStorage.upload($request.getParameter("individualId"), $request.getParameter("path")))
+  #if ($request.getParameter("action") == "upload")
+    #set ($result = $services.VCFStorage.upload($request.getParameter("individualId"), $request.getParameter("path")))
+  #else
+    #if ($request.getParameter("action") == "remove")
+      #set ($result = $services.VCFStorage.removeVCF($request.getParameter("individualId")))
+    #end
+  #end
   $response.setStatus($result.get('status'))
   $result
 #else
