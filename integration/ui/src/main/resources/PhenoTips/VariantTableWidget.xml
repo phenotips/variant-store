@@ -180,55 +180,55 @@
       var columnTemplates = {
         "referenceName" : {
           display : _this.displayPlainTextCell.bind(_this, "referenceName"),
-          heading : _this.Strings["chromosome.heading"]
+          heading : "$escapetool.javascript($services.localization.render('phenotips.variants.table.headings.chomosome'))"
         },
         "start"      : {
           display : _this.displayPlainTextCell.bind(_this, "start"),
-          heading : _this.Strings["position.heading"]
+          heading : "$escapetool.javascript($services.localization.render('phenotips.variants.table.headings.position'))"
         },
         "referenceBases": {
           display : _this.displayBasesCell.bind(_this, "referenceBases"),
-          heading : _this.Strings["reference.heading"]
+          heading : "$escapetool.javascript($services.localization.render('phenotips.variants.table.headings.reference'))"
         },
         "alternateBases" : {
           display : _this.displayBasesCell.bind(_this, "alternateBases"),
-          heading : _this.Strings["alternate.heading"]
+          heading : "$escapetool.javascript($services.localization.render('phenotips.variants.table.headings.alternate'))"
         },
         "zygosity" : {
           display :  _this.displayPlainTextCell.bind(_this, "zygosity"),
-          heading : _this.Strings["zygosity.heading"]
+          heading : "$escapetool.javascript($services.localization.render('phenotips.variants.table.headings.zygosity'))"
         },
         "score" : {
           display : _this.displayScoreBarCell.bind(_this, "score"),
-          heading : _this.Strings["variantScore.heading"]
+          heading : "$escapetool.javascript($services.localization.render('phenotips.variants.table.headings.variantScore'))"
         },
         "geneSymbol" : {
           display : _this.displayPlainTextCell.bind(_this, "geneSymbol"),
-          heading : _this.Strings["gene.heading"]
+          heading : "$escapetool.javascript($services.localization.render('phenotips.variants.table.headings.gene'))"
         },
         "geneScore" : {
           display : _this.displayScoreBarCell.bind(_this, "geneScore"),
-          heading : _this.Strings["geneScore.heading"]
+          heading : "$escapetool.javascript($services.localization.render('phenotips.variants.table.headings.geneScore'))"
         },
         "effect" : {
           display : _this.displayPlainTextCell.bind(_this, "effect"),
-          heading : _this.Strings["codingEffect.heading"]
+          heading : "$escapetool.javascript($services.localization.render('phenotips.variants.table.headings.codingEffect'))"
         },
         "exacAF" : {
           display : _this.displayAF.bind(_this, "exacAF"),
-          heading : _this.Strings["exacAF.heading"]
+          heading : "$escapetool.javascript($services.localization.render('phenotips.variants.table.headings.exacAF'))"
         },
         "gtCounts" : {
           display : _this.displayGtCounts.bind(_this),
-          heading : _this.Strings["gtCounts.heading"]
+          heading : "$escapetool.javascript($services.localization.render('phenotips.variants.table.headings.gtCounts.'))"
         },
         "UCSC_POSITION_LINK" : {
           display : _this.displayUCSCPositionCell.bind(_this),
-          heading : _this.Strings["UCSC_POSITION_LINK.heading"]
+          heading : "$escapetool.javascript($services.localization.render('phenotips.variants.table.headings.UCSC_POSITION_LINK'))"
         },
         "B_UCSC_POSITION_LINK" : {
           display : _this.displayButtonUCSCPositionCell.bind(_this),
-          heading : _this.Strings["UCSC_POSITION_LINK.heading"]
+          heading : "$escapetool.javascript($services.localization.render('phenotips.variants.table.headings.UCSC_POSITION_LINK'))"
         }
       };
 
@@ -321,7 +321,7 @@
     },
 
     //A cell to display variant information and provide a link to the UCSC genome browser
-    displayUCSCPositionCell : function(variant){
+    displayUCSCPositionCell : function(variant) {
       var cell = new Element('td');
       if (variant.referenceName &amp;&amp; variant.start &amp;&amp; variant.referenceBases) {
         var _this = this;
@@ -338,7 +338,7 @@
           'href': 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=' + assembly + '&amp;position=' + encodeURIComponent(positionURLFragment),
           'class': 'variant-position',
           'target': '__blank',
-          'title': _this.Strings["UCSCLinkTitle"]
+          'title': "$escapetool.javascript($services.localization.render('phenotips.variants.table.position.tooltip'))"
         }).update(positionText);
         cell.insert(position);
       } else {
@@ -362,7 +362,7 @@
       if (!isNaN(af)) {
         cell.insert(af);
       } else {
-        cell.insert(this.Strings['message.EmptyInFo']);
+        cell.insert("$escapetool.javascript($services.localization.render('phenotips.variants.table.dataUnavailable'))");
       }
       return cell;
     },
@@ -374,7 +374,7 @@
       if (!isNaN(gtHet) &amp;&amp; !isNaN(gtHom)) {
         cell.insert(gtHet + '/' + gtHom);
       } else {
-        cell.insert(this.Strings['message.EmptyInFo']);
+        cell.insert("$escapetool.javascript($services.localization.render('phenotips.variants.table.dataUnavailable'))");
       }
       return cell;
     },
@@ -386,22 +386,8 @@
     },
 
     Strings : {
-      'chromosome.heading'  : "chromosome",
-      'position.heading'    : "position",
-      'reference.heading'   : "ref",
-      'alternate.heading'   : "alt",
-      'variantScore.heading': "variant score",
-      'gene.heading'        : "gene symbol",
-      'geneScore.heading'   : "exomizer score",
-      'codingEffect.heading': "gene effect",
-      'exacAF.heading'      : "allele freq.",
-      'gtCounts.heading'    : "N het/hom",
-      'UCSC_POSITION_LINK.heading': "variant",
-      'zygosity.heading'    : "zygosity",
-      "positionPhrase"      : "__CHROMOSOME__:__START__-__STOP__",
-      "snvPositionPhrase"   : "__CHROMOSOME__:__START__",
-      "UCSCLinkTitle"       : 'Visualize in the UCSC Genome Browser',
-      'message.EmptyInFo'   : "unavailable"
+      "positionPhrase"    : "__CHROMOSOME__:__START__-__STOP__",
+      "snvPositionPhrase" : "__CHROMOSOME__:__START__"
     }
 
     });
