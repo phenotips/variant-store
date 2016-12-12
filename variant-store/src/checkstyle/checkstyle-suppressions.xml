@@ -21,12 +21,13 @@
     "http://www.puppycrawl.com/dtds/suppressions_1_0.dtd">
 
 <suppressions>
-  <suppress checks="JavadocVariable" files="ExomiserTSVColumn.java" />
+  <suppress checks="CyclomaticComplexity" files="AbstractTSVIterator.java" />
   <suppress checks="MultipleStringLiterals" files="ExomiserTSVIterator.java" />
-  <suppress checks="JavadocVariable" files="Exomiser6TSVColumn.java" />
-  <suppress checks="MultipleStringLiterals" files="Exomiser6TSVIterator.java" />
+  <suppress checks="JavadocVariable" files="ExomiserTSVIterator.java" />
+  <suppress checks="CyclomaticComplexity" files="ExomiserTSVIterator.java" />
   <suppress checks="JavadocVariable" files="VariantsSchema.java" />
   <suppress checks="JavadocVariable" files="GAVariantInfoFields.java" />
   <suppress checks="JavadocVariable" files="GACallInfoFields.java" />
   <suppress checks="UncommentedMain" files="VariantStore.java" /><!--TODO: This is temporary until we have better tests-->
+  <suppress checks="ExecutableStatementCount" files="RemoveIndividualTask.java"/>
 </suppressions>

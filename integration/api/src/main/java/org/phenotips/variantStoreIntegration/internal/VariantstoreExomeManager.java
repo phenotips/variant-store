@@ -17,44 +17,41 @@
  */
 package org.phenotips.variantStoreIntegration.internal;
 
+import org.phenotips.data.Patient;
+import org.phenotips.data.similarity.Exome;
+import org.phenotips.data.similarity.ExomeManager;
 import org.phenotips.variantStoreIntegration.VariantStoreService;
-import org.phenotips.variantstore.VariantStore;
-import org.phenotips.variantstore.db.solr.SolrController;
-import org.phenotips.variantstore.input.tsv.ExomiserTSVManager;
-import org.phenotips.variantstore.shared.VariantStoreException;
 
 import org.xwiki.component.annotation.Component;
-import org.xwiki.component.phase.Initializable;
-import org.xwiki.component.phase.InitializationException;
-import org.xwiki.environment.Environment;
-
-import java.nio.file.Paths;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 /**
+ * This is an implementation of the {@link ExomeManager}, and allows accessing {@link ExomiserExome} objects for the
+ * given {@link Patient}.
+ *
  * @version $Id$
+ * @since 1.0M6
  */
 @Component
 @Singleton
-public class DefaultVariantStoreService extends AbstractVariantStoreProxy implements Initializable, VariantStoreService
+public class VariantstoreExomeManager implements ExomeManager
 {
     @Inject
-    private Environment env;
+    private VariantStoreService vs;
 
+    /**
+     * Get the (potentially-cached) {@link Exome} for the given {@link Patient}.
+     *
+     * @param p the patient for which the {@link Exome} will be retrieved
+     *
+     * @return the corresponding {@link Exome}, or {@code null} if no exome available
+     */
     @Override
-    public void initialize() throws InitializationException {
-        this.variantStore = new VariantStore(
-                new ExomiserTSVManager(),
-                new SolrController()
-        );
-
-        try {
-            this.variantStore.init(Paths.get(this.env.getPermanentDirectory().getPath()).resolve("variant-store"));
-        } catch (VariantStoreException e) {
-            throw new InitializationException("Error setting up Variant Store", e);
-        }
+    public Exome getExome(Patient p) {
+        Exome exome = new VariantstoreExome(vs, p);
+        return exome;
     }
 
 }

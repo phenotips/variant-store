@@ -17,11 +17,14 @@
  */
 package org.phenotips.variantstore.db.solr;
 
+import org.phenotips.variantstore.db.DatabaseException;
 import org.phenotips.variantstore.shared.GACallInfoFields;
 import org.phenotips.variantstore.shared.GAVariantInfoFields;
+
 import static org.phenotips.variantstore.shared.VariantUtils.addInfo;
 import static org.phenotips.variantstore.shared.VariantUtils.getInfo;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -29,10 +32,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.solr.client.solrj.SolrClient;
+import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
+import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.util.StrUtils;
-import org.apache.solr.update.processor.Lookup3Signature;
 import org.ga4gh.GACall;
 import org.ga4gh.GAVariant;
 
@@ -41,6 +46,11 @@ import org.ga4gh.GAVariant;
  */
 public final class SolrVariantUtils
 {
+    /**
+     * The ID of the metadocument that stores all individual ids.
+     */
+    public static final String METADATA_DOC_ID = "metadata";
+
     private SolrVariantUtils() {
         throw new AssertionError();
     }
@@ -122,6 +132,7 @@ public final class SolrVariantUtils
 
         addInfo(variant, GAVariantInfoFields.GENE, doc.get(VariantsSchema.GENE));
         addInfo(variant, GAVariantInfoFields.GENE_EFFECT, doc.get(VariantsSchema.GENE_EFFECT));
+        addInfo(variant, GAVariantInfoFields.GENE_HGVS, doc.get(VariantsSchema.GENE_HGVS));
 
         if (doc.containsKey(VariantsSchema.EXAC_AF)) {
             addInfo(variant, GAVariantInfoFields.EXAC_AF, doc.get(VariantsSchema.EXAC_AF));
@@ -131,6 +142,10 @@ public final class SolrVariantUtils
         }
         if (doc.containsKey(VariantsSchema.GT_HOM)) {
             addInfo(variant, GAVariantInfoFields.GT_HOM, doc.get(VariantsSchema.GT_HOM));
+        }
+
+        if (doc.containsKey(VariantsSchema.AC_TOT)) {
+            addInfo(variant, GAVariantInfoFields.AC_TOT, doc.get(VariantsSchema.AC_TOT));
         }
 
         GACall call = new GACall();
@@ -181,7 +196,7 @@ public final class SolrVariantUtils
     public static SolrDocument variantToDoc(GAVariant variant) {
         SolrDocument doc = new SolrDocument();
 
-        doc.setField(VariantsSchema.HASH, getHash(variant));
+        doc.setField(VariantsSchema.ID, getHash(variant));
         doc.setField(VariantsSchema.CHROM, variant.getReferenceName());
         doc.setField(VariantsSchema.START, variant.getStart());
         doc.setField(VariantsSchema.END, variant.getStart() + variant.getReferenceBases().length());
@@ -194,6 +209,7 @@ public final class SolrVariantUtils
 
         doc.setField(VariantsSchema.GENE, getInfo(variant, GAVariantInfoFields.GENE));
         doc.setField(VariantsSchema.GENE_EFFECT, getInfo(variant, GAVariantInfoFields.GENE_EFFECT));
+        doc.setField(VariantsSchema.GENE_HGVS, getInfo(variant, GAVariantInfoFields.GENE_HGVS));
 
         doc.setField(VariantsSchema.EXAC_AF, safeValueOf(getInfo(variant, GAVariantInfoFields.EXAC_AF)));
 
@@ -246,7 +262,14 @@ public final class SolrVariantUtils
                 safeValueOf(getInfo(call, GACallInfoFields.EXOMISER_GENE_COMBINED_SCORE)));
     }
 
-    private static void addMultiFieldValue(SolrDocument doc, String key, Object value) {
+    /**
+     * Add a field to a document.
+     *
+     * @param doc   the SolrDocument
+     * @param key   the name of the field where the specified value to be added
+     * @param value the specified value to be added
+     */
+    public static void addMultiFieldValue(SolrDocument doc, String key, Object value) {
         // clone array, sometimes it's unmodifiable
         List<Object> values = new ArrayList<>(doc.getFieldValues(key));
         values.add(value);
@@ -290,13 +313,10 @@ public final class SolrVariantUtils
      * @return the signature
      */
     public static String getHash(GAVariant variant) {
-        Lookup3Signature signatureBuilder = new Lookup3Signature();
-        signatureBuilder.add(variant.getReferenceName());
-        signatureBuilder.add(variant.getStart().toString());
-        signatureBuilder.add(variant.getReferenceBases());
-        signatureBuilder.add(variant.getAlternateBases().get(0));
-
-        return byteArrayToString(signatureBuilder.getSignature());
+        return variant.getReferenceName() + ":"
+            + variant.getStart().toString() + ":"
+            + variant.getReferenceBases() + ":"
+            + variant.getAlternateBases().get(0);
     }
 
     /**
@@ -361,7 +381,14 @@ public final class SolrVariantUtils
                 safeValueOf(getInfo(call, GACallInfoFields.EXOMISER_GENE_COMBINED_SCORE)));
     }
 
-    private static void removeMultiFieldValue(SolrDocument doc, String key, Object value) {
+    /**
+     * Remove a field from a document.
+     *
+     * @param doc   the SolrDocument
+     * @param key   the name of the field from which the specified value to be removed
+     * @param value the specified value to be removed
+     */
+    public static void removeMultiFieldValue(SolrDocument doc, String key, Object value) {
         // clone array, sometimes it's unmodifiable
         List<Object> values = new ArrayList<>(doc.getFieldValues(key));
         values.remove(value);
@@ -372,5 +399,40 @@ public final class SolrVariantUtils
         doc.removeFields(VariantsSchema.getCallsetsFieldName(callsetId, fieldName));
         // since callset fields are copied to multivalued fields, we need to remove that too.
         removeMultiFieldValue(doc, fieldName, value);
+    }
+
+    /**
+     * Retrieve a metadocument that stores all individual ids.
+     *
+     * @param server the solr server to assist communication with a Solr server
+     *
+     * @return a SolrDocument
+     * @throws SolrServerException SolrServerException
+     * @throws IOException IOException
+     */
+    public static SolrDocument getMetaDocument(SolrClient server) throws SolrServerException, IOException  {
+        SolrDocument metaDoc = server.getById(METADATA_DOC_ID);
+        if (metaDoc == null) {
+            metaDoc = new SolrDocument();
+            metaDoc.setField(VariantsSchema.ID, METADATA_DOC_ID);
+            metaDoc.setField(VariantsSchema.CALLSET_IDS, Collections.emptyList());
+        }
+        return metaDoc;
+    }
+
+    /**
+     * Add a document to a SolrClient.
+     *
+     * @param doc    the SolrDocument do be added
+     * @param server the solr server to assist communication with a Solr server
+     * @throws DatabaseException DatabaseException
+     */
+    public static void addDoc(SolrInputDocument doc, SolrClient server) throws DatabaseException {
+        try {
+            server.add(doc);
+            doc.clear();
+        } catch (SolrServerException | IOException e) {
+            throw new DatabaseException("Error adding variants to Solr", e);
+        }
     }
 }

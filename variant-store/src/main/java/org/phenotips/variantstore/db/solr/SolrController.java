@@ -23,6 +23,7 @@ import org.phenotips.variantstore.db.solr.tasks.AddIndividualTask;
 import org.phenotips.variantstore.db.solr.tasks.RemoveIndividualTask;
 import org.phenotips.variantstore.input.VariantIterator;
 import org.phenotips.variantstore.shared.ResourceManager;
+
 import static org.phenotips.variantstore.db.solr.SolrVariantUtils.documentListToMapList;
 
 import java.io.IOException;
@@ -253,7 +254,7 @@ public class SolrController extends AbstractDatabaseController
         // sort on unique
 
         try {
-            SolrUtils.processAllDocs(server, q, VariantsSchema.HASH, new Function<Collection<SolrDocument>, Boolean>()
+            SolrUtils.processAllDocs(server, q, VariantsSchema.ID, new Function<Collection<SolrDocument>, Boolean>()
             {
                 @Override
                 public Boolean apply(Collection<SolrDocument> solrDocuments) {
@@ -517,5 +518,19 @@ public class SolrController extends AbstractDatabaseController
         return map;
     }
 
+    @Override
+    public List<String> getAllIndividuals() {
+        List<String> ids = new ArrayList<String>();
+        try {
+            SolrDocument metaDoc = SolrVariantUtils.getMetaDocument(server);
+            List<Object> values = new ArrayList<>(metaDoc.getFieldValues(VariantsSchema.CALLSET_IDS));
+            for (Object item : values) {
+                ids.add((String) item);
+            }
+        } catch (SolrServerException | IOException e) {
+            logger.error("Error getting all individals stored in the variant store", e);
+        }
+        return ids;
+    }
 
 }

@@ -23,7 +23,7 @@ package org.phenotips.variantstore.db.solr;
 public final class VariantsSchema
 {
     //  a hash of chrom, pos, ref, alt
-    public static final String HASH = "hash";
+    public static final String ID = "id";
 
     public static final String CHROM = "chrom";
     //  start = pos - 1 (0-indexed)
@@ -40,6 +40,7 @@ public final class VariantsSchema
     //  Fields with a single value per variant (chrom, pos, ref, alt)
     public static final String GENE = "gene";
     public static final String GENE_EFFECT = "gene_effect";
+    public static final String GENE_HGVS = "gene_hgvs";
     public static final String EXAC_AF = "exac_af";
     //  aggregate statistics
     public static final String AC_TOT = "ac_tot";

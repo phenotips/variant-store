@@ -156,6 +156,7 @@
           exacAF : The allele frequency of the variant in the Exome Aggregation Consortium (ExAC) dataset
           gtHet : the number of individuals heterozygous for this variant
           gtHom : the number of individuals homozygous for this variant
+          pcAF : The allele frequency of the variant in the PhenomeCentral (PC) dataset
         }
       }
 
@@ -221,6 +222,10 @@
         "gtCounts" : {
           display : _this.displayGtCounts.bind(_this),
           heading : "$escapetool.javascript($services.localization.render('phenotips.variants.table.headings.gtCounts.'))"
+        },
+        "pcAF" : {
+          display : _this.displayAF.bind(_this, "pcAF"),
+          heading : _this.Strings["pcAF.heading"]
         },
         "UCSC_POSITION_LINK" : {
           display : _this.displayUCSCPositionCell.bind(_this),
@@ -386,8 +391,23 @@
     },
 
     Strings : {
-      "positionPhrase"    : "__CHROMOSOME__:__START__-__STOP__",
-      "snvPositionPhrase" : "__CHROMOSOME__:__START__"
+      'chromosome.heading'  : "chromosome",
+      'position.heading'    : "position",
+      'reference.heading'   : "ref",
+      'alternate.heading'   : "alt",
+      'variantScore.heading': "variant score",
+      'gene.heading'        : "gene symbol",
+      'geneScore.heading'   : "exomizer score",
+      'codingEffect.heading': "gene effect",
+      'exacAF.heading'      : "allele freq.",
+      'gtCounts.heading'    : "N het/hom",
+      'pcAF.heading'        : "pc allele freq.",
+      'UCSC_POSITION_LINK.heading': "variant",
+      'zygosity.heading'    : "zygosity",
+      "positionPhrase"      : "__CHROMOSOME__:__START__-__STOP__",
+      "snvPositionPhrase"   : "__CHROMOSOME__:__START__",
+      "UCSCLinkTitle"       : 'Visualize in the UCSC Genome Browser',
+      'message.EmptyInFo'   : "unavailable"
     }
 
     });

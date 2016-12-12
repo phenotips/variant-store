@@ -107,7 +107,7 @@ public class VariantStore implements VariantStoreInterface
                 variantEffects,
                 alleleFrequencies,
                 5,
-                this.getIndividuals().size());
+                this.getAllIndividuals().size());
     }
 
     @Override
@@ -116,8 +116,8 @@ public class VariantStore implements VariantStoreInterface
     }
 
     @Override
-    public List<String> getIndividuals() {
-        return this.inputManager.getAllIndividuals();
+    public List<String> getAllIndividuals() {
+        return this.db.getAllIndividuals();
     }
 
     @Override
@@ -150,7 +150,7 @@ public class VariantStore implements VariantStoreInterface
      * @return the allele frequency of this variant in the db.
      */
     public double beacon(String chr, long pos, String allele) {
-        return (double) this.db.beacon(chr, pos, allele) / ((double) this.getIndividuals().size() * 2);
+        return (double) this.db.beacon(chr, pos, allele) / ((double) this.getAllIndividuals().size() * 2);
     }
 
     /**
@@ -161,5 +161,4 @@ public class VariantStore implements VariantStoreInterface
     public long getTotNumVariants() {
         return db.getTotNumVariants();
     }
-
 }

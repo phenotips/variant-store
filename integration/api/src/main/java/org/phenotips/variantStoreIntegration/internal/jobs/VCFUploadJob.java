@@ -79,7 +79,7 @@ public class VCFUploadJob implements Runnable
     {
         String propertyName = "status";
         try {
-            // set patient VCF upload status to 'Inititialized' on disk
+            // set patient VCF upload status to 'Initialized' on disk
             XWiki xwiki = this.contextProvider.get().getWiki();
             XWikiDocument d = xwiki.getDocument(this.patient.getDocument(), this.contextProvider.get());
 

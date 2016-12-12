@@ -206,7 +206,7 @@ public class DefaultVCFUploadManager implements VCFUploadManager
      */
     @Override
     public List<String> getUploadedPatients() {
-        return this.varStore.getIndividuals();
+        return this.varStore.getAllIndividuals();
     }
 
     private static boolean resolvePatientPermission(Patient patient)
