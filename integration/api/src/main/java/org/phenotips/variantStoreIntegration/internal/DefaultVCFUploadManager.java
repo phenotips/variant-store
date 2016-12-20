@@ -144,9 +144,6 @@ public class DefaultVCFUploadManager implements VCFUploadManager
             this.currentUploads.add(patientID, this.executor.submit(wrappedJob));
         } catch (VariantStoreException e) {
             this.logger.warn("Variant store exception thrown when trying to upload a vcf for: {}", patientID);
-            //e.printStackTrace();
-            throw new Exception("Variant store exception thrown when trying to upload a vcf for: "
-                + patientID + "| " + e.getMessage());
         }
     }
 
@@ -203,9 +200,6 @@ public class DefaultVCFUploadManager implements VCFUploadManager
             this.currentRemovals.add(patientID, this.executor.submit(wrappedJob));
         } catch (VariantStoreException e) {
             this.logger.warn("Variant store exception thrown when trying to remove a vcf for: {}", patientID);
-            //e.printStackTrace();
-            throw new Exception("Variant store exception thrown when trying to remove a vcf for: "
-                + patientID + " | " + e.getMessage());
         }
     }
 
