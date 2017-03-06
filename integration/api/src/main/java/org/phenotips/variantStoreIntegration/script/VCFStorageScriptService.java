@@ -72,7 +72,7 @@ public class VCFStorageScriptService implements ScriptService
     public JSONObject upload(String patientID, String filePath) {
         JSONObject response = new JSONObject();
 
-        Patient patient = this.repository.getPatientById(patientID);
+        Patient patient = this.repository.get(patientID);
         if (patient == null) {
             response.put(STATUS_STRING, 404);
             response.put(MESSAGE, "patient " + patientID + " not found");
