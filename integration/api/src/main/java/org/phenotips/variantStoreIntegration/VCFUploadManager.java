@@ -71,9 +71,10 @@ public interface VCFUploadManager extends Initializable
     /**
      * Removes the patients variants from the variant store.
      *
-     * @param patient A valid PhenoTips patient
+     * @param patientID A valid PhenoTips patientID
+     * @throws Exception If there was an error while uploading the file.
      */
-    void removeVCF(Patient patient);
+    void removeVCF(String patientID) throws Exception;
 
     /**
      * Get a list of patients in the variant store.

@@ -49,6 +49,8 @@ public class VCFStorageScriptService implements ScriptService
 {
     static final String MESSAGE = "message";
     private static final String STATUS_STRING = "status";
+    private static final String UPLOAD_STRING = "upload";
+    private static final String REMOVE_STRING = "remove";
     @Inject
     private VCFUploadManager uploadManager;
 
@@ -65,35 +67,12 @@ public class VCFStorageScriptService implements ScriptService
      * @param patientID A PhenoTips patient ID.
      * @param filePath  The path to where the patients VCF is stored
      *
-     * @return A json object with key status representing the status of the intial request. NOTE: The status is only
+     * @return A json object with key status representing the status of the initial request. NOTE: The status is only
      * relevant to the submission of the request. Failures during asynchronous vcf processing will not effect the status
      * of the request.
      */
     public JSONObject upload(String patientID, String filePath) {
-        JSONObject response = new JSONObject();
-
-        Patient patient = this.repository.getPatientById(patientID);
-        if (patient == null) {
-            response.put(STATUS_STRING, 404);
-            response.put(MESSAGE, "patient " + patientID + " not found");
-            return response;
-        }
-        User currentUser = this.users.getCurrentUser();
-        if (!this.access.hasAccess(Right.EDIT, currentUser == null ? null : currentUser.getProfileDocument(),
-                patient.getDocument())) {
-            response.put(STATUS_STRING, 401);
-            response.put(MESSAGE, "The current user is not authorized to edit this patient");
-            return response;
-        }
-        try {
-            this.uploadManager.uploadVCF(patientID, filePath);
-            response.put(STATUS_STRING, 202);
-        } catch (Exception e) {
-            response.put(STATUS_STRING, 500);
-            response.put(MESSAGE, e.getMessage());
-            response.put("trace", e.getStackTrace());
-        }
-        return response;
+        return executeJob(patientID, filePath, UPLOAD_STRING);
     }
 
     /**
@@ -108,10 +87,14 @@ public class VCFStorageScriptService implements ScriptService
     /**
      * Removes Patients VCF from the variant store.
      *
-     * @param patient a PhenoTips patient
+     * @param patientID a PhenoTips patient ID
+     *
+     * @return A json object with key status representing the status of the initial request. NOTE: The status is only
+     * relevant to the submission of the request. Failures during asynchronous vcf processing will not effect the status
+     * of the request.
      */
-    public void removeVCF(Patient patient) {
-        this.uploadManager.removeVCF(patient);
+    public JSONObject removeVCF(String patientID) {
+        return executeJob(patientID, null, REMOVE_STRING);
     }
 
     /**
@@ -131,5 +114,36 @@ public class VCFStorageScriptService implements ScriptService
      */
     public List<String> getUploadedPatients() {
         return uploadManager.getUploadedPatients();
+    }
+
+    private JSONObject executeJob(String patientID, String filePath, String jobName) {
+        JSONObject response = new JSONObject();
+
+        Patient patient = this.repository.get(patientID);
+        if (patient == null) {
+            response.put(STATUS_STRING, 404);
+            response.put(MESSAGE, "patient " + patientID + " not found");
+            return response;
+        }
+        User currentUser = this.users.getCurrentUser();
+        if (!this.access.hasAccess(Right.EDIT, currentUser == null ? null : currentUser.getProfileDocument(),
+                patient.getDocument())) {
+            response.put(STATUS_STRING, 401);
+            response.put(MESSAGE, "The current user is not authorized to edit this patient");
+            return response;
+        }
+        try {
+            if (UPLOAD_STRING.equals(jobName)) {
+                this.uploadManager.uploadVCF(patientID, filePath);
+            } else if (REMOVE_STRING.equals(jobName)) {
+                this.uploadManager.removeVCF(patientID);
+            }
+            response.put(STATUS_STRING, 202);
+        } catch (Exception e) {
+            response.put(STATUS_STRING, 500);
+            response.put(MESSAGE, e.getMessage());
+            response.put("trace", e.getStackTrace());
+        }
+        return response;
     }
 }

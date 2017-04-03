@@ -50,7 +50,7 @@ public interface DatabaseController extends Service
      * @throws DatabaseException if an error is encountered immediately.
      *                           The Future throws exceptions if an error is encountred during insert.
      */
-    Future removeIndividual(VariantIterator id) throws DatabaseException;
+    Future removeIndividual(String id) throws DatabaseException;
 
     /**
      * Fetch all individuals that exhibit the given genes. Filter on variant effects, variant allele frequencies.
@@ -165,4 +165,13 @@ public interface DatabaseController extends Service
      * @return a list of individual IDs
      */
     List<String> getAllIndividuals();
+
+    /**
+     * Get a list of all variants for the individual ID stored in the variant store.
+     *
+     * @param id   the individual
+     *
+     * @return the list of variants
+     */
+    List<GAVariant> getAllVariantsForIndividual(String id);
 }

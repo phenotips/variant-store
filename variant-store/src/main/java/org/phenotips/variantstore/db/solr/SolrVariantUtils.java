@@ -37,7 +37,6 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
-import org.apache.solr.common.util.StrUtils;
 import org.ga4gh.GACall;
 import org.ga4gh.GAVariant;
 
@@ -90,6 +89,24 @@ public final class SolrVariantUtils
             Map<String, GAVariant> variantMap = docToVariantMap(doc);
 
             list.add(variantMap);
+        }
+
+        return list;
+    }
+
+    /**
+     * Add the documents in a SolrDocumentList to a list of GAVariants for the individual ID.
+     *
+     * @param documentList the SolrDocumentList
+     * @param callsetId the individual id
+     *
+     * @return the list of GAVariants
+     */
+    public static List<GAVariant> documentListToGAVarintList(SolrDocumentList documentList, String callsetId) {
+        List<GAVariant> list = new ArrayList<>();
+
+        for (SolrDocument doc : documentList) {
+            list.add(docToVariant(doc, callsetId));
         }
 
         return list;
@@ -272,7 +289,9 @@ public final class SolrVariantUtils
     public static void addMultiFieldValue(SolrDocument doc, String key, Object value) {
         // clone array, sometimes it's unmodifiable
         List<Object> values = new ArrayList<>(doc.getFieldValues(key));
-        values.add(value);
+        if (!values.contains(value)) {
+            values.add(value);
+        }
         doc.setField(key, values);
     }
 
@@ -320,65 +339,36 @@ public final class SolrVariantUtils
     }
 
     /**
-     * Turns bytes[] into a hex String. Copied from {@link
-     * org.apache.solr.update.processor.SignatureUpdateProcessorFactory}.
-     *
-     * @param bytes a byte array
-     *
-     * @return a String
-     */
-    private static String byteArrayToString(byte[] bytes) {
-        char[] arr = new char[bytes.length << 1];
-
-        for (int i = 0; i < bytes.length; i++) {
-            int b = bytes[i];
-            int idx = i << 1;
-            arr[idx] = StrUtils.HEX_DIGITS[(b >> 4) & 0xf];
-            arr[idx + 1] = StrUtils.HEX_DIGITS[b & 0xf];
-        }
-        return Arrays.toString(arr);
-
-    }
-
-    /**
-     * Remove a variant from a document. The call set ID must be provided to
-     * specify which callset to remove the variant from.
+     * Remove a callset from a document.
      *
      * @param doc       the SolrDocument
-     * @param variant   the GAVatriant to remove
-     * @param callsetId the callsetId that the variant belongs to
-     * @param isPublic  whether the variant was public
+     * @param callsetId the callsetId to remove
      */
-    public static void removeVariantFromDoc(SolrDocument doc, GAVariant variant, String callsetId, boolean isPublic) {
+    public static void removeCallsetFromDoc(SolrDocument doc, String callsetId) {
 
+        /*
+         *   a. remove the individual's value from multivalued fields (e.g., callsetIds)
+         *   b. remove the individual-specific fields (e.g., P0000001_ac)
+         *   c. adjust the aggregate counts (e.g., AC_TOT)
+         */
         removeMultiFieldValue(doc, VariantsSchema.CALLSET_IDS, callsetId);
 
-        GACall call = variant.getCalls().get(0);
-        int copies = 0;
-        for (int i : call.getGenotype()) {
-            if (i == 1) {
-                copies--;
-            }
-        }
+        int copies = (int) getCallsetField(doc, callsetId, VariantsSchema.AC);
         doc.setField(VariantsSchema.AC_TOT, (int) doc.getFieldValue(VariantsSchema.AC_TOT) - copies);
         if (copies == 1) {
-            doc.setField(VariantsSchema.AC_TOT, (int) doc.getFieldValue(VariantsSchema.GT_HET) - 1);
+            doc.setField(VariantsSchema.GT_HET, (int) doc.getFieldValue(VariantsSchema.GT_HET) - 1);
         } else if (copies == 2) {
-            doc.setField(VariantsSchema.AC_TOT, (int) doc.getFieldValue(VariantsSchema.GT_HOM) - 1);
+            doc.setField(VariantsSchema.GT_HOM, (int) doc.getFieldValue(VariantsSchema.GT_HOM) - 1);
         }
 
-        removeCallsetFieldValue(doc, callsetId, VariantsSchema.PUBLIC, isPublic);
-        removeCallsetFieldValue(doc, callsetId, VariantsSchema.AC, copies);
-        removeCallsetFieldValue(doc, callsetId, VariantsSchema.QUAL, getInfo(call, GACallInfoFields.QUALITY));
-        removeCallsetFieldValue(doc, callsetId, VariantsSchema.FILTER, getInfo(call, GACallInfoFields.FILTER));
-        removeCallsetFieldValue(doc, callsetId, VariantsSchema.EXOMISER_VARIANT_SCORE,
-                safeValueOf(getInfo(call, GACallInfoFields.EXOMISER_VARIANT_SCORE)));
-        removeCallsetFieldValue(doc, callsetId, VariantsSchema.EXOMISER_GENE_PHENO_SCORE,
-                safeValueOf(getInfo(call, GACallInfoFields.EXOMISER_GENE_PHENO_SCORE)));
-        removeCallsetFieldValue(doc, callsetId, VariantsSchema.EXOMISER_GENE_VARIANT_SCORE,
-                safeValueOf(getInfo(call, GACallInfoFields.EXOMISER_GENE_VARIANT_SCORE)));
-        removeCallsetFieldValue(doc, callsetId, VariantsSchema.EXOMISER_GENE_COMBINED_SCORE,
-                safeValueOf(getInfo(call, GACallInfoFields.EXOMISER_GENE_COMBINED_SCORE)));
+        removeCallsetField(doc, callsetId, VariantsSchema.PUBLIC);
+        removeCallsetField(doc, callsetId, VariantsSchema.AC);
+        removeCallsetField(doc, callsetId, VariantsSchema.QUAL);
+        removeCallsetField(doc, callsetId, VariantsSchema.FILTER);
+        removeCallsetField(doc, callsetId, VariantsSchema.EXOMISER_VARIANT_SCORE);
+        removeCallsetField(doc, callsetId, VariantsSchema.EXOMISER_GENE_PHENO_SCORE);
+        removeCallsetField(doc, callsetId, VariantsSchema.EXOMISER_GENE_VARIANT_SCORE);
+        removeCallsetField(doc, callsetId, VariantsSchema.EXOMISER_GENE_COMBINED_SCORE);
     }
 
     /**
@@ -395,10 +385,8 @@ public final class SolrVariantUtils
         doc.setField(key, values);
     }
 
-    private static void removeCallsetFieldValue(SolrDocument doc, String callsetId, String fieldName, Object value) {
+    private static void removeCallsetField(SolrDocument doc, String callsetId, String fieldName) {
         doc.removeFields(VariantsSchema.getCallsetsFieldName(callsetId, fieldName));
-        // since callset fields are copied to multivalued fields, we need to remove that too.
-        removeMultiFieldValue(doc, fieldName, value);
     }
 
     /**

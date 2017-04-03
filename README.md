@@ -33,6 +33,7 @@ VariantStore vs = new VariantStore(
 
 vs.init(Paths.get("/where/to/store/data/");
 vs.addIndividual("IndividualId", true, Path.get("/path/to/variant/file"));
+vs.removeIndividual("IndividualId");
 ```
 
 # Architecture

@@ -60,7 +60,7 @@ public class VCFUploadJob implements Runnable
     private ObservationManager observationManager;
 
     /**
-     * @param patient A PhenoTips Patient ID
+     * @param patient A PhenoTips Patient
      * @param variantStoreFuture The future returned by the variant store.
      * @param provider The xwiki context provider
      * @param observationManager The observation manager for event pubs
