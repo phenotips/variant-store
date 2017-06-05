@@ -176,7 +176,7 @@ public class DefaultVCFUploadManager implements VCFUploadManager
     @Override
     public void removeVCF(String patientID) throws Exception
     {
-        Patient patient = this.pr.getPatientById(patientID);
+        Patient patient = this.pr.get(patientID);
 
         if (patient == null) {
             this.logger.warn("No patient found with the id : {}", patientID);
