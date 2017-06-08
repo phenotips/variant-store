@@ -148,7 +148,7 @@
         referenceBases : The reference bases for this variant,
         alternateBases : The bases that appear instead of the reference bases,
         zygosity : number of copies of alternative alleles ("1/1" - homozygous, otherwise heterozygous),
-        effect : The effect of this mutation (i.e. MISSENSE, STOPGAIN etc.),
+        effect : The effect of this mutation (i.e. missense_variant, stop_gained etc.),
         score : The exomiser score for the variant,
         annotations : {
           geneSymbol : The symbol of the gene to which this variant belongs,
