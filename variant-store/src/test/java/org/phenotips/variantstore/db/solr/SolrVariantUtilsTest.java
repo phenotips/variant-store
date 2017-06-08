@@ -59,7 +59,7 @@ public class SolrVariantUtilsTest
         double exomiser_gene_variant_score = 0.3;
         double exomiser_gene_combined_score = 0.4;
         String gene = "CNST";
-        String gene_effect = "MISSENSE";
+        String gene_effect = "missense_variant";
         double exac_af = 0.5;
 
         SolrDocument doc = new SolrDocument();
@@ -121,7 +121,7 @@ public class SolrVariantUtilsTest
         double exomiser_gene_variant_score = 0.3;
         double exomiser_gene_combined_score = 0.4;
         String gene = "CNST";
-        String gene_effect = "MISSENSE";
+        String gene_effect = "missense_variant";
         double exac_af = 0.5;
 
         GAVariant variant = new GAVariant();
@@ -180,7 +180,7 @@ public class SolrVariantUtilsTest
         double exomiser_gene_variant_score = 0.3;
         double exomiser_gene_combined_score = 0.4;
         String gene = "CNST";
-        String gene_effect = "MISSENSE";
+        String gene_effect = "missense_variant";
         double exac_af = 0.5;
 
         GAVariant variant = new GAVariant();

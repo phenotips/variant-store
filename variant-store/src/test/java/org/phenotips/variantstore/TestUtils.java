@@ -35,10 +35,11 @@ import com.google.common.collect.Lists;
  */
 public class TestUtils
 {
-    private static final List<String> effects = Arrays.asList("MISSENSE", "FS_DELETION", "FS_INSERTION", "NON_FS_DELETION", "NON_FS_INSERTION", "STOPGAIN", "STOPLOSS",
-            "FS_DUPLICATION", "SPLICING", "NON_FS_DUPLICATION", "FS_SUBSTITUTION", "NON_FS_SUBSTITUTION", "STARTLOSS",
-            "ncRNA_EXONIC", "ncRNA_SPLICING", "UTR3", "UTR5", "SYNONYMOUS", "INTRONIC", "ncRNA_INTRONIC", "UPSTREAM",
-            "DOWNSTREAM", "INTERGENIC");
+    private static final List<String> effects = Arrays.asList("missense_variant", "frameshift_truncation",
+            "frameshift_elongation", "frameshift_variant", "disruptive_inframe_deletion", "disruptive_inframe_insertion",
+            "stop_gained", "stop_lost", "start_lost", "exon_loss_variant", "splice_acceptor_variant", "splice_donor_variant",
+            "3_prime_utr_truncation", "5_prime_utr_truncation", "synonymous_variant", "non_coding_transcript_variant",
+            "upstream_gene_variant", "downstream_gene_variant", "intergenic_variant");
 
     private static final List<String> chromosomes = Arrays.asList( "chr1", "chr2", "chr3", "chr4", "chr5", "chr6", "chr7", "chr8", "chr9", "chr10", "chr11", "chr12", "chr13", "chr14", "chr15", "chr16", "chr17", "chr18", "chr19", "chr20", "chr21", "chr22", "chrX", "chrY");
 
