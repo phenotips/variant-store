@@ -71,7 +71,8 @@ public class ExomiserTSVIterator extends AbstractTSVIterator
             case "EXAC_SAS_FREQ":
             case "EXAC_OTH_FREQ":
                 try {
-                    maxExacFreq = Math.max(maxExacFreq, Double.parseDouble(field));
+                    // Exomiser outputs percentages instead of frequencies
+                    maxExacFreq = Math.max(maxExacFreq, Double.parseDouble(field)) / 100;
                 } catch (NumberFormatException e) {
                     // do nothing, stay with default 0.0 value
                 }
