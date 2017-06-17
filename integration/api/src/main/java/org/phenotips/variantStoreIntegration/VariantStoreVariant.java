@@ -22,6 +22,7 @@ import org.phenotips.variantstore.shared.GACallInfoFields;
 import org.phenotips.variantstore.shared.GAVariantInfoFields;
 import org.phenotips.variantstore.shared.VariantUtils;
 
+import java.text.DecimalFormat;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -62,17 +63,20 @@ public class VariantStoreVariant extends AbstractVariant
             setScore(Double.valueOf(value));
         }
 
+        DecimalFormat df = new DecimalFormat("#.####");
+
         setAnnotation("geneScore", VariantUtils.getInfo(call, GACallInfoFields.EXOMISER_GENE_COMBINED_SCORE));
         setAnnotation("geneSymbol", VariantUtils.getInfo(gaVariant, GAVariantInfoFields.GENE));
         setAnnotation("hgvs", VariantUtils.getInfo(gaVariant, GAVariantInfoFields.GENE_HGVS));
-        setAnnotation("exacAF", VariantUtils.getInfo(gaVariant, GAVariantInfoFields.EXAC_AF));
+        value = VariantUtils.getInfo(gaVariant, GAVariantInfoFields.EXAC_AF);
+        setAnnotation("exacAF", df.format(Double.valueOf(value)));
         setAnnotation("gtHet", VariantUtils.getInfo(gaVariant, GAVariantInfoFields.GT_HET));
         setAnnotation("gtHom", VariantUtils.getInfo(gaVariant, GAVariantInfoFields.GT_HOM));
 
         if (totIndividuals != null) {
             value = VariantUtils.getInfo(gaVariant, GAVariantInfoFields.AC_TOT);
             Double pcAF = Double.valueOf(value) / (totIndividuals * 2);
-            setAnnotation("pcAF", pcAF.toString());
+            setAnnotation("pcAF", df.format(pcAF));
         }
     }
 }
