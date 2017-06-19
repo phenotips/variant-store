@@ -36,6 +36,8 @@ import org.ga4gh.GAVariant;
  */
 public class VariantStoreVariant extends AbstractVariant
 {
+    private static DecimalFormat df = new DecimalFormat("#.####");
+
     /**
      * Create a {@link Variant} from a {@link GAVariant} returned by a {@link
      * org.phenotips.variantstore.VariantStoreInterface}.
@@ -62,8 +64,6 @@ public class VariantStoreVariant extends AbstractVariant
         } else {
             setScore(Double.valueOf(value));
         }
-
-        DecimalFormat df = new DecimalFormat("#.####");
 
         setAnnotation("geneScore", VariantUtils.getInfo(call, GACallInfoFields.EXOMISER_GENE_COMBINED_SCORE));
         setAnnotation("geneSymbol", VariantUtils.getInfo(gaVariant, GAVariantInfoFields.GENE));
