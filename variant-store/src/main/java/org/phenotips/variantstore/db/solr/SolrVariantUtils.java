@@ -423,4 +423,23 @@ public final class SolrVariantUtils
             throw new DatabaseException("Error adding variants to Solr", e);
         }
     }
+
+    // TODO This is a temporary fix, remove this method when issue #VS-34 is implemented.
+    /**
+     * Convert an existing document to an input document. This method is a duplicate of
+     * Solrj's toSolrInputDocument method from ClientUtils, which is now deprecated.
+     *
+     * @param doc   the SolrDocument to be converted into an input
+     *
+     * @return inputDoc a SolrInputDocument that contains the data given in the original doc
+     */
+    public static SolrInputDocument toSolrInputDocument(SolrDocument doc) {
+        SolrInputDocument inputDoc = new SolrInputDocument();
+
+        for (String name : doc.getFieldNames()) {
+            inputDoc.addField(name, doc.getFieldValue(name));
+        }
+
+        return inputDoc;
+    }
 }

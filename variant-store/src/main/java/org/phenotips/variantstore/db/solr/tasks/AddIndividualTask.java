@@ -28,7 +28,6 @@ import java.util.concurrent.Callable;
 
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrDocument;
 import org.ga4gh.GAVariant;
 import org.slf4j.Logger;
@@ -104,14 +103,14 @@ public class AddIndividualTask implements Callable<Object>
                     individualId,
                     iterator.getHeader().isPublic());
 
-            SolrVariantUtils.addDoc(ClientUtils.toSolrInputDocument(doc), server);
+            SolrVariantUtils.addDoc(SolrVariantUtils.toSolrInputDocument(doc), server);
         }
         logger.debug("csv: Hash Collisions: " + hashCollisions);
 
         // updating the metadata document with individual id
         SolrDocument metaDoc = SolrVariantUtils.getMetaDocument(server);
         SolrVariantUtils.addMultiFieldValue(metaDoc, VariantsSchema.CALLSET_IDS, individualId);
-        SolrVariantUtils.addDoc(ClientUtils.toSolrInputDocument(metaDoc), server);
+        SolrVariantUtils.addDoc(SolrVariantUtils.toSolrInputDocument(metaDoc), server);
 
         // Solr should commit the fields at it's own optimal pace.
         // We want to commit once at the end to make sure any leftovers in solr buffers are available for querying.

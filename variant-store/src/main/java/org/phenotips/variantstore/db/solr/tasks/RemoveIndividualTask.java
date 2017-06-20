@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 import org.apache.solr.client.solrj.SolrClient;
-import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,13 +78,13 @@ public class RemoveIndividualTask implements Callable<Object>
 
             doc.remove("_version_");
             SolrVariantUtils.removeCallsetFromDoc(doc, this.individualId);
-            SolrVariantUtils.addDoc(ClientUtils.toSolrInputDocument(doc), server);
+            SolrVariantUtils.addDoc(SolrVariantUtils.toSolrInputDocument(doc), server);
         }
 
         // removing individual id from the metadata document
         SolrDocument metaDoc = SolrVariantUtils.getMetaDocument(server);
         SolrVariantUtils.removeMultiFieldValue(metaDoc, VariantsSchema.CALLSET_IDS, this.individualId);
-        SolrVariantUtils.addDoc(ClientUtils.toSolrInputDocument(metaDoc), server);
+        SolrVariantUtils.addDoc(SolrVariantUtils.toSolrInputDocument(metaDoc), server);
 
         // Solr should commit the fields at it's own optimal pace.
         // We want to commit once at the end to make sure any leftovers in solr buffers are available for querying.
