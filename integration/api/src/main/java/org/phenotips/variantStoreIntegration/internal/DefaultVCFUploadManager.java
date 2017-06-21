@@ -127,12 +127,12 @@ public class DefaultVCFUploadManager implements VCFUploadManager
 
         if (this.currentUploads.get(patientID) != null) {
             this.logger.warn("Tried to upload VCF of {} while it was already uploading", patientID);
-            this.currentRemovals.get(patientID).get();
+            this.currentUploads.get(patientID).get();
         } else if (this.currentRemovals.get(patientID) != null) {
             this.logger.warn("Tried to upload VCF of {} while it was being removed", patientID);
             this.currentRemovals.get(patientID).get();
         }
-        this.logger.warn("UPLOAD VCF STARTED: {}", patientID);
+
         boolean isPublic = DefaultVCFUploadManager.resolvePatientPermission(patient);
 
         Future varStoreFuture = null;
@@ -184,12 +184,12 @@ public class DefaultVCFUploadManager implements VCFUploadManager
 
         if (this.currentUploads.get(patientID) != null) {
             this.logger.warn("Tried to remove the VCF of {} while it was uploading", patientID);
-            this.currentRemovals.get(patientID).get();
+            this.currentUploads.get(patientID).get();
         } else if (this.currentRemovals.get(patientID) != null) {
             this.logger.warn("Tried to remove the VCF of {} while it was already removing", patientID);
             this.currentRemovals.get(patientID).get();
         }
-        this.logger.warn("REMOVE VCF STARTED: {}", patientID);
+
         Future varStoreFuture = null;
         try {
             varStoreFuture = this.varStore.removeIndividual(patientID);

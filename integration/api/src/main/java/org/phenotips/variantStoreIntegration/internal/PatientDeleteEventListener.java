@@ -61,13 +61,11 @@ public class PatientDeleteEventListener extends AbstractEventListener
     public void onEvent(final Event event, final Object source, final Object data)
     {
         Patient patient = ((PatientEvent) event).getPatient();
-        if (event instanceof PatientDeletedEvent) {
-            try {
-                Future varStoreFuture = this.varStore.removeIndividual(patient.getId());
-            } catch (Exception ex) {
-                this.logger.error("Failed to remove individual from variant store [{}]: {}", patient.getId(),
-                    ex.getMessage(), ex);
-            }
+        try {
+            Future varStoreFuture = this.varStore.removeIndividual(patient.getId());
+        } catch (Exception ex) {
+            this.logger.error("Failed to remove individual from variant store [{}]: {}", patient.getId(),
+                ex.getMessage(), ex);
         }
     }
 }
