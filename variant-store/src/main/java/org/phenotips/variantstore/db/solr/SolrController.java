@@ -31,7 +31,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -119,19 +118,14 @@ public class SolrController extends AbstractDatabaseController
     @Override
     public Future addIndividual(final VariantIterator iterator) {
         FutureTask task = new FutureTask<>(new AddIndividualTask(server, iterator));
-
         executor.submit(task);
-
         return task;
     }
 
     @Override
     public Future removeIndividual(String id) throws DatabaseException {
-        Iterator<SolrDocument> iterator = getAllVariantsDocumentsForIndividual(id).iterator();
-
-        FutureTask task = new FutureTask<>(new RemoveIndividualTask(server, iterator, id));
+        FutureTask task = new FutureTask<>(new RemoveIndividualTask(server, id));
         executor.submit(task);
-
         return task;
     }
 
@@ -264,7 +258,7 @@ public class SolrController extends AbstractDatabaseController
                     return false;
                 }
             });
-        } catch (SolrServerException | IOException e) {
+        } catch (Exception e) {
             logger.error("AllGenesForIndividual Solr Exception", e);
             return set;
         }
@@ -523,9 +517,11 @@ public class SolrController extends AbstractDatabaseController
         List<String> ids = new ArrayList<String>();
         try {
             SolrDocument metaDoc = SolrVariantUtils.getMetaDocument(server);
-            List<Object> values = new ArrayList<>(metaDoc.getFieldValues(VariantsSchema.CALLSET_IDS));
-            for (Object item : values) {
-                ids.add((String) item);
+            if (metaDoc.getFieldValues(VariantsSchema.CALLSET_IDS) != null) {
+                List<Object> values = new ArrayList<>(metaDoc.getFieldValues(VariantsSchema.CALLSET_IDS));
+                for (Object item : values) {
+                    ids.add((String) item);
+                }
             }
         } catch (SolrServerException | IOException e) {
             logger.error("Error getting all individals stored in the variant store", e);

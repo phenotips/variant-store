@@ -287,9 +287,15 @@ public final class SolrVariantUtils
      * @param value the specified value to be added
      */
     public static void addMultiFieldValue(SolrDocument doc, String key, Object value) {
-        // clone array, sometimes it's unmodifiable
-        List<Object> values = new ArrayList<>(doc.getFieldValues(key));
-        if (!values.contains(value)) {
+        List<Object> values = new ArrayList<>();
+        if (doc.getFieldValues(key) == null) {
+            values.add(value);
+        } else {
+            if (doc.getFieldValues(key).contains(value)) {
+                return;
+            }
+            // clone array, sometimes it's unmodifiable
+            values = new ArrayList<>(doc.getFieldValues(key));
             values.add(value);
         }
         doc.setField(key, values);
@@ -379,6 +385,9 @@ public final class SolrVariantUtils
      * @param value the specified value to be removed
      */
     public static void removeMultiFieldValue(SolrDocument doc, String key, Object value) {
+        if (doc.getFieldValues(key) == null) {
+            return;
+        }
         // clone array, sometimes it's unmodifiable
         List<Object> values = new ArrayList<>(doc.getFieldValues(key));
         values.remove(value);

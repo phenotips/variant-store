@@ -24,6 +24,7 @@ import org.phenotips.variantstore.input.VariantIterator;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
@@ -78,8 +79,10 @@ public class VCFManager implements InputManager
     public void removeIndividual(String id) throws InputException {
         try {
             Files.delete(this.getIndividual(id));
+        } catch (NoSuchFileException x) {
+            logger.warn("No VCF file found for patient record with the id: {}", id);
         } catch (IOException e) {
-            throw new InputException("Error removing VCF", e);
+            logger.error("Error removing VCF.", e);
         }
     }
 

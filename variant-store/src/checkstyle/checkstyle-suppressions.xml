@@ -30,4 +30,5 @@
   <suppress checks="JavadocVariable" files="GACallInfoFields.java" />
   <suppress checks="UncommentedMain" files="VariantStore.java" /><!--TODO: This is temporary until we have better tests-->
   <suppress checks="ExecutableStatementCount" files="RemoveIndividualTask.java"/>
+  <suppress checks="AnonInnerLength" files="RemoveIndividualTask.java" />
 </suppressions>

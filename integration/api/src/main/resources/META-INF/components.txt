@@ -3,4 +3,5 @@ org.phenotips.variantStoreIntegration.script.VCFStorageScriptService
 org.phenotips.variantStoreIntegration.script.VariantStoreScriptService
 org.phenotips.variantStoreIntegration.internal.DefaultVariantStoreService
 org.phenotips.variantStoreIntegration.internal.VariantStoreInitializer
+org.phenotips.variantStoreIntegration.internal.PatientDeleteEventListener
 500:org.phenotips.variantStoreIntegration.internal.VariantstoreExomeManager

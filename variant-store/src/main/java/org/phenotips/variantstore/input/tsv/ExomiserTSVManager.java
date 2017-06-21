@@ -25,6 +25,7 @@ import org.phenotips.variantstore.shared.VariantStoreException;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
@@ -37,7 +38,7 @@ import org.slf4j.LoggerFactory;
 public class ExomiserTSVManager implements InputManager
 {
     private static String suffix = ".variants.tsv";
-    private Logger logger = LoggerFactory.getLogger(ExomiserTSVManager.class);
+    private static Logger logger = LoggerFactory.getLogger(ExomiserTSVManager.class);
     private Path path;
 
     @Override
@@ -78,8 +79,10 @@ public class ExomiserTSVManager implements InputManager
     public void removeIndividual(String id) throws InputException {
         try {
             Files.delete(this.getIndividual(id));
+        } catch (NoSuchFileException x) {
+            logger.warn("No TSV file found for patient record with the id: {}", id);
         } catch (IOException e) {
-            throw new InputException("Error removing TSV", e);
+            logger.error("Error removing TSV", e);
         }
     }
 

@@ -17,13 +17,11 @@
  */
 package org.phenotips.variantstore.db.solr;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.function.Function;
 
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.params.CursorMarkParams;
@@ -46,13 +44,12 @@ public final class SolrUtils
      * @param server    the solr db
      * @param q         the query
      * @param uniqueKey the solr uniqueKey field to sort on. Required for solr's Cursor functionality.
-     *@param processor the processor to handle the data. If the function returns true, we stop fetching more data.
-     *  @throws IOException
-     * @throws SolrServerException
+     * @param processor the processor to handle the data. If the function returns true, we stop fetching more data.
+     * @throws Exception exception
      */
-    static void processAllDocs(SolrClient server, SolrQuery q,
+    public static void processAllDocs(SolrClient server, SolrQuery q,
                                String uniqueKey, Function<Collection<SolrDocument>, Boolean> processor
-    ) throws IOException, SolrServerException {
+    ) throws Exception {
         boolean done = false;
         String oldCursorMark;
         String cursorMark = CursorMarkParams.CURSOR_MARK_START;
