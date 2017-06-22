@@ -17,6 +17,7 @@
  */
 package org.phenotips.variantStoreIntegration.script;
 
+import org.phenotips.data.ConsentManager;
 import org.phenotips.data.Patient;
 import org.phenotips.data.PatientRepository;
 import org.phenotips.variantStoreIntegration.VCFUploadManager;
@@ -62,6 +63,9 @@ public class VCFStorageScriptService implements ScriptService
 
     @Inject
     private AuthorizationManager access;
+
+    @Inject
+    private ConsentManager consentManager;
 
     /**
      * @param patientID A PhenoTips patient ID.
@@ -130,6 +134,12 @@ public class VCFStorageScriptService implements ScriptService
                 patient.getDocument())) {
             response.put(STATUS_STRING, 401);
             response.put(MESSAGE, "The current user is not authorized to edit this patient");
+            return response;
+        }
+        if (!this.consentManager.hasConsent(patientID, "genetic")
+            || !this.consentManager.hasConsent(patientID, "real")) {
+            response.put(STATUS_STRING, 401);
+            response.put(MESSAGE, "All required consents have not been granted for this patient");
             return response;
         }
         try {
