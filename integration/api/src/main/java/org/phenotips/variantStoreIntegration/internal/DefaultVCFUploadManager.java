@@ -133,7 +133,7 @@ public class DefaultVCFUploadManager implements VCFUploadManager
             this.currentRemovals.get(patientID).get();
         }
 
-        boolean isPublic = DefaultVCFUploadManager.resolvePatientPermission(patient);
+        boolean isPublic = resolvePatientPermission(patient);
 
         Future varStoreFuture = null;
         try {
@@ -212,11 +212,9 @@ public class DefaultVCFUploadManager implements VCFUploadManager
         return this.varStore.getAllIndividuals();
     }
 
-    private static boolean resolvePatientPermission(Patient patient)
+    private boolean resolvePatientPermission(Patient patient)
     {
-
         Visibility patientVisibility = permissions.getPatientAccess(patient).getVisibility();
         return (patientVisibility.compareTo(hiddenVisibility) > 0);
     }
-
 }
