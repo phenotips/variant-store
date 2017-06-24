@@ -463,11 +463,16 @@
       $xwiki.jsx.use('PhenoTips.VariantTableWidget', {'minify' : false})##
       $xwiki.ssx.use('PhenoTips.VariantTableWidget')##
       === $services.localization.render('phenotips.variants.topGenes.title') ===
+      #set ($filename = $doc.getObject('PhenoTips.VCF').getProperty('filename').value)
+      #set ($time = "$services.VCFStorage.getTSVTimeStamp($patient.getId())")
+      ## Under assumption that only one VCF file is allowed to upload
+      #if (!$filename.isEmpty() &amp;&amp; $time != "")
+        {{html clean=false}}$services.localization.render('phenotips.variants.topGenes.exomiser.timeStamp', ["&lt;a href='$doc.getAttachmentURL(${filename})' target='_blank'&gt;$filename&lt;/a&gt;", $time]){{/html}}
+      #end
       {{html clean=false}}&lt;p class="box hint"&gt;$services.localization.render('phenotips.variants.topGenes.exomiser.hint', ['&lt;a href="http://www.sanger.ac.uk/resources/software/exomiser/" target="_blank"&gt;', '&lt;/a&gt;'])&lt;/p&gt;
 &lt;div id="variant_display_container"&gt;&lt;/div&gt;{{/html}}##
 #end
-{{/velocity}}
-</content>
+{{/velocity}}</content>
     </property>
     <property>
       <extensionPointId>org.phenotips.patientSheet.section.genotype</extensionPointId>

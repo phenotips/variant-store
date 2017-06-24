@@ -27,6 +27,7 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.BasicFileAttributes;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -101,5 +102,18 @@ public class VCFManager implements InputManager
     @Override
     public VariantIterator getIteratorForIndividual(String id) {
         return getIteratorForIndividual(id, false);
+    }
+
+    @Override
+    public String getTSVTimeStamp(String id) {
+        try {
+            BasicFileAttributes attr = Files.readAttributes(this.getIndividual(id), BasicFileAttributes.class);
+            return attr.creationTime().toString();
+        } catch (NoSuchFileException x) {
+            logger.warn("No VCF file found for patient record with the id: {}", id);
+        } catch (IOException e) {
+            logger.error("Error getting time for VCF file.", e);
+        }
+        return null;
     }
 }

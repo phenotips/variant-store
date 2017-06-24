@@ -32,7 +32,7 @@ import javax.inject.Singleton;
 /**
  * A script service that directly exposes all methods in {{@link org.phenotips.variantstore.VariantStore}} to velocity.
  *
- * Often in PhenoTips you see fat ScriptServices that pass methods onto the actual Component with the buisness logic.
+ * Often in PhenoTips you see fat ScriptServices that pass methods onto the actual Component with the business logic.
  * In this case, both the Component and the ScriptService implement a "proxy" functionality, where they just
  * marshall the method calls onto the actual {{@link org.phenotips.variantstore.VariantStore}} implementation.
  *

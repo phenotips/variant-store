@@ -28,6 +28,8 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.text.SimpleDateFormat;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -109,5 +111,19 @@ public class ExomiserTSVManager implements InputManager
     @Override
     public VariantIterator getIteratorForIndividual(String id) {
         return getIteratorForIndividual(id, false);
+    }
+
+    @Override
+    public String getTSVTimeStamp(String id) {
+        try {
+            SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+            BasicFileAttributes attr = Files.readAttributes(this.getIndividual(id), BasicFileAttributes.class);
+            return sdfDate.format(attr.creationTime().toMillis());
+        } catch (NoSuchFileException x) {
+            logger.warn("No TSF file found for patient record with the id: {}", id);
+        } catch (IOException e) {
+            logger.error("Error getting time for TSF file.", e);
+        }
+        return null;
     }
 }

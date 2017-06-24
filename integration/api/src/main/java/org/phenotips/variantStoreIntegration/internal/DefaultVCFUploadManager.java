@@ -217,4 +217,9 @@ public class DefaultVCFUploadManager implements VCFUploadManager
         Visibility patientVisibility = permissions.getPatientAccess(patient).getVisibility();
         return (patientVisibility.compareTo(hiddenVisibility) > 0);
     }
+
+    @Override
+    public String getTSVTimeStamp(String patientID) {
+        return this.varStore.getTSVTimeStamp(patientID);
+    }
 }

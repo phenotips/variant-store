@@ -163,4 +163,9 @@ public class VariantStore implements VariantStoreInterface
     public long getTotNumVariants() {
         return db.getTotNumVariants();
     }
+
+    @Override
+    public String getTSVTimeStamp(String id) {
+        return this.inputManager.getTSVTimeStamp(id);
+    }
 }

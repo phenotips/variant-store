@@ -163,4 +163,11 @@ public class MockVariantStore implements VariantStoreInterface
         return null;
     }
 
+    @Override
+    public String getTSVTimeStamp(String id)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

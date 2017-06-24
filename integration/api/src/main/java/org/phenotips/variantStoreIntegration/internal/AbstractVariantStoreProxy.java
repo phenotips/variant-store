@@ -97,4 +97,8 @@ public abstract class AbstractVariantStoreProxy implements VariantStoreInterface
         return this.variantStore.getTopGenesForIndividual(id, k);
     }
 
+    @Override
+    public String getTSVTimeStamp(String id) {
+        return this.variantStore.getTSVTimeStamp(id);
+    }
 }
