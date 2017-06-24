@@ -1,6 +1,7 @@
 org.phenotips.variantStoreIntegration.internal.DefaultVCFUploadManager
 org.phenotips.variantStoreIntegration.script.VCFStorageScriptService
 org.phenotips.variantStoreIntegration.script.VariantStoreScriptService
+org.phenotips.variantStoreIntegration.script.ExomiserViewScriptService
 org.phenotips.variantStoreIntegration.internal.DefaultVariantStoreService
 org.phenotips.variantStoreIntegration.internal.VariantStoreInitializer
 org.phenotips.variantStoreIntegration.internal.PatientDeleteEventListener
