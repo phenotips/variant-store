@@ -60,6 +60,7 @@ public class ExomiserViewScriptService implements ScriptService
 
     /** Manager to allow access to patient exome data. */
     @Inject
+    @Named("variantstore-exomiser")
     private ExomeManager exomeManager;
 
     /**

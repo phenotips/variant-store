@@ -24,11 +24,16 @@ import org.phenotips.variantStoreIntegration.VariantStoreService;
 
 import org.xwiki.component.annotation.Component;
 
+import java.util.List;
+
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 
+import org.slf4j.Logger;
+
 /**
- * This is an implementation of the {@link ExomeManager}, and allows accessing {@link ExomiserExome} objects for the
+ * This is an implementation of the {@link ExomeManager}, and allows accessing {@link VariantstoreExome} objects for the
  * given {@link Patient}.
  *
  * @version $Id$
@@ -36,13 +41,17 @@ import javax.inject.Singleton;
  */
 @Component
 @Singleton
+@Named("variantstore-exomiser")
 public class VariantstoreExomeManager implements ExomeManager
 {
+    @Inject
+    private static Logger logger;
+
     @Inject
     private VariantStoreService vs;
 
     /**
-     * Get the (potentially-cached) {@link Exome} for the given {@link Patient}.
+     * Get the {@link Exome} for the given {@link Patient}.
      *
      * @param p the patient for which the {@link Exome} will be retrieved
      *
@@ -50,8 +59,12 @@ public class VariantstoreExomeManager implements ExomeManager
      */
     @Override
     public Exome getExome(Patient p) {
+        List<String> allIndividuals = vs.getAllIndividuals();
+        if (!allIndividuals.contains(p.getId())) {
+            logger.info("No exome data exists for " + p.getId());
+            return null;
+        }
         Exome exome = new VariantstoreExome(vs, p);
         return exome;
     }
-
 }
