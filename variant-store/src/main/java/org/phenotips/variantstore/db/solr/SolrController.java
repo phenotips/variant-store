@@ -282,12 +282,12 @@ public class SolrController extends AbstractDatabaseController
             resp = server.query(q);
         } catch (SolrServerException | IOException e) {
             logger.error("GeneScore Solr Exception", e);
-            return 0D;
+            return null;
         }
 
         SolrDocumentList results = resp.getResults();
         if (results.size() != 1) {
-            return 0D;
+            return null;
         }
 
         Float result = (Float) results.get(0).get(VariantsSchema.getCallsetsFieldName(
@@ -296,7 +296,7 @@ public class SolrController extends AbstractDatabaseController
         if (result != null) {
             return result.doubleValue();
         } else {
-            return 0D;
+            return null;
         }
     }
 
