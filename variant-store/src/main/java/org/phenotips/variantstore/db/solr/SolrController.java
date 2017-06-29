@@ -23,6 +23,7 @@ import org.phenotips.variantstore.db.solr.tasks.AddIndividualTask;
 import org.phenotips.variantstore.db.solr.tasks.RemoveIndividualTask;
 import org.phenotips.variantstore.input.VariantIterator;
 import org.phenotips.variantstore.shared.ResourceManager;
+import org.phenotips.variantstore.shared.VariantUtils;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -41,6 +42,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.function.Function;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -75,7 +77,13 @@ public class SolrController extends AbstractDatabaseController
      * the field name of the internal (db) allele frequency value in the allele frequency query map.
      */
     public static final String DB_FREQUENCY_FIELD = "PhenomeCentral";
-
+    /** The error message for input parameters validation. **/
+    public static final String ID_ERROR_MESSAGE = "id cannot be empty";
+    /** The error message for input parameters validation. **/
+    public static final String ENSEMBL_ID_ERROR_MESSAGE = "gene ensembl id cannot be empty";
+    /** The error message for input parameters validation. **/
+    public static final String NUMBER_ERROR_MESSAGE = "k cannot be equal or less than zero";
+    /** The error message for input parameters validation. **/
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     // ensure that insertion and deletions are done synchronously, one task at a time
@@ -131,11 +139,10 @@ public class SolrController extends AbstractDatabaseController
 
     @Override
     public List<GAVariant> getTopHarmfullVariants(String id, int n) {
-        List<GAVariant> list = new ArrayList<>();
+        checkArgument(!StringUtils.isBlank(id), ID_ERROR_MESSAGE);
+        checkArgument(n > 0, "n cannot be equal or less than zero");
 
-        if (id == null || "".equals(id) || n == 0) {
-            return list;
-        }
+        List<GAVariant> list = new ArrayList<>();
 
         logger.debug(String.format("Searching for id:%s n:%s", id, n));
 
@@ -237,12 +244,13 @@ public class SolrController extends AbstractDatabaseController
      */
     @Override
     public Set<String> getAllGenesForIndividual(String id) {
-        checkArgument(!id.isEmpty());
+        checkArgument(!StringUtils.isBlank(id), ID_ERROR_MESSAGE);
         logger.debug("getAllGenesForIndividual(" + id + ")");
 
         final Set<String> set = new HashSet<>();
 
-        String queryString = String.format("%s:%s ", VariantsSchema.CALLSET_IDS, id);
+        String queryString = String.format("%s:%s AND NOT %s:%s ", VariantsSchema.CALLSET_IDS,
+            ClientUtils.escapeQueryChars(id), VariantsSchema.ID, SolrVariantUtils.METADATA_DOC_ID);
 
         SolrQuery q = new SolrQuery().setQuery(queryString);
         // sort on unique
@@ -253,7 +261,10 @@ public class SolrController extends AbstractDatabaseController
                 @Override
                 public Boolean apply(Collection<SolrDocument> solrDocuments) {
                     for (SolrDocument doc : solrDocuments) {
-                        set.add((String) doc.get(VariantsSchema.GENE));
+                        String gene = (String) doc.get(VariantsSchema.GENE);
+                        if (StringUtils.isNotBlank(gene)) {
+                            set.add((String) doc.get(VariantsSchema.GENE));
+                        }
                     }
                     return false;
                 }
@@ -268,10 +279,14 @@ public class SolrController extends AbstractDatabaseController
 
     @Override
     public Double getGeneScore(String id, String gene) {
+        checkArgument(!StringUtils.isBlank(id), ID_ERROR_MESSAGE);
+        checkArgument(!StringUtils.isBlank(gene), "gene cannot be empty");
         logger.debug(String.format("getGeneScore(%s, %s)", id, gene));
+
+        String ensemblId = VariantUtils.getEnsemblId(gene);
         String queryString = String.format("%s:%s AND %s:%s",
-                VariantsSchema.CALLSET_IDS, id,
-                VariantsSchema.GENE, gene);
+                VariantsSchema.CALLSET_IDS, ClientUtils.escapeQueryChars(id),
+                VariantsSchema.GENE, ClientUtils.escapeQueryChars(ensemblId));
 
         SolrQuery q = new SolrQuery()
                 .setQuery(queryString)
@@ -302,10 +317,13 @@ public class SolrController extends AbstractDatabaseController
 
     @Override
     public List<String> getTopGenesForIndividual(String id, Integer k) {
+        checkArgument(!StringUtils.isBlank(id), ID_ERROR_MESSAGE);
+        checkArgument(k > 0, NUMBER_ERROR_MESSAGE);
         logger.debug(String.format("getTopGenesForIndividual(%s, %d)", id, k));
+
         final List<String> list = new LinkedList<>();
 
-        String queryString = String.format("%s:%s", VariantsSchema.CALLSET_IDS, id);
+        String queryString = String.format("%s:%s", VariantsSchema.CALLSET_IDS, ClientUtils.escapeQueryChars(id));
 
         SolrQuery q = new SolrQuery()
                 .setQuery(queryString)
@@ -335,12 +353,17 @@ public class SolrController extends AbstractDatabaseController
 
     @Override
     public List<GAVariant> getTopHarmfullVariantsForGene(String id, String gene, Integer k) {
+        checkArgument(!StringUtils.isBlank(id), ID_ERROR_MESSAGE);
+        checkArgument(!StringUtils.isBlank(gene), "gene cannot be empty");
+        checkArgument(k > 0, NUMBER_ERROR_MESSAGE);
         logger.debug(String.format("getTopHarmfullVariantsForGene(%s, %s, %d)", id, gene, k));
+
+        String ensemblId = VariantUtils.getEnsemblId(gene);
         final List<GAVariant> list = new LinkedList<>();
 
         String queryString = String.format("%s:%s AND  %s:%s",
-                VariantsSchema.CALLSET_IDS, id,
-                VariantsSchema.GENE, gene);
+                VariantsSchema.CALLSET_IDS, ClientUtils.escapeQueryChars(id),
+                VariantsSchema.GENE, ClientUtils.escapeQueryChars(ensemblId));
 
         SolrQuery q = new SolrQuery()
                 .setQuery(queryString)
@@ -373,13 +396,12 @@ public class SolrController extends AbstractDatabaseController
 
         List<GAVariant> list = new ArrayList<>();
 
-        checkNotNull(id);
-        checkArgument(!"".equals(id));
+        checkArgument(!StringUtils.isBlank(id), ID_ERROR_MESSAGE);
+        checkArgument(!StringUtils.isBlank(gene), "gene cannot be empty");
+        checkArgument(n > 0, NUMBER_ERROR_MESSAGE);
 
-        checkArgument(n != 0);
-
-        checkNotNull(gene);
-        checkArgument(!"".equals(gene));
+        String ensemblId = VariantUtils.getEnsemblId(gene);
+        checkArgument(!"".equals(ensemblId), ENSEMBL_ID_ERROR_MESSAGE);
 
         checkNotNull(variantEffects);
         checkArgument(variantEffects.size() != 0);
@@ -405,7 +427,7 @@ public class SolrController extends AbstractDatabaseController
 
         String queryString = String.format("s:%s AND %s:%s AND (%s) AND (%s)",
                 VariantsSchema.CALLSET_IDS, ClientUtils.escapeQueryChars(id),
-                VariantsSchema.GENE, ClientUtils.escapeQueryChars(gene),
+                VariantsSchema.GENE, ClientUtils.escapeQueryChars(ensemblId),
                 effectQuery,
                 exacQuery
         );
@@ -447,10 +469,11 @@ public class SolrController extends AbstractDatabaseController
                                                                int n, int totIndividuals) {
         Map<String, List<GAVariant>> map = new HashMap<>();
 
-        checkArgument(n != 0, "n cannot be zero");
+        checkArgument(!StringUtils.isBlank(gene), "gene cannot be empty");
+        checkArgument(n > 0, "n cannot be equal or less than zero");
 
-        checkNotNull(gene, "gene cannot be null");
-        checkArgument(!"".equals(gene), "gene cannot be empty");
+        String ensemblId = VariantUtils.getEnsemblId(gene);
+        checkArgument(!"".equals(ensemblId), ENSEMBL_ID_ERROR_MESSAGE);
 
         checkNotNull(variantEffects, "effects cannot be null");
         checkArgument(variantEffects.size() != 0, "effects cannot be empty");
@@ -482,7 +505,7 @@ public class SolrController extends AbstractDatabaseController
 
         String queryString = String.format("%s:[* TO %s] AND %s:%s AND (%s) AND (%s)",
                 VariantsSchema.AC_TOT, copiesSum,
-                VariantsSchema.GENE, ClientUtils.escapeQueryChars(gene),
+                VariantsSchema.GENE, ClientUtils.escapeQueryChars(ensemblId),
                 effectQuery,
                 exacQuery
         );
@@ -531,6 +554,8 @@ public class SolrController extends AbstractDatabaseController
 
     @Override
     public List<GAVariant> getAllVariantsForIndividual(String id) {
+        checkArgument(!StringUtils.isBlank(id), ID_ERROR_MESSAGE);
+
         List<GAVariant> variants = new ArrayList<GAVariant>();
         SolrDocumentList list = getAllVariantsDocumentsForIndividual(id);
         if (list != null) {
@@ -540,8 +565,9 @@ public class SolrController extends AbstractDatabaseController
     }
 
     private SolrDocumentList getAllVariantsDocumentsForIndividual(String id) {
-        checkArgument(!id.isEmpty());
-        String queryString = String.format("%s:%s ", VariantsSchema.CALLSET_IDS, id);
+        checkArgument(!StringUtils.isBlank(id), ID_ERROR_MESSAGE);
+
+        String queryString = String.format("%s:%s ", VariantsSchema.CALLSET_IDS, ClientUtils.escapeQueryChars(id));
         SolrQuery q = new SolrQuery().setQuery(queryString);
 
         QueryResponse resp = null;

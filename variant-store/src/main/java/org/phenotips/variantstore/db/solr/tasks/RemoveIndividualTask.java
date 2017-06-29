@@ -30,6 +30,7 @@ import java.util.function.Function;
 
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,8 +68,8 @@ public class RemoveIndividualTask implements Callable<Object>
          */
 
         checkArgument(!this.individualId.isEmpty());
-        String queryString = String.format("%s:%s AND NOT %s:%s ", VariantsSchema.CALLSET_IDS, this.individualId,
-                VariantsSchema.ID, SolrVariantUtils.METADATA_DOC_ID);
+        String queryString = String.format("%s:%s AND NOT %s:%s ", VariantsSchema.CALLSET_IDS,
+            ClientUtils.escapeQueryChars(this.individualId), VariantsSchema.ID, SolrVariantUtils.METADATA_DOC_ID);
         SolrQuery q = new SolrQuery().setQuery(queryString);
 
         SolrUtils.processAllDocs(server, q, VariantsSchema.ID, new Function<Collection<SolrDocument>, Boolean>()

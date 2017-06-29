@@ -17,6 +17,14 @@
  */
 package org.phenotips.variantstore.shared;
 
+import org.phenotips.components.ComponentManagerRegistry;
+import org.phenotips.vocabulary.Vocabulary;
+import org.phenotips.vocabulary.VocabularyManager;
+import org.phenotips.vocabulary.VocabularyTerm;
+
+import org.xwiki.component.manager.ComponentLookupException;
+import org.xwiki.component.manager.ComponentManager;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -24,6 +32,8 @@ import java.util.Map;
 
 import org.ga4gh.GACall;
 import org.ga4gh.GAVariant;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Utility functions for working with GAVariants.
@@ -32,6 +42,23 @@ import org.ga4gh.GAVariant;
  */
 public final class VariantUtils
 {
+    /** Manager to allow access to HGNC vocabulary gene data. */
+    private static VocabularyManager vocabularyManager;
+
+    /** Logging helper object. */
+    private static Logger logger = LoggerFactory.getLogger(VariantUtils.class);
+
+    static {
+        VocabularyManager vm = null;
+        try {
+            ComponentManager ccm = ComponentManagerRegistry.getContextComponentManager();
+            vm = ccm.getInstance(VocabularyManager.class);
+        } catch (ComponentLookupException e) {
+            logger.error("Error loading static components: {}", e.getMessage(), e);
+        }
+        vocabularyManager = vm;
+    }
+
     private VariantUtils() {
         throw new AssertionError();
     }
@@ -100,4 +127,24 @@ public final class VariantUtils
         return map.get(key).get(0);
     }
 
+    /**
+     * Gets EnsemblID corresponding to the HGNC symbol.
+     *
+     * @param geneSymbol the string representation of a gene symbol (e.g. NOD2).
+     * @return the string representation of the corresponding Ensembl ID.
+     */
+    public static String getEnsemblId(String geneSymbol)
+    {
+        String symbol = null;
+        if (vocabularyManager != null) {
+            Vocabulary hgnc = vocabularyManager.getVocabulary("HGNC");
+            VocabularyTerm term = hgnc.getTerm(geneSymbol);
+            @SuppressWarnings("unchecked")
+            List<String> ensemblIdList = term != null ? (List<String>) term.get("ensembl_gene_id") : null;
+            String ensemblId = ensemblIdList != null && !ensemblIdList.isEmpty() ? ensemblIdList.get(0) : null;
+            // Retain information as is if we can't find Ensembl ID.
+            symbol = ensemblId != null ? ensemblId : geneSymbol;
+        }
+        return symbol;
+    }
 }

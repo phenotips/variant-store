@@ -55,7 +55,8 @@ public class ExomiserTSVIterator extends AbstractTSVIterator
     protected void processField(GAVariant variant, GACall call, String column, String field) {
         switch (column) {
             case "EXOMISER_GENE":
-                VariantUtils.addInfo(variant, GAVariantInfoFields.GENE, field);
+                String ensemblId = VariantUtils.getEnsemblId(field);
+                VariantUtils.addInfo(variant, GAVariantInfoFields.GENE, ensemblId);
                 break;
             case "FUNCTIONAL_CLASS":
                 VariantUtils.addInfo(variant, GAVariantInfoFields.GENE_EFFECT, field);

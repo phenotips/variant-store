@@ -66,7 +66,7 @@ public class VariantStoreVariant extends AbstractVariant
         }
 
         setAnnotation("geneScore", VariantUtils.getInfo(call, GACallInfoFields.EXOMISER_GENE_COMBINED_SCORE));
-        setAnnotation("geneSymbol", VariantUtils.getInfo(gaVariant, GAVariantInfoFields.GENE));
+        setAnnotation("geneEnsemblId", VariantUtils.getInfo(gaVariant, GAVariantInfoFields.GENE));
         setAnnotation("hgvs", VariantUtils.getInfo(gaVariant, GAVariantInfoFields.GENE_HGVS));
         value = VariantUtils.getInfo(gaVariant, GAVariantInfoFields.EXAC_AF);
         setAnnotation("exacAF", df.format(Double.valueOf(value)));
