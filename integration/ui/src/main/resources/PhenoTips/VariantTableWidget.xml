@@ -190,12 +190,12 @@
         "referenceBases": {
           display : _this.displayBasesCell.bind(_this, "referenceBases"),
           heading : "$escapetool.javascript($services.localization.render('phenotips.variants.table.headings.reference'))",
-          title   : "$escapetool.javascript($services.localization.render('phenotips.variants.table.headings.reference.title'))"
+          title   : "$escapetool.javascript($services.localization.render('phenotips.variants.table.headings.reference.tooltip'))"
         },
         "alternateBases" : {
           display : _this.displayBasesCell.bind(_this, "alternateBases"),
           heading : "$escapetool.javascript($services.localization.render('phenotips.variants.table.headings.alternate'))",
-          title   : "$escapetool.javascript($services.localization.render('phenotips.variants.table.headings.alternate.title'))"
+          title   : "$escapetool.javascript($services.localization.render('phenotips.variants.table.headings.alternate.tooltip'))"
         },
         "zygosity" : {
           display :  _this.displayPlainTextCell.bind(_this, "zygosity"),
@@ -220,17 +220,17 @@
         "exacAF" : {
           display : _this.displayAF.bind(_this, "exacAF"),
           heading : "$escapetool.javascript($services.localization.render('phenotips.variants.table.headings.exacAF'))",
-          title   : "$escapetool.javascript($services.localization.render('phenotips.variants.table.headings.exacAF.title'))"
+          title   : "$escapetool.javascript($services.localization.render('phenotips.variants.table.headings.exacAF.tooltip'))"
         },
         "gtCounts" : {
           display : _this.displayGtCounts.bind(_this),
           heading : "$escapetool.javascript($services.localization.render('phenotips.variants.table.headings.gtCounts'))",
-          title   : "$escapetool.javascript($services.localization.render('phenotips.variants.table.headings.gtCounts.title'))"
+          title   : "$escapetool.javascript($services.localization.render('phenotips.variants.table.headings.gtCounts.tooltip'))"
         },
         "pcAF" : {
           display : _this.displayAF.bind(_this, "pcAF"),
           heading : "$escapetool.javascript($services.localization.render('phenotips.variants.table.headings.pcAF'))",
-          title   : "$escapetool.javascript($services.localization.render('phenotips.variants.table.headings.pcAF.title'))"
+          title   : "$escapetool.javascript($services.localization.render('phenotips.variants.table.headings.pcAF.tooltip'))"
         },
         "UCSC_POSITION_LINK" : {
           display : _this.displayUCSCPositionCell.bind(_this),
