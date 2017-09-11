@@ -17,7 +17,7 @@
  */
 package org.phenotips.variantStoreIntegration;
 
-import org.phenotips.data.similarity.internal.AbstractVariant;
+import org.phenotips.data.similarity.genotype.AbstractVariant;
 import org.phenotips.variantstore.shared.GACallInfoFields;
 import org.phenotips.variantstore.shared.GAVariantInfoFields;
 import org.phenotips.variantstore.shared.VariantUtils;
