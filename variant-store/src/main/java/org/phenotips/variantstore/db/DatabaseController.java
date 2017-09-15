@@ -40,6 +40,7 @@ public interface DatabaseController extends Service
      * @throws DatabaseException if an error is encountered immediately.
      *                           The Future throws exceptions if an error is encountered during insert.
      */
+    @SuppressWarnings("rawtypes")
     Future addIndividual(VariantIterator iterator) throws DatabaseException;
 
     /**
@@ -50,6 +51,7 @@ public interface DatabaseController extends Service
      * @throws DatabaseException if an error is encountered immediately.
      *                           The Future throws exceptions if an error is encountred during insert.
      */
+    @SuppressWarnings("rawtypes")
     Future removeIndividual(String id) throws DatabaseException;
 
     /**
@@ -62,7 +64,7 @@ public interface DatabaseController extends Service
      * @param n                 the number of variants to return per individual
      * @param totIndividuals    the total number of individuals in the db.
      * @return a map, where the keys are individual ids, and the values are a list of variants
-     * for each individual that match the filter, sorted by variant harmfulness.
+     *         for each individual that match the filter, sorted by variant harmfulness.
      */
     Map<String, List<GAVariant>> getIndividualsWithGene(String gene,
                                                         List<String> variantEffects,
@@ -77,7 +79,7 @@ public interface DatabaseController extends Service
      * @param ref the reference bases
      * @param alt the alternate bases
      * @return a map, where the keys are individual ids, and the values are a list of variants
-     * for each individual that match the filter.
+     *         for each individual that match the filter.
      */
     Map<String, List<GAVariant>> getIndividualsWithVariant(String chr, int pos, String ref, String alt);
 
@@ -147,7 +149,7 @@ public interface DatabaseController extends Service
      */
     List<String> getTopGenesForIndividual(String id, Integer k);
 
-     /**
+    /**
      * Get a list of at most k variants with a known gene of an individual, sorted by
      * harmfulness.
      *

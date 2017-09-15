@@ -32,7 +32,8 @@ public class VariantHeader
      * @param individualId the individual's id
      * @param isPublic can these variants be used in aggregate searches
      */
-    public VariantHeader(String individualId, boolean isPublic) {
+    public VariantHeader(String individualId, boolean isPublic)
+    {
         this.individualId = individualId;
         this.isPublic = isPublic;
     }
@@ -41,15 +42,17 @@ public class VariantHeader
      * Get the individual id.
      * @return the individuals id
      */
-    public String getIndividualId() {
-        return individualId;
+    public String getIndividualId()
+    {
+        return this.individualId;
     }
 
     /**
      * Set the individual's id.
      * @param individualId the id
      */
-    public void setIndividualId(String individualId) {
+    public void setIndividualId(String individualId)
+    {
         this.individualId = individualId;
     }
 
@@ -57,15 +60,17 @@ public class VariantHeader
      * Return whether the variants can be used in aggregate queries.
      * @return whether the variants can be used in aggregate queries.
      */
-    public boolean isPublic() {
-        return isPublic;
+    public boolean isPublic()
+    {
+        return this.isPublic;
     }
 
     /**
      * Set whether the variants may be used in aggregate queries.
      * @param isPublic whether the variants may be used in aggregate queries
      */
-    public void setPublic(boolean isPublic) {
+    public void setPublic(boolean isPublic)
+    {
         this.isPublic = isPublic;
     }
 }

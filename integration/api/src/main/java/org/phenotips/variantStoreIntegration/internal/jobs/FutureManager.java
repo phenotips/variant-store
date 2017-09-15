@@ -36,6 +36,7 @@ import java.util.concurrent.Future;
 public class FutureManager implements EventListener
 {
 
+    @SuppressWarnings("rawtypes")
     private Map<String, Future> futures;
 
     private String name;
@@ -59,6 +60,7 @@ public class FutureManager implements EventListener
      * @param id The key for the future
      * @param f The stored future
      */
+    @SuppressWarnings("rawtypes")
     public void add(String id, Future f)
     {
         this.futures.put(id, f);
@@ -68,6 +70,7 @@ public class FutureManager implements EventListener
      * @param id The key for the future
      * @return Future The stored future
      */
+    @SuppressWarnings("rawtypes")
     public Future get(String id)
     {
         return this.futures.get(id);

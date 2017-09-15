@@ -31,7 +31,8 @@ public final class GAVariantInfoFields
     public static final String GT_HET = "GT_HET";
     public static final String GT_HOM = "GT_HOM";
 
-    private GAVariantInfoFields() {
+    private GAVariantInfoFields()
+    {
         throw new AssertionError();
     }
 }

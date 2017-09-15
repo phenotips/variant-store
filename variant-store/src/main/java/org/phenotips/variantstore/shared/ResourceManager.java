@@ -34,8 +34,6 @@ import java.util.jar.JarFile;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Manage the resources for the application. Set them up, clean them up, the whole 9 yards.
@@ -44,9 +42,8 @@ import org.slf4j.LoggerFactory;
  */
 public final class ResourceManager
 {
-    private static Logger logger = LoggerFactory.getLogger(ResourceManager.class);
-
-    private ResourceManager() {
+    private ResourceManager()
+    {
         throw new AssertionError();
     }
 
@@ -57,7 +54,8 @@ public final class ResourceManager
      * @param dest   the destination
      * @throws DatabaseException if an error occurs
      */
-    public static void copyResourcesToPath(String source, Path dest) throws DatabaseException {
+    public static void copyResourcesToPath(String source, Path dest) throws DatabaseException
+    {
         copyResourcesToPath(Paths.get(source), dest);
     }
 
@@ -68,7 +66,8 @@ public final class ResourceManager
      * @param destination the destination
      * @throws DatabaseException if an error occurs
      */
-    public static void copyResourcesToPath(final Path source, Path destination) throws DatabaseException {
+    public static void copyResourcesToPath(final Path source, Path destination) throws DatabaseException
+    {
         copyResourcesToPath(source, destination, ResourceManager.class);
     }
 
@@ -81,7 +80,8 @@ public final class ResourceManager
      * @throws DatabaseException if an error occurs
      */
     public static void copyResourcesToPath(final Path source, Path destination, Class<?> clazz)
-        throws DatabaseException {
+        throws DatabaseException
+    {
         Path dest = destination;
         // Check if storage dirs exists
         if (Files.isDirectory(dest)) {
@@ -132,22 +132,25 @@ public final class ResourceManager
     /**
      * Copy resources recursively from a path on the filesystem to the destination folder.
      *
-     * @param source
-     * @param dest
-     * @throws IOException
+     * @param source the folder on the filesystem
+     * @param dest   the destination
+     * @throws IOException if an error occurs
      */
-    private static void copyResourcesFromFilesystem(final Path source, final Path dest) throws IOException {
+    private static void copyResourcesFromFilesystem(final Path source, final Path dest) throws IOException
+    {
         Files.walkFileTree(source, new SimpleFileVisitor<Path>()
         {
             @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
+            {
                 Path relative = source.relativize(file);
                 Files.copy(file, dest.resolve(relative));
                 return FileVisitResult.CONTINUE;
             }
 
             @Override
-            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException
+            {
                 Path relative = source.relativize(dir);
                 Files.createDirectory(dest.resolve(relative));
                 return FileVisitResult.CONTINUE;
@@ -162,9 +165,10 @@ public final class ResourceManager
      * @param jarPath the jar file
      * @param source  the folder on the filesystem
      * @param dest    the destination
-     * @throws IOException
+     * @throws IOException if an error occurs
      */
-    private static void copyResourcesFromJar(Path jarPath, Path source, Path dest) throws IOException {
+    private static void copyResourcesFromJar(Path jarPath, Path source, Path dest) throws IOException
+    {
         JarFile jar = new JarFile(jarPath.toFile());
 
         for (JarEntry entry : Collections.list(jar.entries())) {
@@ -178,6 +182,8 @@ public final class ResourceManager
             }
 
         }
+
+        jar.close();
     }
 
     /**
@@ -186,7 +192,8 @@ public final class ResourceManager
      * @param path the directory to delete
      * @throws DatabaseException if an error occurs
      */
-    public static void clearResources(Path path) throws DatabaseException {
+    public static void clearResources(Path path) throws DatabaseException
+    {
         try {
             FileUtils.deleteDirectory(path.toFile());
         } catch (IOException e) {

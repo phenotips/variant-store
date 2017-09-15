@@ -47,7 +47,8 @@ public class VariantStoreScriptService extends AbstractVariantStoreProxy impleme
     protected VariantStoreService variantStoreService;
 
     @Override
-    public void initialize() throws InitializationException {
+    public void initialize() throws InitializationException
+    {
         this.variantStore = variantStoreService;
     }
 }

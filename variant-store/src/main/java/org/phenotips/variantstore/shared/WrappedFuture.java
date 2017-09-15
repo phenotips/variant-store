@@ -29,6 +29,7 @@ import java.util.concurrent.TimeoutException;
  * A Future that wraps around multiple futures, and completes only when they all complete.
  * @version $Id$
  */
+@SuppressWarnings("rawtypes")
 public class WrappedFuture implements Future<List>
 {
     /** a list of futures we're wrapping. */
@@ -44,16 +45,18 @@ public class WrappedFuture implements Future<List>
      * and fails when any one fails.
      * @param futures the futures to wrap.
      */
-    public WrappedFuture(Future... futures) {
+    public WrappedFuture(Future... futures)
+    {
         this.futures = Arrays.asList(futures);
     }
 
     @Override
-    public boolean cancel(boolean b) {
+    public boolean cancel(boolean b)
+    {
         boolean ret = true;
         this.canceled = true;
 
-        for (Future f : futures) {
+        for (Future f : this.futures) {
             ret = ret && f.cancel(b);
         }
 
@@ -61,13 +64,15 @@ public class WrappedFuture implements Future<List>
     }
 
     @Override
-    public boolean isCancelled() {
+    public boolean isCancelled()
+    {
         return this.canceled;
     }
 
     @Override
-    public boolean isDone() {
-        for (Future f : futures) {
+    public boolean isDone()
+    {
+        for (Future f : this.futures) {
             if (!f.isDone()) {
                 return false;
             }
@@ -76,18 +81,20 @@ public class WrappedFuture implements Future<List>
     }
 
     @Override
-    public List<Object> get() throws InterruptedException, ExecutionException {
+    public List<Object> get() throws InterruptedException, ExecutionException
+    {
         List<Object> list = new ArrayList<Object>();
-        for (Future f : futures) {
+        for (Future f : this.futures) {
             list.add(f.get());
         }
         return list;
     }
 
     @Override
-    public List get(long l, TimeUnit timeUnit) throws InterruptedException, ExecutionException, TimeoutException {
+    public List get(long l, TimeUnit timeUnit) throws InterruptedException, ExecutionException, TimeoutException
+    {
         List<Object> list = new ArrayList<Object>();
-        for (Future f : futures) {
+        for (Future f : this.futures) {
             list.add(f.get(l, timeUnit));
         }
         return list;

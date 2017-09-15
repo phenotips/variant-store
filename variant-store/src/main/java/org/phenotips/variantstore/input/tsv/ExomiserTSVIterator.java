@@ -43,16 +43,19 @@ public class ExomiserTSVIterator extends AbstractTSVIterator
      * @param path          the path to the file
      * @param variantHeader the header with file meta-information
      */
-    public ExomiserTSVIterator(Path path, VariantHeader variantHeader) {
+    public ExomiserTSVIterator(Path path, VariantHeader variantHeader)
+    {
         super(path, variantHeader);
     }
 
-    protected void finalizeVariant(GAVariant variant) {
+    protected void finalizeVariant(GAVariant variant)
+    {
         super.finalizeVariant(variant);
-        VariantUtils.addInfo(variant, GAVariantInfoFields.EXAC_AF, String.valueOf(maxExacFreq));
+        VariantUtils.addInfo(variant, GAVariantInfoFields.EXAC_AF, String.valueOf(this.maxExacFreq));
     }
 
-    protected void processField(GAVariant variant, GACall call, String column, String field) {
+    protected void processField(GAVariant variant, GACall call, String column, String field)
+    {
         switch (column) {
             case "EXOMISER_GENE":
                 String ensemblId = VariantUtils.getEnsemblId(field);
@@ -73,7 +76,7 @@ public class ExomiserTSVIterator extends AbstractTSVIterator
             case "EXAC_OTH_FREQ":
                 try {
                     // Exomiser outputs percentages instead of frequencies
-                    maxExacFreq = Math.max(maxExacFreq, Double.parseDouble(field) / 100);
+                    this.maxExacFreq = Math.max(this.maxExacFreq, Double.parseDouble(field) / 100);
                 } catch (NumberFormatException e) {
                     // do nothing, stay with default 0.0 value
                 }

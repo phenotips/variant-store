@@ -44,7 +44,8 @@ public class VCFManager implements InputManager
     private Path path;
 
     @Override
-    public void init(Path path) throws InputException {
+    public void init(Path path) throws InputException
+    {
         this.path = path;
 
         if (!Files.exists(this.path)) {
@@ -58,12 +59,14 @@ public class VCFManager implements InputManager
     }
 
     @Override
-    public void stop() {
+    public void stop()
+    {
 
     }
 
     @Override
-    public void addIndividual(String id, Path path) throws InputException {
+    public void addIndividual(String id, Path path) throws InputException
+    {
         try {
             Files.copy(path, this.getIndividual(id), StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
@@ -72,12 +75,14 @@ public class VCFManager implements InputManager
     }
 
     @Override
-    public Path getIndividual(String id) {
+    public Path getIndividual(String id)
+    {
         return this.path.resolve(id + suffix);
     }
 
     @Override
-    public void removeIndividual(String id) throws InputException {
+    public void removeIndividual(String id) throws InputException
+    {
         try {
             Files.delete(this.getIndividual(id));
         } catch (NoSuchFileException x) {
@@ -88,7 +93,8 @@ public class VCFManager implements InputManager
     }
 
     @Override
-    public VariantIterator getIteratorForIndividual(String id, boolean isPublic) {
+    public VariantIterator getIteratorForIndividual(String id, boolean isPublic)
+    {
         return new VCFIterator(this.getIndividual(id), new VariantHeader(id, true));
     }
 
@@ -100,12 +106,14 @@ public class VCFManager implements InputManager
      * @return the variant iterator
      */
     @Override
-    public VariantIterator getIteratorForIndividual(String id) {
+    public VariantIterator getIteratorForIndividual(String id)
+    {
         return getIteratorForIndividual(id, false);
     }
 
     @Override
-    public String getTSVTimeStamp(String id) {
+    public String getTSVTimeStamp(String id)
+    {
         try {
             BasicFileAttributes attr = Files.readAttributes(this.getIndividual(id), BasicFileAttributes.class);
             return attr.creationTime().toString();

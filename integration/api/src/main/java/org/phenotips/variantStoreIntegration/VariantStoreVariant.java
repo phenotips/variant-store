@@ -45,7 +45,8 @@ public class VariantStoreVariant extends AbstractVariant
      * @param gaVariant a {@link GAVariant}
      * @param totIndividuals number of individuals stored in the variant store
      */
-    public VariantStoreVariant(GAVariant gaVariant, Integer totIndividuals) {
+    public VariantStoreVariant(GAVariant gaVariant, Integer totIndividuals)
+    {
         setChrom(gaVariant.getReferenceName());
         setPosition((int) (gaVariant.getStart() + 1));
 

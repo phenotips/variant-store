@@ -96,7 +96,6 @@
       -->
     <!-- <termIndexInterval>256</termIndexInterval> -->
 
-    <unlockOnStartup>true</unlockOnStartup>
     <lockType>native</lockType>
   </indexConfig>
 
@@ -110,9 +109,6 @@
     <autoSoftCommit>
       <maxTime>1000</maxTime>
     </autoSoftCommit>
-    <updateLog class="solr.FSUpdateLog">
-      <str name="dir">${solr.data.dir:}</str>
-    </updateLog>
   </updateHandler>
 
   <!-- A dedup update processor that creates the "id" field on the fly

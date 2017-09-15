@@ -17,7 +17,7 @@
  */
 package org.phenotips.variantStoreIntegration.script;
 
-import org.phenotips.data.ConsentManager;
+import org.phenotips.consents.ConsentManager;
 import org.phenotips.data.Patient;
 import org.phenotips.data.PatientRepository;
 import org.phenotips.variantStoreIntegration.VCFUploadManager;
@@ -72,10 +72,11 @@ public class VCFStorageScriptService implements ScriptService
      * @param filePath  The path to where the patients VCF is stored
      *
      * @return A json object with key status representing the status of the initial request. NOTE: The status is only
-     * relevant to the submission of the request. Failures during asynchronous vcf processing will not effect the status
-     * of the request.
+     *         relevant to the submission of the request. Failures during asynchronous vcf processing will not effect
+     *         the status of the request.
      */
-    public JSONObject upload(String patientID, String filePath) {
+    public JSONObject upload(String patientID, String filePath)
+    {
         return executeJob(patientID, filePath, UPLOAD_STRING);
     }
 
@@ -84,7 +85,8 @@ public class VCFStorageScriptService implements ScriptService
      *
      * @param patient a phenotips patient
      */
-    public void cancelUpload(Patient patient) {
+    public void cancelUpload(Patient patient)
+    {
         this.uploadManager.cancelUpload(patient);
     }
 
@@ -94,10 +96,11 @@ public class VCFStorageScriptService implements ScriptService
      * @param patientID a PhenoTips patient ID
      *
      * @return A json object with key status representing the status of the initial request. NOTE: The status is only
-     * relevant to the submission of the request. Failures during asynchronous vcf processing will not effect the status
-     * of the request.
+     *         relevant to the submission of the request. Failures during asynchronous vcf processing will not effect
+     *         the status of the request.
      */
-    public JSONObject removeVCF(String patientID) {
+    public JSONObject removeVCF(String patientID)
+    {
         return executeJob(patientID, null, REMOVE_STRING);
     }
 
@@ -106,7 +109,8 @@ public class VCFStorageScriptService implements ScriptService
      *
      * @return The current status of the VCF file 0-Unknown. 1-Uploading 2-Stored -1-Removing
      */
-    public int getVCFStatus(Patient patient) {
+    public int getVCFStatus(Patient patient)
+    {
         // I guess this will just query the database??? Doesn't seem like such a good way of doing things.
         return 0;
     }
@@ -116,11 +120,13 @@ public class VCFStorageScriptService implements ScriptService
      *
      * @return a list of patients.
      */
-    public List<String> getUploadedPatients() {
-        return uploadManager.getUploadedPatients();
+    public List<String> getUploadedPatients()
+    {
+        return this.uploadManager.getUploadedPatients();
     }
 
-    private JSONObject executeJob(String patientID, String filePath, String jobName) {
+    private JSONObject executeJob(String patientID, String filePath, String jobName)
+    {
         JSONObject response = new JSONObject();
 
         Patient patient = this.repository.get(patientID);
@@ -131,7 +137,7 @@ public class VCFStorageScriptService implements ScriptService
         }
         User currentUser = this.users.getCurrentUser();
         if (!this.access.hasAccess(Right.EDIT, currentUser == null ? null : currentUser.getProfileDocument(),
-                patient.getDocument())) {
+                patient.getDocumentReference())) {
             response.put(STATUS_STRING, 401);
             response.put(MESSAGE, "The current user is not authorized to edit this patient");
             return response;
@@ -162,7 +168,8 @@ public class VCFStorageScriptService implements ScriptService
      * @param patientID the id of the individual
      * @return the file creation timestamp
      */
-    public String getTSVTimeStamp(String patientID) {
+    public String getTSVTimeStamp(String patientID)
+    {
         return this.uploadManager.getTSVTimeStamp(patientID);
     }
 }

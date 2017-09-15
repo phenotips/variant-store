@@ -44,7 +44,8 @@ public class DefaultVariantStoreService extends AbstractVariantStoreProxy implem
     private Environment env;
 
     @Override
-    public void initialize() throws InitializationException {
+    public void initialize() throws InitializationException
+    {
         this.variantStore = new VariantStore(
                 new ExomiserTSVManager(),
                 new SolrController()
@@ -56,5 +57,4 @@ public class DefaultVariantStoreService extends AbstractVariantStoreProxy implem
             throw new InitializationException("Error setting up Variant Store", e);
         }
     }
-
 }

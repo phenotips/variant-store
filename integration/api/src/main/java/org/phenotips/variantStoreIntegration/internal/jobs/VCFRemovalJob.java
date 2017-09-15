@@ -49,6 +49,7 @@ public class VCFRemovalJob implements Runnable
     public static final EntityReference CLASS_REFERENCE = new EntityReference("VCFStatusClass", EntityType.DOCUMENT,
         Constants.CODE_SPACE_REFERENCE);
 
+    @SuppressWarnings("rawtypes")
     private Future future;
 
     private Patient patient;
@@ -63,6 +64,7 @@ public class VCFRemovalJob implements Runnable
      * @param provider The xwiki context provider
      * @param observationManager The observation manager for event pubs
      */
+    @SuppressWarnings("rawtypes")
     public VCFRemovalJob(Patient patient, Future variantStoreFuture, Provider<XWikiContext> provider,
         ObservationManager observationManager)
     {
@@ -79,7 +81,7 @@ public class VCFRemovalJob implements Runnable
         try {
             // set patient VCF removal status to 'Removing' on disk
             XWiki xwiki = this.contextProvider.get().getWiki();
-            XWikiDocument d = xwiki.getDocument(this.patient.getDocument(), this.contextProvider.get());
+            XWikiDocument d = xwiki.getDocument(this.patient.getDocumentReference(), this.contextProvider.get());
 
             BaseObject removingStatusObj = d.getXObject(CLASS_REFERENCE, true, this.contextProvider.get());
             removingStatusObj.set(propertyName, "Removing", this.contextProvider.get());
@@ -97,7 +99,7 @@ public class VCFRemovalJob implements Runnable
             XWiki xwiki = this.contextProvider.get().getWiki();
             XWikiDocument d;
             try {
-                d = xwiki.getDocument(this.patient.getDocument(), this.contextProvider.get());
+                d = xwiki.getDocument(this.patient.getDocumentReference(), this.contextProvider.get());
                 BaseObject removingStatusObj = d.getXObject(CLASS_REFERENCE, true, this.contextProvider.get());
 
                 StringProperty status = (StringProperty) removingStatusObj.get(propertyName);

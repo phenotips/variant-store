@@ -52,13 +52,15 @@ public class RemoveIndividualTask implements Callable<Object>
      * @param server    the solr server to run the task on
      * @param id        the individual id
      */
-    public RemoveIndividualTask(SolrClient server, String id) {
+    public RemoveIndividualTask(SolrClient server, String id)
+    {
         this.server = server;
         this.individualId = id;
     }
 
     @Override
-    public Object call() throws Exception {
+    public Object call() throws Exception
+    {
         /*
          * 1. Find all documents that have our individualId in the callsetIds except metadata document
          * 2. For each doc, remove all traces of the individual:
@@ -72,10 +74,11 @@ public class RemoveIndividualTask implements Callable<Object>
             ClientUtils.escapeQueryChars(this.individualId), VariantsSchema.ID, SolrVariantUtils.METADATA_DOC_ID);
         SolrQuery q = new SolrQuery().setQuery(queryString);
 
-        SolrUtils.processAllDocs(server, q, VariantsSchema.ID, new Function<Collection<SolrDocument>, Boolean>()
+        SolrUtils.processAllDocs(this.server, q, VariantsSchema.ID, new Function<Collection<SolrDocument>, Boolean>()
         {
             @Override
-            public Boolean apply(Collection<SolrDocument> solrDocuments) {
+            public Boolean apply(Collection<SolrDocument> solrDocuments)
+            {
                 SolrDocument doc;
                 Iterator<SolrDocument> iterator = solrDocuments.iterator();
                 try {
@@ -105,13 +108,13 @@ public class RemoveIndividualTask implements Callable<Object>
         });
 
         // removing individual id from the metadata document
-        SolrDocument metaDoc = SolrVariantUtils.getMetaDocument(server);
+        SolrDocument metaDoc = SolrVariantUtils.getMetaDocument(this.server);
         SolrVariantUtils.removeMultiFieldValue(metaDoc, VariantsSchema.CALLSET_IDS, this.individualId);
-        SolrVariantUtils.addDoc(SolrVariantUtils.toSolrInputDocument(metaDoc), server);
+        SolrVariantUtils.addDoc(SolrVariantUtils.toSolrInputDocument(metaDoc), this.server);
 
         // Solr should commit the fields at it's own optimal pace.
         // We want to commit once at the end to make sure any leftovers in solr buffers are available for querying.
-        server.commit(true, true);
+        this.server.commit(true, true);
         return null;
     }
 }

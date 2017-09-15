@@ -31,6 +31,7 @@ import org.ga4gh.GAVariant;
 /**
  * @version $Id$
  */
+@SuppressWarnings("rawtypes")
 public interface VariantStoreInterface extends Service
 {
     /**

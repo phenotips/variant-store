@@ -51,6 +51,7 @@ public class VCFUploadJob implements Runnable
     public static final EntityReference CLASS_REFERENCE = new EntityReference("VCFStatusClass", EntityType.DOCUMENT,
         Constants.CODE_SPACE_REFERENCE);
 
+    @SuppressWarnings("rawtypes")
     private Future future;
 
     private Patient patient;
@@ -65,6 +66,7 @@ public class VCFUploadJob implements Runnable
      * @param provider The xwiki context provider
      * @param observationManager The observation manager for event pubs
      */
+    @SuppressWarnings("rawtypes")
     public VCFUploadJob(Patient patient, Future variantStoreFuture, Provider<XWikiContext> provider,
         ObservationManager observationManager)
     {
@@ -81,7 +83,7 @@ public class VCFUploadJob implements Runnable
         try {
             // set patient VCF upload status to 'Initialized' on disk
             XWiki xwiki = this.contextProvider.get().getWiki();
-            XWikiDocument d = xwiki.getDocument(this.patient.getDocument(), this.contextProvider.get());
+            XWikiDocument d = xwiki.getDocument(this.patient.getDocumentReference(), this.contextProvider.get());
 
             BaseObject uploadStatusObj = d.getXObject(CLASS_REFERENCE, true, this.contextProvider.get());
             uploadStatusObj.set(propertyName, "Initialized", this.contextProvider.get());
@@ -99,7 +101,7 @@ public class VCFUploadJob implements Runnable
             XWiki xwiki = this.contextProvider.get().getWiki();
             XWikiDocument d;
             try {
-                d = xwiki.getDocument(this.patient.getDocument(), this.contextProvider.get());
+                d = xwiki.getDocument(this.patient.getDocumentReference(), this.contextProvider.get());
                 BaseObject uploadStatusObj = d.getXObject(CLASS_REFERENCE, true, this.contextProvider.get());
 
                 StringProperty status = (StringProperty) uploadStatusObj.get(propertyName);

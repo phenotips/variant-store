@@ -23,13 +23,15 @@ import org.phenotips.variantstore.shared.VariantStoreException;
  * An exception thrown by the input handlers.
  * @version $Id$
  */
+@SuppressWarnings("serial")
 public class DatabaseException extends VariantStoreException
 {
     /**
      * Create a new exception with a message.
      * @param message the exception message
      */
-    public DatabaseException(String message) {
+    public DatabaseException(String message)
+    {
         super(message);
     }
 
@@ -38,7 +40,8 @@ public class DatabaseException extends VariantStoreException
      * @param message the message
      * @param e the chained exception
      */
-    public DatabaseException(String message, Exception e) {
+    public DatabaseException(String message, Exception e)
+    {
         super(message, e);
     }
 }

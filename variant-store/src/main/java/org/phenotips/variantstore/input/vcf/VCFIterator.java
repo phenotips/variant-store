@@ -60,7 +60,8 @@ public class VCFIterator extends AbstractVariantIterator
      * @param path   the path to the vcf
      * @param header vcf meta info
      */
-    public VCFIterator(Path path, VariantHeader header) {
+    public VCFIterator(Path path, VariantHeader header)
+    {
         this(path, null, header, null);
     }
 
@@ -71,30 +72,34 @@ public class VCFIterator extends AbstractVariantIterator
      * @param index  the index file
      * @param header the header
      */
-    public VCFIterator(Path path, Path index, VariantHeader header) {
+    public VCFIterator(Path path, Path index, VariantHeader header)
+    {
         this(path, index, header, null);
     }
 
     /**
-     * Create a new Variant Iterator for a VCF file with a filter to skip any info field that matches the filter.
+     * Create a new Variant Iterator for a VCF file with a this.filter to skip
+     * any info field that matches the this.filter.
      *
      * @param path   the vcf file
      * @param header vcf meta info
      * @param filter map of info field names and the values to skip on
      */
-    public VCFIterator(Path path, VariantHeader header, Map<String, List<String>> filter) {
+    public VCFIterator(Path path, VariantHeader header, Map<String, List<String>> filter)
+    {
         this(path, null, header, filter);
     }
 
     /**
-     * Set a filter for the Info fields. Any VCF row with info fields that match this filter will be skipped.
+     * Set a this.filter for the Info fields. Any VCF row with info fields that match this this.filter will be skipped.
      *
      * @param path   the vcf file
      * @param index  the index file
      * @param header vcf meta info
      * @param filter A Map of Info field -> List of values to exclude
      */
-    public VCFIterator(Path path, Path index, VariantHeader header, Map<String, List<String>> filter) {
+    public VCFIterator(Path path, Path index, VariantHeader header, Map<String, List<String>> filter)
+    {
         super(path, header);
 
         this.filter = filter;
@@ -109,19 +114,21 @@ public class VCFIterator extends AbstractVariantIterator
     }
 
     @Override
-    public boolean hasNext() {
-        return nextRow != null;
+    public boolean hasNext()
+    {
+        return this.nextRow != null;
     }
 
     @Override
-    public GAVariant next() {
+    public GAVariant next()
+    {
         if (!hasNext()) {
             throw new NoSuchElementException();
         }
 
         GAVariant variant = new GAVariant();
 
-        VariantContext context = nextRow;
+        VariantContext context = this.nextRow;
 
         Map<String, List<String>> info = new HashMap<>();
 
@@ -133,7 +140,7 @@ public class VCFIterator extends AbstractVariantIterator
 
 
         // ALT
-        List<String> alts = Collections.singletonList(context.getAlleles().get(altIndex).getBaseString());
+        List<String> alts = Collections.singletonList(context.getAlleles().get(this.altIndex).getBaseString());
         variant.setAlternateBases(alts);
 
         // INFO
@@ -152,7 +159,7 @@ public class VCFIterator extends AbstractVariantIterator
 
             // genotype
             call.setGenotype(new ArrayList<Integer>());
-            int count = genotype.countAllele(context.getAlleles().get(altIndex));
+            int count = genotype.countAllele(context.getAlleles().get(this.altIndex));
             // if 2: (1,1), if 1: (0, 1), if 0: (0, 0)
             call.setGenotype(Arrays.asList(count / 2, count % 2));
 
@@ -164,45 +171,46 @@ public class VCFIterator extends AbstractVariantIterator
         }
         variant.setCalls(calls);
 
-        if (this.nextRow.getAlternateAlleles().size() > altIndex) {
-            altIndex++;
+        if (this.nextRow.getAlternateAlleles().size() > this.altIndex) {
+            this.altIndex++;
         } else {
             this.nextRow = this.nextFiltered();
-            altIndex = 0;
+            this.altIndex = 0;
         }
         if (!hasNext()) {
-            iterator.close();
-            reader.close();
+            this.iterator.close();
+            this.reader.close();
         }
 
         return variant;
     }
 
     /**
-     * Advance the iterator to the next filtered.
+     * Advance the this.iterator to the next this.filtered.
      */
-    private VariantContext nextFiltered() {
+    private VariantContext nextFiltered()
+    {
 
         // no next
-        if (!iterator.hasNext()) {
+        if (!this.iterator.hasNext()) {
             return null;
         }
-        // no filter, don't do extra work.
+        // no this.filter, don't do extra work.
         if (this.filter == null) {
-            return iterator.next();
+            return this.iterator.next();
         }
 
-        while (iterator.hasNext()) {
-            VariantContext ctx = iterator.next();
+        while (this.iterator.hasNext()) {
+            VariantContext ctx = this.iterator.next();
             CommonInfo contextInfo = ctx.getCommonInfo();
 
-            // Skip any vcf row that matches the filter.
+            // Skip any vcf row that matches the this.filter.
             boolean matched = false;
-            for (Map.Entry<String, List<String>> filterEntry : filter.entrySet()) {
+            for (Map.Entry<String, List<String>> filterEntry : this.filter.entrySet()) {
 
                 String ctxInfoValue = String.valueOf(contextInfo.getAttribute(filterEntry.getKey()));
                 if (filterEntry.getValue().contains(ctxInfoValue)) {
-                    // the INFO field matched the filter, skip to discarding this element.
+                    // the INFO field matched the this.filter, skip to discarding this element.
                     matched = true;
                     break;
                 }
@@ -215,6 +223,5 @@ public class VCFIterator extends AbstractVariantIterator
 
         // no items found!
         return null;
-
     }
 }

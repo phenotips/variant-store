@@ -38,67 +38,82 @@ public abstract class AbstractVariantStoreProxy implements VariantStoreInterface
     protected VariantStoreInterface variantStore;
 
     @Override
-    public void init(Path path) throws VariantStoreException {
+    public void init(Path path) throws VariantStoreException
+    {
     }
 
     @Override
-    public void stop() {
+    public void stop()
+    {
         this.variantStore.stop();
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
-    public Future addIndividual(String id, boolean isPublic, Path file) throws VariantStoreException {
+    public Future addIndividual(String id, boolean isPublic, Path file) throws VariantStoreException
+    {
         return this.variantStore.addIndividual(id, isPublic, file);
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
-    public Future removeIndividual(String id) throws VariantStoreException {
+    public Future removeIndividual(String id) throws VariantStoreException
+    {
         return this.variantStore.removeIndividual(id);
     }
 
     @Override
-    public List<GAVariant> getTopHarmfullVariants(String id, int n) {
+    public List<GAVariant> getTopHarmfullVariants(String id, int n)
+    {
         return this.variantStore.getTopHarmfullVariants(id, n);
     }
 
     @Override
     public Map<String, List<GAVariant>> getIndividualsWithGene(String geneSymbol, List<String> variantEffects,
-                                                               Map<String, Double> alleleFrequencies) {
+                                                               Map<String, Double> alleleFrequencies)
+    {
         return this.variantStore.getIndividualsWithGene(geneSymbol, variantEffects, alleleFrequencies);
     }
 
     @Override
-    public Map<String, List<GAVariant>> getIndividualsWithVariant(String chr, int pos, String ref, String alt) {
+    public Map<String, List<GAVariant>> getIndividualsWithVariant(String chr, int pos, String ref, String alt)
+    {
         return null;
     }
 
     @Override
-    public List<String> getAllIndividuals() {
+    public List<String> getAllIndividuals()
+    {
         return this.variantStore.getAllIndividuals();
     }
 
     @Override
-    public Set<String> getAllGenesForIndividual(String id) {
+    public Set<String> getAllGenesForIndividual(String id)
+    {
         return this.variantStore.getAllGenesForIndividual(id);
     }
 
     @Override
-    public Double getGeneScore(String id, String gene) {
+    public Double getGeneScore(String id, String gene)
+    {
         return this.variantStore.getGeneScore(id, gene);
     }
 
     @Override
-    public List<GAVariant> getTopHarmfullVariantsForGene(String id, String gene, Integer k) {
+    public List<GAVariant> getTopHarmfullVariantsForGene(String id, String gene, Integer k)
+    {
         return this.variantStore.getTopHarmfullVariantsForGene(id, gene, k);
     }
 
     @Override
-    public List<String> getTopGenesForIndividual(String id, Integer k) {
+    public List<String> getTopGenesForIndividual(String id, Integer k)
+    {
         return this.variantStore.getTopGenesForIndividual(id, k);
     }
 
     @Override
-    public String getTSVTimeStamp(String id) {
+    public String getTSVTimeStamp(String id)
+    {
         return this.variantStore.getTSVTimeStamp(id);
     }
 }

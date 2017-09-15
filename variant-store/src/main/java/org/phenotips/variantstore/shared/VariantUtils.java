@@ -59,7 +59,8 @@ public final class VariantUtils
         vocabularyManager = vm;
     }
 
-    private VariantUtils() {
+    private VariantUtils()
+    {
         throw new AssertionError();
     }
 
@@ -70,7 +71,8 @@ public final class VariantUtils
      * @param infoField the info field's name
      * @param value     the field's value
      */
-    public static void addInfo(GAVariant variant, String infoField, Object value) {
+    public static void addInfo(GAVariant variant, String infoField, Object value)
+    {
         if (variant.getInfo() == null) {
             variant.setInfo(new HashMap<String, List<String>>());
         }
@@ -84,7 +86,8 @@ public final class VariantUtils
      * @param infoField the info field name
      * @param value the info field value
      */
-    public static void addInfo(GACall call, String infoField, Object value) {
+    public static void addInfo(GACall call, String infoField, Object value)
+    {
         if (call.getInfo() == null) {
             call.setInfo(new HashMap<String, List<String>>());
         }
@@ -99,7 +102,8 @@ public final class VariantUtils
      * @param field   the field to fetch.
      * @return null if field is not found, the String value otherwise.
      */
-    public static String getInfo(GAVariant variant, String field) {
+    public static String getInfo(GAVariant variant, String field)
+    {
         return getFirstElementValue(variant.getInfo(), field);
     }
 
@@ -109,7 +113,8 @@ public final class VariantUtils
      * @param field the field to fetch
      * @return null if field is not found, the String value otherwise
      */
-    public static String getInfo(GACall call, String field) {
+    public static String getInfo(GACall call, String field)
+    {
         return getFirstElementValue(call.getInfo(), field);
     }
 
@@ -119,7 +124,8 @@ public final class VariantUtils
      * @param key the key
      * @return null if map is null or the key is not in the map. The first element of the value otherwise.
      */
-    private static String getFirstElementValue(Map<String, List<String>> map, String key) {
+    private static String getFirstElementValue(Map<String, List<String>> map, String key)
+    {
         if (map == null || map.get(key) == null) {
             return null;
         }

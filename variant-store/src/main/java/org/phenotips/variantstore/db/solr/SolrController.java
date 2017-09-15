@@ -84,7 +84,7 @@ public class SolrController extends AbstractDatabaseController
     /** The error message for input parameters validation. **/
     public static final String NUMBER_ERROR_MESSAGE = "k cannot be equal or less than zero";
     /** The error message for input parameters validation. **/
-    private Logger logger = LoggerFactory.getLogger(getClass());
+    private static Logger logger = LoggerFactory.getLogger(SolrController.class);
 
     // ensure that insertion and deletions are done synchronously, one task at a time
     private ExecutorService executor = Executors.newFixedThreadPool(1);
@@ -95,50 +95,59 @@ public class SolrController extends AbstractDatabaseController
     /**
      * Create a SolrController, that will store it's files and configuration in a directory inside of rootPath.
      */
-    public SolrController() {
+    public SolrController()
+    {
         super();
     }
 
     @Override
-    protected Path getStoragePathSuffix() {
+    protected Path getStoragePathSuffix()
+    {
         return Paths.get("solr/");
     }
 
     @Override
-    public void init(Path path) throws DatabaseException {
+    public void init(Path path) throws DatabaseException
+    {
         super.init(path);
 
         ResourceManager.copyResourcesToPath(this.getStoragePathSuffix(), this.path);
 
         // Spin Solr up
         logger.debug(String.valueOf(this.path));
-        cores = new CoreContainer(this.path.toString());
-        cores.load();
-        server = new EmbeddedSolrServer(cores, "variants");
+        this.cores = new CoreContainer(this.path.toString());
+        this.cores.load();
+        this.server = new EmbeddedSolrServer(this.cores, "variants");
     }
 
     @Override
-    public void stop() {
-        executor.shutdownNow();
-        cores.shutdown();
+    public void stop()
+    {
+        this.executor.shutdownNow();
+        this.cores.shutdown();
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
-    public Future addIndividual(final VariantIterator iterator) {
-        FutureTask task = new FutureTask<>(new AddIndividualTask(server, iterator));
-        executor.submit(task);
+    public Future addIndividual(final VariantIterator iterator)
+    {
+        FutureTask task = new FutureTask<>(new AddIndividualTask(this.server, iterator));
+        this.executor.submit(task);
+        return task;
+    }
+
+    @SuppressWarnings("rawtypes")
+    @Override
+    public Future removeIndividual(String id) throws DatabaseException
+    {
+        FutureTask task = new FutureTask<>(new RemoveIndividualTask(this.server, id));
+        this.executor.submit(task);
         return task;
     }
 
     @Override
-    public Future removeIndividual(String id) throws DatabaseException {
-        FutureTask task = new FutureTask<>(new RemoveIndividualTask(server, id));
-        executor.submit(task);
-        return task;
-    }
-
-    @Override
-    public List<GAVariant> getTopHarmfullVariants(String id, int n) {
+    public List<GAVariant> getTopHarmfullVariants(String id, int n)
+    {
         checkArgument(!StringUtils.isBlank(id), ID_ERROR_MESSAGE);
         checkArgument(n > 0, "n cannot be equal or less than zero");
 
@@ -160,7 +169,7 @@ public class SolrController extends AbstractDatabaseController
         QueryResponse resp;
 
         try {
-            resp = server.query(q);
+            resp = this.server.query(q);
         } catch (SolrServerException | IOException e) {
             logger.error("Error getting individuals ", e);
             return list;
@@ -186,7 +195,8 @@ public class SolrController extends AbstractDatabaseController
      * @return the allele count for this specific variant in the db.
      */
     @Override
-    public int beacon(String chr, long pos, String allele) {
+    public int beacon(String chr, long pos, String allele)
+    {
         checkNotNull(chr);
         checkArgument(!"".equals(chr));
         checkArgument(pos > 0);
@@ -203,7 +213,7 @@ public class SolrController extends AbstractDatabaseController
 
         QueryResponse resp;
         try {
-            resp = server.query(q);
+            resp = this.server.query(q);
         } catch (SolrServerException | IOException e) {
             logger.error("Beacon Solr Exception", e);
             return 0;
@@ -217,7 +227,8 @@ public class SolrController extends AbstractDatabaseController
     }
 
     @Override
-    public long getTotNumVariants() {
+    public long getTotNumVariants()
+    {
         String queryString = "*:*";
 
         SolrQuery q = new SolrQuery()
@@ -226,7 +237,7 @@ public class SolrController extends AbstractDatabaseController
 
         QueryResponse resp;
         try {
-            resp = server.query(q);
+            resp = this.server.query(q);
         } catch (SolrServerException | IOException e) {
             logger.error("TotNumVariants Solr Exception", e);
             return 0;
@@ -243,7 +254,8 @@ public class SolrController extends AbstractDatabaseController
      * @return the set of genes.
      */
     @Override
-    public Set<String> getAllGenesForIndividual(String id) {
+    public Set<String> getAllGenesForIndividual(String id)
+    {
         checkArgument(!StringUtils.isBlank(id), ID_ERROR_MESSAGE);
         logger.debug("getAllGenesForIndividual(" + id + ")");
 
@@ -256,10 +268,12 @@ public class SolrController extends AbstractDatabaseController
         // sort on unique
 
         try {
-            SolrUtils.processAllDocs(server, q, VariantsSchema.ID, new Function<Collection<SolrDocument>, Boolean>()
+            SolrUtils.processAllDocs(this.server, q, VariantsSchema.ID, new Function<Collection<SolrDocument>,
+                Boolean>()
             {
                 @Override
-                public Boolean apply(Collection<SolrDocument> solrDocuments) {
+                public Boolean apply(Collection<SolrDocument> solrDocuments)
+                {
                     for (SolrDocument doc : solrDocuments) {
                         String gene = (String) doc.get(VariantsSchema.GENE);
                         if (StringUtils.isNotBlank(gene)) {
@@ -278,7 +292,8 @@ public class SolrController extends AbstractDatabaseController
     }
 
     @Override
-    public Double getGeneScore(String id, String gene) {
+    public Double getGeneScore(String id, String gene)
+    {
         checkArgument(!StringUtils.isBlank(id), ID_ERROR_MESSAGE);
         checkArgument(!StringUtils.isBlank(gene), "gene cannot be empty");
         logger.debug(String.format("getGeneScore(%s, %s)", id, gene));
@@ -294,7 +309,7 @@ public class SolrController extends AbstractDatabaseController
 
         QueryResponse resp;
         try {
-            resp = server.query(q);
+            resp = this.server.query(q);
         } catch (SolrServerException | IOException e) {
             logger.error("GeneScore Solr Exception", e);
             return null;
@@ -316,7 +331,8 @@ public class SolrController extends AbstractDatabaseController
     }
 
     @Override
-    public List<String> getTopGenesForIndividual(String id, Integer k) {
+    public List<String> getTopGenesForIndividual(String id, Integer k)
+    {
         checkArgument(!StringUtils.isBlank(id), ID_ERROR_MESSAGE);
         checkArgument(k > 0, NUMBER_ERROR_MESSAGE);
         logger.debug(String.format("getTopGenesForIndividual(%s, %d)", id, k));
@@ -336,7 +352,7 @@ public class SolrController extends AbstractDatabaseController
 
         QueryResponse resp;
         try {
-            resp = server.query(q);
+            resp = this.server.query(q);
         } catch (SolrServerException | IOException e) {
             logger.error("Solr Exception", e);
             return list;
@@ -352,7 +368,8 @@ public class SolrController extends AbstractDatabaseController
     }
 
     @Override
-    public List<GAVariant> getTopHarmfullVariantsForGene(String id, String gene, Integer k) {
+    public List<GAVariant> getTopHarmfullVariantsForGene(String id, String gene, Integer k)
+    {
         checkArgument(!StringUtils.isBlank(id), ID_ERROR_MESSAGE);
         checkArgument(!StringUtils.isBlank(gene), "gene cannot be empty");
         checkArgument(k > 0, NUMBER_ERROR_MESSAGE);
@@ -374,7 +391,7 @@ public class SolrController extends AbstractDatabaseController
 
         QueryResponse resp;
         try {
-            resp = server.query(q);
+            resp = this.server.query(q);
         } catch (SolrServerException | IOException e) {
             logger.error("Caught Solr Exception", e);
             return list;
@@ -392,7 +409,8 @@ public class SolrController extends AbstractDatabaseController
                                                  int n,
                                                  String gene,
                                                  List<String> variantEffects,
-                                                 Map<String, Double> alleleFrequencies) {
+                                                 Map<String, Double> alleleFrequencies)
+    {
 
         List<GAVariant> list = new ArrayList<>();
 
@@ -439,7 +457,7 @@ public class SolrController extends AbstractDatabaseController
         QueryResponse resp = null;
 
         try {
-            resp = server.query(q);
+            resp = this.server.query(q);
         } catch (SolrServerException | IOException e) {
             logger.error("Error getting individuals with variants", e);
             return list;
@@ -458,7 +476,8 @@ public class SolrController extends AbstractDatabaseController
      *
      * @return the allele count
      */
-    public int beacon() {
+    public int beacon()
+    {
         return 0;
     }
 
@@ -466,7 +485,8 @@ public class SolrController extends AbstractDatabaseController
     public Map<String, List<GAVariant>> getIndividualsWithGene(String gene,
                                                                List<String> variantEffects,
                                                                Map<String, Double> alleleFrequencies,
-                                                               int n, int totIndividuals) {
+                                                               int n, int totIndividuals)
+    {
         Map<String, List<GAVariant>> map = new HashMap<>();
 
         checkArgument(!StringUtils.isBlank(gene), "gene cannot be empty");
@@ -519,7 +539,7 @@ public class SolrController extends AbstractDatabaseController
         QueryResponse resp;
 
         try {
-            resp = server.query(q);
+            resp = this.server.query(q);
             map = SolrVariantUtils.variantListToCallsetMap(SolrVariantUtils.documentListToMapList(resp.getResults()));
         } catch (SolrServerException | IOException e) {
             logger.error("Error getting individals with variant", e);
@@ -529,17 +549,19 @@ public class SolrController extends AbstractDatabaseController
     }
 
     @Override
-    public Map<String, List<GAVariant>> getIndividualsWithVariant(String chr, int pos, String ref, String alt) {
+    public Map<String, List<GAVariant>> getIndividualsWithVariant(String chr, int pos, String ref, String alt)
+    {
         //TODO: NEWINIESE
         Map<String, List<GAVariant>> map = new HashMap<>();
         return map;
     }
 
     @Override
-    public List<String> getAllIndividuals() {
+    public List<String> getAllIndividuals()
+    {
         List<String> ids = new ArrayList<String>();
         try {
-            SolrDocument metaDoc = SolrVariantUtils.getMetaDocument(server);
+            SolrDocument metaDoc = SolrVariantUtils.getMetaDocument(this.server);
             if (metaDoc.getFieldValues(VariantsSchema.CALLSET_IDS) != null) {
                 List<Object> values = new ArrayList<>(metaDoc.getFieldValues(VariantsSchema.CALLSET_IDS));
                 for (Object item : values) {
@@ -553,7 +575,8 @@ public class SolrController extends AbstractDatabaseController
     }
 
     @Override
-    public List<GAVariant> getAllVariantsForIndividual(String id) {
+    public List<GAVariant> getAllVariantsForIndividual(String id)
+    {
         checkArgument(!StringUtils.isBlank(id), ID_ERROR_MESSAGE);
 
         List<GAVariant> variants = new ArrayList<GAVariant>();
@@ -564,7 +587,8 @@ public class SolrController extends AbstractDatabaseController
         return variants;
     }
 
-    private SolrDocumentList getAllVariantsDocumentsForIndividual(String id) {
+    private SolrDocumentList getAllVariantsDocumentsForIndividual(String id)
+    {
         checkArgument(!StringUtils.isBlank(id), ID_ERROR_MESSAGE);
 
         String queryString = String.format("%s:%s ", VariantsSchema.CALLSET_IDS, ClientUtils.escapeQueryChars(id));
@@ -572,7 +596,7 @@ public class SolrController extends AbstractDatabaseController
 
         QueryResponse resp = null;
         try {
-            resp = server.query(q);
+            resp = this.server.query(q);
         } catch (SolrServerException | IOException e) {
             logger.error("Error getting variants for individual with id " + id, e);
             return null;

@@ -102,7 +102,8 @@ public class MockVariantStore implements VariantStoreInterface
      * @return the set of genes
      */
     @Override
-    public Set<String> getAllGenesForIndividual(String id) {
+    public Set<String> getAllGenesForIndividual(String id)
+    {
         return null;
     }
 
@@ -115,7 +116,8 @@ public class MockVariantStore implements VariantStoreInterface
      * @return the exomiser harmfulness score for the gene for the individual.
      */
     @Override
-    public Double getGeneScore(String id, String gene) {
+    public Double getGeneScore(String id, String gene)
+    {
         return null;
     }
 
@@ -130,7 +132,8 @@ public class MockVariantStore implements VariantStoreInterface
      * @return the list of variants
      */
     @Override
-    public List<GAVariant> getTopHarmfullVariantsForGene(String id, String gene, Integer k) {
+    public List<GAVariant> getTopHarmfullVariantsForGene(String id, String gene, Integer k)
+    {
         return null;
     }
 
@@ -144,7 +147,8 @@ public class MockVariantStore implements VariantStoreInterface
      * @return the list of genes
      */
     @Override
-    public List<String> getTopGenesForIndividual(String id, Integer k) {
+    public List<String> getTopGenesForIndividual(String id, Integer k)
+    {
         return null;
     }
 

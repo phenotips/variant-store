@@ -57,11 +57,13 @@ public class PatientDeleteEventListener extends AbstractEventListener
         super("variant-store-patient-remover", new PatientDeletedEvent());
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public void onEvent(final Event event, final Object source, final Object data)
     {
         Patient patient = ((PatientEvent) event).getPatient();
         try {
+            @SuppressWarnings("unused")
             Future varStoreFuture = this.varStore.removeIndividual(patient.getId());
         } catch (Exception ex) {
             this.logger.error("Failed to remove individual from variant store [{}]: {}", patient.getId(),

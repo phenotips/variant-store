@@ -33,7 +33,8 @@ import org.apache.solr.common.params.CursorMarkParams;
  */
 public final class SolrUtils
 {
-    private SolrUtils() {
+    private SolrUtils()
+    {
         throw new AssertionError();
     }
 
@@ -49,7 +50,8 @@ public final class SolrUtils
      */
     public static void processAllDocs(SolrClient server, SolrQuery q,
                                String uniqueKey, Function<Collection<SolrDocument>, Boolean> processor
-    ) throws Exception {
+    ) throws Exception
+    {
         boolean done = false;
         String oldCursorMark;
         String cursorMark = CursorMarkParams.CURSOR_MARK_START;

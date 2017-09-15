@@ -31,7 +31,8 @@ public final class GACallInfoFields
     public static final String FILTER = "FILTER";
     public static final String QUALITY = "QUAL";
 
-    private GACallInfoFields() {
+    private GACallInfoFields()
+    {
         throw new AssertionError();
     }
 }

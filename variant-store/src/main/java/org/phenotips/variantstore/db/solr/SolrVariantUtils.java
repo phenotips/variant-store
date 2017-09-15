@@ -50,7 +50,8 @@ public final class SolrVariantUtils
      */
     public static final String METADATA_DOC_ID = "metadata";
 
-    private SolrVariantUtils() {
+    private SolrVariantUtils()
+    {
         throw new AssertionError();
     }
 
@@ -61,7 +62,8 @@ public final class SolrVariantUtils
      *
      * @return a map of callSetId to list of variants
      */
-    public static Map<String, List<GAVariant>> variantListToCallsetMap(List<Map<String, GAVariant>> mapList) {
+    public static Map<String, List<GAVariant>> variantListToCallsetMap(List<Map<String, GAVariant>> mapList)
+    {
         Map<String, List<GAVariant>> callsetMap = new HashMap<>();
         for (Map<String, GAVariant> map : mapList) {
             for (String key : map.keySet()) {
@@ -82,7 +84,8 @@ public final class SolrVariantUtils
      *
      * @return the list of GAVariants
      */
-    public static List<Map<String, GAVariant>> documentListToMapList(SolrDocumentList documentList) {
+    public static List<Map<String, GAVariant>> documentListToMapList(SolrDocumentList documentList)
+    {
         List<Map<String, GAVariant>> list = new ArrayList<>();
 
         for (SolrDocument doc : documentList) {
@@ -102,7 +105,8 @@ public final class SolrVariantUtils
      *
      * @return the list of GAVariants
      */
-    public static List<GAVariant> documentListToGAVarintList(SolrDocumentList documentList, String callsetId) {
+    public static List<GAVariant> documentListToGAVarintList(SolrDocumentList documentList, String callsetId)
+    {
         List<GAVariant> list = new ArrayList<>();
 
         for (SolrDocument doc : documentList) {
@@ -119,7 +123,9 @@ public final class SolrVariantUtils
      *
      * @return a map of callsetid to variant
      */
-    public static Map<String, GAVariant> docToVariantMap(SolrDocument doc) {
+    @SuppressWarnings("unchecked")
+    public static Map<String, GAVariant> docToVariantMap(SolrDocument doc)
+    {
         Map<String, GAVariant> map = new HashMap<>();
 
         for (String callsetId : (List<String>) doc.get(VariantsSchema.CALLSET_IDS)) {
@@ -137,7 +143,8 @@ public final class SolrVariantUtils
      *
      * @return a new GAVariant
      */
-    public static GAVariant docToVariant(SolrDocument doc, String callsetId) {
+    public static GAVariant docToVariant(SolrDocument doc, String callsetId)
+    {
         GAVariant variant = new GAVariant();
 
         // TODO: Whole function needs to be newed, should be doc to list<Variant>
@@ -199,7 +206,8 @@ public final class SolrVariantUtils
      *
      * @return the value of the field
      */
-    public static Object getCallsetField(SolrDocument doc, String callsetId, String fieldName) {
+    public static Object getCallsetField(SolrDocument doc, String callsetId, String fieldName)
+    {
         return doc.get(VariantsSchema.getCallsetsFieldName(callsetId, fieldName));
     }
 
@@ -210,7 +218,8 @@ public final class SolrVariantUtils
      *
      * @return the SolrDocument
      */
-    public static SolrDocument variantToDoc(GAVariant variant) {
+    public static SolrDocument variantToDoc(GAVariant variant)
+    {
         SolrDocument doc = new SolrDocument();
 
         doc.setField(VariantsSchema.ID, getHash(variant));
@@ -248,7 +257,8 @@ public final class SolrVariantUtils
      * @param isPublic  whether these variants can be used in an aggregate
      *                  search.
      */
-    public static void addVariantToDoc(SolrDocument doc, GAVariant variant, String callsetId, boolean isPublic) {
+    public static void addVariantToDoc(SolrDocument doc, GAVariant variant, String callsetId, boolean isPublic)
+    {
         addMultiFieldValue(doc, VariantsSchema.CALLSET_IDS, callsetId);
 
         GACall call = variant.getCalls().get(0);
@@ -286,7 +296,8 @@ public final class SolrVariantUtils
      * @param key   the name of the field where the specified value to be added
      * @param value the specified value to be added
      */
-    public static void addMultiFieldValue(SolrDocument doc, String key, Object value) {
+    public static void addMultiFieldValue(SolrDocument doc, String key, Object value)
+    {
         List<Object> values = new ArrayList<>();
         if (doc.getFieldValues(key) == null) {
             values.add(value);
@@ -311,7 +322,8 @@ public final class SolrVariantUtils
      * @param fieldName the name of the field
      * @param value     the value
      */
-    static void setCallsetField(SolrDocument doc, String callsetId, String fieldName, Object value) {
+    static void setCallsetField(SolrDocument doc, String callsetId, String fieldName, Object value)
+    {
         doc.setField(VariantsSchema.getCallsetsFieldName(callsetId, fieldName), value);
     }
 
@@ -322,7 +334,8 @@ public final class SolrVariantUtils
      *
      * @return a double or null
      */
-    private static Double safeValueOf(String s) {
+    private static Double safeValueOf(String s)
+    {
         if (s == null) {
             return null;
         }
@@ -337,7 +350,8 @@ public final class SolrVariantUtils
      *
      * @return the signature
      */
-    public static String getHash(GAVariant variant) {
+    public static String getHash(GAVariant variant)
+    {
         return variant.getReferenceName() + ":"
             + variant.getStart().toString() + ":"
             + variant.getReferenceBases() + ":"
@@ -350,7 +364,8 @@ public final class SolrVariantUtils
      * @param doc       the SolrDocument
      * @param callsetId the callsetId to remove
      */
-    public static void removeCallsetFromDoc(SolrDocument doc, String callsetId) {
+    public static void removeCallsetFromDoc(SolrDocument doc, String callsetId)
+    {
 
         /*
          *   a. remove the individual's value from multivalued fields (e.g., callsetIds)
@@ -384,7 +399,8 @@ public final class SolrVariantUtils
      * @param key   the name of the field from which the specified value to be removed
      * @param value the specified value to be removed
      */
-    public static void removeMultiFieldValue(SolrDocument doc, String key, Object value) {
+    public static void removeMultiFieldValue(SolrDocument doc, String key, Object value)
+    {
         if (doc.getFieldValues(key) == null) {
             return;
         }
@@ -394,7 +410,8 @@ public final class SolrVariantUtils
         doc.setField(key, values);
     }
 
-    private static void removeCallsetField(SolrDocument doc, String callsetId, String fieldName) {
+    private static void removeCallsetField(SolrDocument doc, String callsetId, String fieldName)
+    {
         doc.removeFields(VariantsSchema.getCallsetsFieldName(callsetId, fieldName));
     }
 
@@ -407,7 +424,8 @@ public final class SolrVariantUtils
      * @throws SolrServerException SolrServerException
      * @throws IOException IOException
      */
-    public static SolrDocument getMetaDocument(SolrClient server) throws SolrServerException, IOException  {
+    public static SolrDocument getMetaDocument(SolrClient server) throws SolrServerException, IOException
+    {
         SolrDocument metaDoc = server.getById(METADATA_DOC_ID);
         if (metaDoc == null) {
             metaDoc = new SolrDocument();
@@ -424,7 +442,8 @@ public final class SolrVariantUtils
      * @param server the solr server to assist communication with a Solr server
      * @throws DatabaseException DatabaseException
      */
-    public static void addDoc(SolrInputDocument doc, SolrClient server) throws DatabaseException {
+    public static void addDoc(SolrInputDocument doc, SolrClient server) throws DatabaseException
+    {
         try {
             server.add(doc);
             doc.clear();
@@ -442,7 +461,8 @@ public final class SolrVariantUtils
      *
      * @return inputDoc a SolrInputDocument that contains the data given in the original doc
      */
-    public static SolrInputDocument toSolrInputDocument(SolrDocument doc) {
+    public static SolrInputDocument toSolrInputDocument(SolrDocument doc)
+    {
         SolrInputDocument inputDoc = new SolrInputDocument();
 
         for (String name : doc.getFieldNames()) {

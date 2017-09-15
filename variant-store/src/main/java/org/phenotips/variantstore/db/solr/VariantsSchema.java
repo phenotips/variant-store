@@ -63,7 +63,8 @@ public final class VariantsSchema
     // TODO this is the important score. sort on it
     public static final String EXOMISER_GENE_COMBINED_SCORE = "exomiser_gene_combined_score";
 
-    private VariantsSchema() {
+    private VariantsSchema()
+    {
         throw new AssertionError();
     }
 
@@ -73,7 +74,8 @@ public final class VariantsSchema
      * @param fieldName the name of the field to access for that individual.
      * @return the individual's field name
      */
-    public static String getCallsetsFieldName(String individual, String fieldName) {
+    public static String getCallsetsFieldName(String individual, String fieldName)
+    {
         return individual + "__" + fieldName;
     }
 

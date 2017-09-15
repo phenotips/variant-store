@@ -38,28 +38,33 @@ public abstract class AbstractVariantIterator implements VariantIterator
      * @param path the file to iterate over
      * @param header information associated with the file
      */
-    public AbstractVariantIterator(Path path, VariantHeader header) {
+    public AbstractVariantIterator(Path path, VariantHeader header)
+    {
         this.path = path;
         this.header = header;
     }
 
     @Override
-    public VariantHeader getHeader() {
-        return header;
+    public VariantHeader getHeader()
+    {
+        return this.header;
     }
 
     @Override
-    public boolean hasNext() {
+    public boolean hasNext()
+    {
         return false;
     }
 
     @Override
-    public GAVariant next() {
+    public GAVariant next()
+    {
         throw new NoSuchElementException();
     }
 
     @Override
-    public void remove() {
+    public void remove()
+    {
         throw new UnsupportedOperationException();
     }
 }

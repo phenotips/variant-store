@@ -49,7 +49,8 @@ public class VariantStore implements VariantStoreInterface
     /**
      * Use VCF and Solr by default.
      */
-    public VariantStore() {
+    public VariantStore()
+    {
         this.inputManager = new VCFManager();
         this.db = new SolrController();
     }
@@ -60,35 +61,41 @@ public class VariantStore implements VariantStoreInterface
      * @param inputManager an input format manager
      * @param db           the db implementation
      */
-    public VariantStore(InputManager inputManager, DatabaseController db) {
-        this.path = path;
+    public VariantStore(InputManager inputManager, DatabaseController db)
+    {
         this.inputManager = inputManager;
         this.db = db;
     }
 
     @Override
-    public void init(Path path) throws VariantStoreException {
+    public void init(Path path) throws VariantStoreException
+    {
         this.path = path;
-        db.init(this.path.resolve("db"));
-        inputManager.init(this.path.resolve("tsv"));
+        this.db.init(this.path.resolve("db"));
+        this.inputManager.init(this.path.resolve("tsv"));
     }
 
     @Override
-    public void stop() {
-        db.stop();
+    public void stop()
+    {
+        this.db.stop();
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
-    public Future addIndividual(String id, boolean isPublic, Path file) throws VariantStoreException {
+    public Future addIndividual(String id, boolean isPublic, Path file) throws VariantStoreException
+    {
         logger.debug("Adding " + id + " from " + file.toString());
         // copy file to file cache
-        inputManager.addIndividual(id, file);
+        this.inputManager.addIndividual(id, file);
 
         return this.db.addIndividual(this.inputManager.getIteratorForIndividual(id, isPublic));
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
-    public Future removeIndividual(String id) throws VariantStoreException {
+    public Future removeIndividual(String id) throws VariantStoreException
+    {
         // delete file
         this.inputManager.removeIndividual(id);
         // update variants in db
@@ -96,7 +103,8 @@ public class VariantStore implements VariantStoreInterface
     }
 
     @Override
-    public List<GAVariant> getTopHarmfullVariants(String id, int n) {
+    public List<GAVariant> getTopHarmfullVariants(String id, int n)
+    {
         return this.db.getTopHarmfullVariants(id, n);
     }
 
@@ -104,7 +112,8 @@ public class VariantStore implements VariantStoreInterface
     public Map<String, List<GAVariant>> getIndividualsWithGene(
             String geneSymbol,
             List<String> variantEffects,
-            Map<String, Double> alleleFrequencies) {
+            Map<String, Double> alleleFrequencies)
+    {
         return this.db.getIndividualsWithGene(geneSymbol,
                 variantEffects,
                 alleleFrequencies,
@@ -113,32 +122,38 @@ public class VariantStore implements VariantStoreInterface
     }
 
     @Override
-    public Map<String, List<GAVariant>> getIndividualsWithVariant(String chr, int pos, String ref, String alt) {
+    public Map<String, List<GAVariant>> getIndividualsWithVariant(String chr, int pos, String ref, String alt)
+    {
         return this.db.getIndividualsWithVariant(chr, pos, ref, alt);
     }
 
     @Override
-    public List<String> getAllIndividuals() {
+    public List<String> getAllIndividuals()
+    {
         return this.db.getAllIndividuals();
     }
 
     @Override
-    public Set<String> getAllGenesForIndividual(String id) {
+    public Set<String> getAllGenesForIndividual(String id)
+    {
         return this.db.getAllGenesForIndividual(id);
     }
 
     @Override
-    public Double getGeneScore(String id, String gene) {
+    public Double getGeneScore(String id, String gene)
+    {
         return this.db.getGeneScore(id, gene);
     }
 
     @Override
-    public List<GAVariant> getTopHarmfullVariantsForGene(String id, String gene, Integer k) {
+    public List<GAVariant> getTopHarmfullVariantsForGene(String id, String gene, Integer k)
+    {
         return this.db.getTopHarmfullVariantsForGene(id, gene, k);
     }
 
     @Override
-    public List<String> getTopGenesForIndividual(String id, Integer k) {
+    public List<String> getTopGenesForIndividual(String id, Integer k)
+    {
         return this.db.getTopGenesForIndividual(id, k);
     }
 
@@ -151,7 +166,8 @@ public class VariantStore implements VariantStoreInterface
      *
      * @return the allele frequency of this variant in the db.
      */
-    public double beacon(String chr, long pos, String allele) {
+    public double beacon(String chr, long pos, String allele)
+    {
         return (double) this.db.beacon(chr, pos, allele) / ((double) this.getAllIndividuals().size() * 2);
     }
 
@@ -160,12 +176,14 @@ public class VariantStore implements VariantStoreInterface
      *
      * @return the total number of variants in the db.
      */
-    public long getTotNumVariants() {
-        return db.getTotNumVariants();
+    public long getTotNumVariants()
+    {
+        return this.db.getTotNumVariants();
     }
 
     @Override
-    public String getTSVTimeStamp(String id) {
+    public String getTSVTimeStamp(String id)
+    {
         return this.inputManager.getTSVTimeStamp(id);
     }
 }

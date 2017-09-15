@@ -44,17 +44,18 @@ import javax.inject.Singleton;
 @Singleton
 public class VariantStoreInitializer implements EventListener
 {
-    @SuppressWarnings("unused")
     @Inject
     private VariantStoreService service;
 
     @Override
-    public String getName() {
+    public String getName()
+    {
         return "variantstoreinitializer";
     }
 
     @Override
-    public List<Event> getEvents() {
+    public List<Event> getEvents()
+    {
         return Arrays.<Event>asList(
                 new ApplicationStartedEvent(),
                 new ApplicationStoppedEvent()
@@ -62,10 +63,11 @@ public class VariantStoreInitializer implements EventListener
     }
 
     @Override
-    public void onEvent(Event event, Object o, Object o2) {
+    public void onEvent(Event event, Object o, Object o2)
+    {
         // don't do anything, just injecting the service.
         if (event instanceof ApplicationStoppedEvent) {
-            service.stop();
+            this.service.stop();
         }
     }
 }

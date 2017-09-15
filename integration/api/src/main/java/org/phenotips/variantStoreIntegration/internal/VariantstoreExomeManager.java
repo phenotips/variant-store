@@ -58,13 +58,14 @@ public class VariantstoreExomeManager implements ExomeManager
      * @return the corresponding {@link Exome}, or {@code null} if no exome available
      */
     @Override
-    public Exome getExome(Patient p) {
-        List<String> allIndividuals = vs.getAllIndividuals();
+    public Exome getExome(Patient p)
+    {
+        List<String> allIndividuals = this.vs.getAllIndividuals();
         if (!allIndividuals.contains(p.getId())) {
             logger.info("No exome data exists for " + p.getId());
             return null;
         }
-        Exome exome = new VariantstoreExome(vs, p);
+        Exome exome = new VariantstoreExome(this.vs, p);
         return exome;
     }
 }

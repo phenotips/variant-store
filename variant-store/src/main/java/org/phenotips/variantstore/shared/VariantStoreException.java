@@ -22,6 +22,7 @@ package org.phenotips.variantstore.shared;
  *
  * @version $Id$
  */
+@SuppressWarnings("serial")
 public class VariantStoreException extends Exception
 {
 
@@ -30,7 +31,8 @@ public class VariantStoreException extends Exception
      *
      * @param message the message
      */
-    public VariantStoreException(String message) {
+    public VariantStoreException(String message)
+    {
         super(message);
     }
 
@@ -40,7 +42,8 @@ public class VariantStoreException extends Exception
      * @param message the message
      * @param e       the chained exception
      */
-    public VariantStoreException(String message, Exception e) {
+    public VariantStoreException(String message, Exception e)
+    {
         super(message, e);
     }
 }

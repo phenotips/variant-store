@@ -44,7 +44,8 @@ public class ExomiserTSVManager implements InputManager
     private Path path;
 
     @Override
-    public void init(Path path) throws VariantStoreException {
+    public void init(Path path) throws VariantStoreException
+    {
         this.path = path;
 
         if (!Files.exists(this.path)) {
@@ -59,12 +60,13 @@ public class ExomiserTSVManager implements InputManager
     }
 
     @Override
-    public void stop() {
-
+    public void stop()
+    {
     }
 
     @Override
-    public void addIndividual(String id, Path path) throws InputException {
+    public void addIndividual(String id, Path path) throws InputException
+    {
         try {
             Files.copy(path, this.getIndividual(id), StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
@@ -73,12 +75,14 @@ public class ExomiserTSVManager implements InputManager
     }
 
     @Override
-    public Path getIndividual(String id) {
+    public Path getIndividual(String id)
+    {
         return this.path.resolve(id + suffix);
     }
 
     @Override
-    public void removeIndividual(String id) throws InputException {
+    public void removeIndividual(String id) throws InputException
+    {
         try {
             Files.delete(this.getIndividual(id));
         } catch (NoSuchFileException x) {
@@ -97,7 +101,8 @@ public class ExomiserTSVManager implements InputManager
      * @return a variant iterator
      */
     @Override
-    public VariantIterator getIteratorForIndividual(String id, boolean isPublic) {
+    public VariantIterator getIteratorForIndividual(String id, boolean isPublic)
+    {
         return new ExomiserTSVIterator(this.getIndividual(id), new VariantHeader(id, isPublic));
     }
 
@@ -109,12 +114,14 @@ public class ExomiserTSVManager implements InputManager
      * @return the variant iterator
      */
     @Override
-    public VariantIterator getIteratorForIndividual(String id) {
+    public VariantIterator getIteratorForIndividual(String id)
+    {
         return getIteratorForIndividual(id, false);
     }
 
     @Override
-    public String getTSVTimeStamp(String id) {
+    public String getTSVTimeStamp(String id)
+    {
         try {
             SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd HH:mm");
             BasicFileAttributes attr = Files.readAttributes(this.getIndividual(id), BasicFileAttributes.class);

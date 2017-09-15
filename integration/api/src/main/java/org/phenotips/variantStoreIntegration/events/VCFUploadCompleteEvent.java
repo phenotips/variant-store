@@ -33,33 +33,37 @@ public class VCFUploadCompleteEvent implements VCFEvent
     /**
      * @param patient A valid PhenoTips patient
      */
-    public VCFUploadCompleteEvent(Patient patient) {
+    public VCFUploadCompleteEvent(Patient patient)
+    {
         this.patient = patient;
     }
 
     @Override
-    public boolean matches(Object otherEvent) {
+    public boolean matches(Object otherEvent)
+    {
         if (otherEvent instanceof VCFUploadCompleteEvent) {
             VCFUploadCompleteEvent otherUploadEvent = (VCFUploadCompleteEvent) otherEvent;
-            return this.patient == null || (otherUploadEvent.getPatient() != null && this.patient.getDocument().equals(
-                    otherUploadEvent.getPatient().getDocument()));
-
+            return this.patient == null || (otherUploadEvent.getPatient() != null
+                && this.patient.getDocumentReference().equals(otherUploadEvent.getPatient().getDocumentReference()));
         }
         return false;
     }
 
     @Override
-    public Patient getPatient() {
+    public Patient getPatient()
+    {
         return this.patient;
     }
 
     @Override
-    public String getEventType() {
+    public String getEventType()
+    {
         return null;
     }
 
     @Override
-    public User getAuthor() {
+    public User getAuthor()
+    {
         return null;
     }
 }

@@ -49,23 +49,25 @@ public class AddIndividualTask implements Callable<Object>
      * @param server   the SolrServer to run the task on
      * @param iterator the variants to add
      */
-    public AddIndividualTask(SolrClient server, VariantIterator iterator) {
+    public AddIndividualTask(SolrClient server, VariantIterator iterator)
+    {
         this.server = server;
         this.iterator = iterator;
     }
 
     @Override
-    public Object call() throws Exception {
+    public Object call() throws Exception
+    {
         GAVariant variant;
         SolrDocument resp;
         SolrDocument doc;
 
         int hashCollisions = 0;
 
-        String individualId = iterator.getHeader().getIndividualId();
+        String individualId = this.iterator.getHeader().getIndividualId();
 
-        while (iterator.hasNext()) {
-            variant = iterator.next();
+        while (this.iterator.hasNext()) {
+            variant = this.iterator.next();
 
             // skip filter!= PASS
             if (!"PASS".equals(VariantUtils.getInfo(variant.getCalls().get(0), GACallInfoFields.FILTER))) {
@@ -79,9 +81,9 @@ public class AddIndividualTask implements Callable<Object>
 
             resp = null;
             try {
-                resp = server.getById(hash);
+                resp = this.server.getById(hash);
             } catch (SolrServerException | IOException e) {
-                logger.error("Failed to check for an existing variant", e);
+                this.logger.error("Failed to check for an existing variant", e);
                 continue;
             }
 
@@ -89,7 +91,7 @@ public class AddIndividualTask implements Callable<Object>
                 // found a doc, use it.
                 doc = resp;
                 doc.remove("_version_");
-                server.deleteById(hash);
+                this.server.deleteById(hash);
                 hashCollisions++;
             } else {
                 // our variant is totally new. create a new doc
@@ -101,20 +103,20 @@ public class AddIndividualTask implements Callable<Object>
                     doc,
                     variant,
                     individualId,
-                    iterator.getHeader().isPublic());
+                    this.iterator.getHeader().isPublic());
 
-            SolrVariantUtils.addDoc(SolrVariantUtils.toSolrInputDocument(doc), server);
+            SolrVariantUtils.addDoc(SolrVariantUtils.toSolrInputDocument(doc), this.server);
         }
-        logger.debug("csv: Hash Collisions: " + hashCollisions);
+        this.logger.debug("csv: Hash Collisions: " + hashCollisions);
 
         // updating the metadata document with individual id
-        SolrDocument metaDoc = SolrVariantUtils.getMetaDocument(server);
+        SolrDocument metaDoc = SolrVariantUtils.getMetaDocument(this.server);
         SolrVariantUtils.addMultiFieldValue(metaDoc, VariantsSchema.CALLSET_IDS, individualId);
-        SolrVariantUtils.addDoc(SolrVariantUtils.toSolrInputDocument(metaDoc), server);
+        SolrVariantUtils.addDoc(SolrVariantUtils.toSolrInputDocument(metaDoc), this.server);
 
         // Solr should commit the fields at it's own optimal pace.
         // We want to commit once at the end to make sure any leftovers in solr buffers are available for querying.
-        server.commit(true, true);
+        this.server.commit(true, true);
         return null;
     }
 }

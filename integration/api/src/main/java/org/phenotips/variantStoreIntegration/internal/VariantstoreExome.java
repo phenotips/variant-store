@@ -47,7 +47,8 @@ public class VariantstoreExome implements Exome
      * @param vs the Variant Store instance
      * @param p the patient
      */
-    public VariantstoreExome(VariantStoreService vs, Patient p) {
+    public VariantstoreExome(VariantStoreService vs, Patient p)
+    {
         this.vs = vs;
         this.patient = p;
     }
@@ -58,8 +59,9 @@ public class VariantstoreExome implements Exome
      * @return an unmodifiable set of gene names with variants in the patient
      */
     @Override
-    public Set<String> getGenes() {
-        return vs.getAllGenesForIndividual(patient.getId());
+    public Set<String> getGenes()
+    {
+        return this.vs.getAllGenesForIndividual(this.patient.getId());
     }
 
     /**
@@ -71,25 +73,27 @@ public class VariantstoreExome implements Exome
      * {@code null} if no variants for gene)
      */
     @Override
-    public Double getGeneScore(String gene) {
-        return vs.getGeneScore(patient.getId(), gene);
+    public Double getGeneScore(String gene)
+    {
+        return this.vs.getGeneScore(this.patient.getId(), gene);
     }
 
     /**
      * Get {@link Variant}s for a gene.
      *
      * @param gene the gene to get {@link Variant}s for.
-     * @param k
+     * @param k the max number of variants to return
      *
      * @return an unmodifiable (potentially-empty) list of top {@link Variant}s
-     * for the gene, by decreasing score
+     *     for the gene, by decreasing score
      */
     @Override
-    public List<Variant> getTopVariants(String gene, int k) {
-        List<GAVariant> gaVariants = vs.getTopHarmfullVariantsForGene(patient.getId(), gene, k);
+    public List<Variant> getTopVariants(String gene, int k)
+    {
+        List<GAVariant> gaVariants = this.vs.getTopHarmfullVariantsForGene(this.patient.getId(), gene, k);
         List<Variant> variants = new ArrayList<>();
         for (GAVariant gaVariant : gaVariants) {
-            variants.add(new VariantStoreVariant(gaVariant, vs.getAllIndividuals().size()));
+            variants.add(new VariantStoreVariant(gaVariant, this.vs.getAllIndividuals().size()));
         }
         return variants;
     }
@@ -103,8 +107,9 @@ public class VariantstoreExome implements Exome
      * @return an unmodifiable (potentially-empty) list of gene names
      */
     @Override
-    public List<String> getTopGenes(int n) {
-        return vs.getTopGenesForIndividual(patient.getId(), n);
+    public List<String> getTopGenes(int n)
+    {
+        return this.vs.getTopGenesForIndividual(this.patient.getId(), n);
     }
 
     /**
@@ -133,7 +138,8 @@ public class VariantstoreExome implements Exome
      * @return the data about this value, using the org.json classes
      */
     @Override
-    public JSONArray toJSON() {
+    public JSONArray toJSON()
+    {
         return null;
     }
 }

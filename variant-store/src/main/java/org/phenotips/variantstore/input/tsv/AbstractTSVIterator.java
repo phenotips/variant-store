@@ -49,7 +49,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractTSVIterator extends AbstractVariantIterator
 {
-    private Logger logger = LoggerFactory.getLogger(AbstractTSVIterator.class);
+    private static Logger logger = LoggerFactory.getLogger(AbstractTSVIterator.class);
     private CSVParser tsvParser;
     private Iterator<CSVRecord> tsvRecordIterator;
     private List<String> columns;
@@ -60,7 +60,8 @@ public abstract class AbstractTSVIterator extends AbstractVariantIterator
      * @param path          the path to the file
      * @param variantHeader the header with file meta-information
      */
-    public AbstractTSVIterator(Path path, VariantHeader variantHeader) {
+    public AbstractTSVIterator(Path path, VariantHeader variantHeader)
+    {
         super(path, variantHeader);
 
         Reader reader = null;
@@ -71,24 +72,26 @@ public abstract class AbstractTSVIterator extends AbstractVariantIterator
             logger.error(String.format("Error when opening file %s, this should NOT be happening", this.path), e);
         }
 
-        this.tsvRecordIterator = tsvParser.iterator();
+        this.tsvRecordIterator = this.tsvParser.iterator();
         // Read column names
         if (this.hasNext()) {
             this.columns = new ArrayList<String>();
-            for (String field : tsvRecordIterator.next()) {
+            for (String field : this.tsvRecordIterator.next()) {
                 // Remove leading hashes
-                columns.add(field.replaceAll("^#+", ""));
+                this.columns.add(field.replaceAll("^#+", ""));
             }
         }
     }
 
     @Override
-    public boolean hasNext() {
+    public boolean hasNext()
+    {
         return this.tsvRecordIterator.hasNext();
     }
 
     @Override
-    public GAVariant next() {
+    public GAVariant next()
+    {
         if (!this.hasNext()) {
             throw new NoSuchElementException();
         }
@@ -100,8 +103,8 @@ public abstract class AbstractTSVIterator extends AbstractVariantIterator
 
         initializeVariant(variant);
         int i = 0;
-        for (String field : tsvRecordIterator.next()) {
-            String column = columns.get(i);
+        for (String field : this.tsvRecordIterator.next()) {
+            String column = this.columns.get(i);
             processField(variant, call, column, field);
             i++;
         }
@@ -110,7 +113,7 @@ public abstract class AbstractTSVIterator extends AbstractVariantIterator
         if (!this.hasNext()) {
             // Cleanup
             try {
-                tsvParser.close();
+                this.tsvParser.close();
             } catch (IOException e) {
                 logger.error(String.format("Error when closing file %s", this.path), e);
             }
@@ -119,15 +122,18 @@ public abstract class AbstractTSVIterator extends AbstractVariantIterator
         return variant;
     }
 
-    protected void initializeVariant(GAVariant variant) {
+    protected void initializeVariant(GAVariant variant)
+    {
 
     }
 
-    protected void finalizeVariant(GAVariant variant) {
+    protected void finalizeVariant(GAVariant variant)
+    {
         variant.setEnd(variant.getStart() + variant.getReferenceBases().length() - 1);
     }
 
-    protected void processField(GAVariant variant, GACall call, String column, String field) {
+    protected void processField(GAVariant variant, GACall call, String column, String field)
+    {
         switch (column) {
             case "CHROM":
                 variant.setReferenceName(field);

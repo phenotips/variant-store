@@ -19,7 +19,7 @@ package org.phenotips.variantStoreIntegration.internal;
 
 import org.phenotips.data.Patient;
 import org.phenotips.data.PatientRepository;
-import org.phenotips.data.permissions.PermissionsManager;
+import org.phenotips.data.permissions.EntityPermissionsManager;
 import org.phenotips.data.permissions.Visibility;
 import org.phenotips.variantStoreIntegration.VCFUploadManager;
 import org.phenotips.variantStoreIntegration.VariantStoreService;
@@ -62,7 +62,7 @@ import com.xpn.xwiki.XWikiContext;
 public class DefaultVCFUploadManager implements VCFUploadManager
 {
     @Inject
-    private static PermissionsManager permissions;
+    private static EntityPermissionsManager permissions;
 
     @Inject
     @Named("hidden")
@@ -109,6 +109,7 @@ public class DefaultVCFUploadManager implements VCFUploadManager
      * {@inheritDoc}
      *
      */
+    @SuppressWarnings("rawtypes")
     @Override
     public void uploadVCF(String patientID, String filePath) throws Exception
     {
@@ -138,9 +139,9 @@ public class DefaultVCFUploadManager implements VCFUploadManager
         Future varStoreFuture = null;
         try {
             varStoreFuture = this.varStore.addIndividual(patientID, isPublic, vcfFile.toPath());
-            VCFUploadJob newUploadJob = new VCFUploadJob(patient, varStoreFuture, contextProvider,
+            VCFUploadJob newUploadJob = new VCFUploadJob(patient, varStoreFuture, this.contextProvider,
                 this.observationManager);
-            ExecutionContextRunnable wrappedJob = new ExecutionContextRunnable(newUploadJob, componentManager);
+            ExecutionContextRunnable wrappedJob = new ExecutionContextRunnable(newUploadJob, this.componentManager);
             this.currentUploads.add(patientID, this.executor.submit(wrappedJob));
         } catch (VariantStoreException e) {
             this.logger.warn("Variant store exception thrown when trying to upload a vcf for: {}", patientID);
@@ -173,6 +174,7 @@ public class DefaultVCFUploadManager implements VCFUploadManager
      *
      * @see org.phenotips.variantStoreIntegration.VCFUploadManager#removeVCF(org.phenotips.data.Patient)
      */
+    @SuppressWarnings("rawtypes")
     @Override
     public void removeVCF(String patientID) throws Exception
     {
@@ -193,9 +195,9 @@ public class DefaultVCFUploadManager implements VCFUploadManager
         Future varStoreFuture = null;
         try {
             varStoreFuture = this.varStore.removeIndividual(patientID);
-            VCFRemovalJob newRemovalJob = new VCFRemovalJob(patient, varStoreFuture, contextProvider,
+            VCFRemovalJob newRemovalJob = new VCFRemovalJob(patient, varStoreFuture, this.contextProvider,
                 this.observationManager);
-            ExecutionContextRunnable wrappedJob = new ExecutionContextRunnable(newRemovalJob, componentManager);
+            ExecutionContextRunnable wrappedJob = new ExecutionContextRunnable(newRemovalJob, this.componentManager);
             this.currentRemovals.add(patientID, this.executor.submit(wrappedJob));
         } catch (VariantStoreException e) {
             this.logger.warn("Variant store exception thrown when trying to remove a vcf for: {}", patientID);
@@ -208,18 +210,20 @@ public class DefaultVCFUploadManager implements VCFUploadManager
      * @return a list of patients
      */
     @Override
-    public List<String> getUploadedPatients() {
+    public List<String> getUploadedPatients()
+    {
         return this.varStore.getAllIndividuals();
     }
 
     private boolean resolvePatientPermission(Patient patient)
     {
-        Visibility patientVisibility = permissions.getPatientAccess(patient).getVisibility();
+        Visibility patientVisibility = permissions.getEntityAccess(patient).getVisibility();
         return (patientVisibility.compareTo(hiddenVisibility) > 0);
     }
 
     @Override
-    public String getTSVTimeStamp(String patientID) {
+    public String getTSVTimeStamp(String patientID)
+    {
         return this.varStore.getTSVTimeStamp(patientID);
     }
 }
