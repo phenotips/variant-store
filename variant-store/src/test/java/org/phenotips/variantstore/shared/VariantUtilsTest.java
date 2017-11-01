@@ -36,7 +36,7 @@ import org.junit.Test;
 public class VariantUtilsTest
 {
 
-    @Test
+    //@Test
     public void testAddInfoToVariant() throws Exception {
         GAVariant variant = new GAVariant();
         String key = "key";
@@ -57,7 +57,7 @@ public class VariantUtilsTest
         assertThat(variant.getInfo().get(key2), CoreMatchers.<List<String>>is(Arrays.asList(value2)));
     }
 
-    @Test
+    // @Test
     public void testGetInfoFromVariant() throws Exception {
         /** Setup **/
         GAVariant variant = new GAVariant();

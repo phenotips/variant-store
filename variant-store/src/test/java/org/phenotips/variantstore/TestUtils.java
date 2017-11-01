@@ -28,8 +28,6 @@ import java.util.List;
 import org.ga4gh.GACall;
 import org.ga4gh.GAVariant;
 
-import com.google.common.collect.Lists;
-
 /**
  * Created by meatcar on 4/29/15.
  */

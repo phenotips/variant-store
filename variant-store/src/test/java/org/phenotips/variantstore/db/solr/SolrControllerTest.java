@@ -67,7 +67,8 @@ public class SolrControllerTest
         header = new VariantHeader("someId", true);
     }
 
-    @Test
+    //@Test
+    @SuppressWarnings("rawtypes")
     public void testAddIndividualWithHugeField() throws Exception {
         ExomiserTSVIterator iterator = new ExomiserTSVIterator(tsvs.resolve("large-field.variants.tsv"), header);
         SolrController controller = new SolrController();
