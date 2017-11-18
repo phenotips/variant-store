@@ -86,7 +86,7 @@ public class ExomiserTSVManager implements InputManager
         try {
             Files.delete(this.getIndividual(id));
         } catch (NoSuchFileException x) {
-            logger.warn("No TSV file found for patient record with the id: {}", id);
+            logger.info("No TSV file found for patient record with the id: {}", id);
         } catch (IOException e) {
             logger.error("Error removing TSV", e);
         }
@@ -127,7 +127,7 @@ public class ExomiserTSVManager implements InputManager
             BasicFileAttributes attr = Files.readAttributes(this.getIndividual(id), BasicFileAttributes.class);
             return sdfDate.format(attr.creationTime().toMillis());
         } catch (NoSuchFileException x) {
-            logger.warn("No TSF file found for patient record with the id: {}", id);
+            logger.warn("Getting a timestamp of a TSV file: No TSF file found for patient record with the id: {}", id);
         } catch (IOException e) {
             logger.error("Error getting time for TSF file.", e);
         }

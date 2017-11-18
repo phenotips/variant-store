@@ -19,10 +19,13 @@ package org.phenotips.variantStoreIntegration.script;
 
 import org.phenotips.data.Patient;
 import org.phenotips.data.permissions.AccessLevel;
+import org.phenotips.data.permissions.EntityAccess;
 import org.phenotips.data.permissions.EntityPermissionsManager;
 import org.phenotips.data.similarity.Exome;
 import org.phenotips.data.similarity.ExomeManager;
 import org.phenotips.data.similarity.Variant;
+import org.phenotips.entities.PrimaryEntity;
+import org.phenotips.entities.PrimaryEntityResolver;
 
 import org.xwiki.component.annotation.Component;
 import org.xwiki.script.service.ScriptService;
@@ -63,6 +66,10 @@ public class ExomiserViewScriptService implements ScriptService
     @Named("variantstore-exomiser")
     private ExomeManager exomeManager;
 
+    /** Provides access to the entity record data model. */
+    @Inject
+    private PrimaryEntityResolver resolver;
+
     /**
      * Checks if a patient has a valid Exomiser genotype.
      *
@@ -100,7 +107,9 @@ public class ExomiserViewScriptService implements ScriptService
 
         int maxGenes = g;
         int maxVars = v;
-        if (!this.pm.getEntityAccess(patient).hasAccessLevel(this.editAccess)) {
+        PrimaryEntity primaryEntity = this.resolver.resolveEntity(patient.getDocumentReference().toString());
+        EntityAccess access = this.pm.getEntityAccess(primaryEntity);
+        if (!access.hasAccessLevel(this.editAccess)) {
             maxGenes = Math.min(g, MAXIMUM_UNPRIVILEGED_GENES);
             maxVars = Math.min(v, MAXIMUM_UNPRIVILEGED_VARIANTS);
         }
